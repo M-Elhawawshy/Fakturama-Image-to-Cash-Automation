@@ -25,7 +25,7 @@ from pydantic import ValidationError
 
 from fakturama_agent.spec.models import RawExtraction
 
-DEFAULT_MODEL_ID = "gemini-3.8-flash"  # stable GA id, checked 2026-11-05; override with GEMINI_MODEL
+DEFAULT_MODEL_ID = "gemini-3.5-flash-lite"  # stable Flash-Lite id (user choice, 2026-11-05); override with GEMINI_MODEL
 DEFAULT_CACHE_DIR = Path(".cache") / "gemini"
 RETRYABLE_CODES = frozenset({429, 500, 502, 503, 504})
 
