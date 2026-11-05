@@ -60,6 +60,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     pre.add_argument("--json", type=Path, dest="json_out", help="also write the report as JSON")
 
+    tab = sub.add_parser(
+        "read-table",
+        help="read a Data view by Select All + Copy (overwrites the clipboard; changes nothing in Fakturama)",
+    )
+    tab.add_argument(
+        "table", choices=["documents", "debtors", "creditors", "products", "vats", "shippings", "payments"]
+    )
+    tab.add_argument("--json", type=Path, dest="json_out", help="also write the rows as JSON")
+
     norm = sub.add_parser("normalize", help="RawExtraction JSON (e.g. a corrected raw.json) -> OrderSpec JSON")
     norm.add_argument("raw", type=Path, help="RawExtraction JSON file")
     norm.add_argument("-o", "--output", type=Path, required=True, help="OrderSpec JSON to write")
@@ -168,7 +177,7 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_extract(args.image, args.output, extractor)
     if args.command == "ocr":
         return cmd_ocr(args.image, args.check, args.overlay, args.json)
-    if args.command in ("inspect", "locate", "preflight"):
+    if args.command in ("inspect", "locate", "preflight", "read-table"):
         from fakturama_agent.uia import commands
 
         if args.command == "inspect":
@@ -176,6 +185,8 @@ def main(argv: list[str] | None = None) -> int:
                 args.output, window_regex=args.window, max_depth=args.max_depth,
                 max_nodes=args.max_nodes, show_outline=not args.quiet,
             )
+        if args.command == "read-table":
+            return commands.cmd_read_table(args.table, args.json_out)
         if args.command == "preflight":
             return commands.cmd_preflight(args.json_out)
         return commands.cmd_locate(args.keys, include_unverified=args.all)

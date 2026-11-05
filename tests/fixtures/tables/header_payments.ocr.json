@@ -1,0 +1,65 @@
+{
+  "engine": "rapidocr-onnxruntime 1.4.4 (box_thresh=0.3)",
+  "boxes": [
+    {
+      "text": "Standard",
+      "score": 0.9978,
+      "box": [
+        11,
+        8,
+        160,
+        49
+      ]
+    },
+    {
+      "text": "Name",
+      "score": 0.9993,
+      "box": [
+        305,
+        5,
+        422,
+        55
+      ]
+    },
+    {
+      "text": "Description",
+      "score": 0.9992,
+      "box": [
+        608,
+        7,
+        802,
+        55
+      ]
+    },
+    {
+      "text": "Discount",
+      "score": 0.9979,
+      "box": [
+        908,
+        8,
+        1064,
+        49
+      ]
+    },
+    {
+      "text": "Disc. Days",
+      "score": 0.9936,
+      "box": [
+        1207,
+        3,
+        1383,
+        57
+      ]
+    },
+    {
+      "text": "Net Days",
+      "score": 0.904,
+      "box": [
+        1505,
+        3,
+        1668,
+        57
+      ]
+    }
+  ]
+}

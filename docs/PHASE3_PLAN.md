@@ -57,7 +57,15 @@ NatTable exposes no rows to UIA. Primary method: focus the grid, **Select All + 
 
 `read-table` command for Data > Documents / VATs / terms of payment / Debtors / Products (opened via existing view tabs or by invoking the menu item, as the findings require).
 
-**Live check:** `read-table documents` shows PO000001–PO000003 with their Cust.Ref. and totals; `read-table vats` shows `VAT 19%`; `read-table payments` shows Cash and Bank Transfer. Offline: recorded TSV and captured empty/non-empty grid images.
+**Live check:** `read-table documents` shows PO000001–PO000003 with their Cust.Ref. and totals; `read-table vats` shows `VAT 19%`; `read-table payments` shows Cash (Bank Transfer was deleted). Offline: recorded TSV and captured empty/non-empty grid images.
+
+**Done 2026-11-05.** What the live work showed:
+- A view is a Pane named like the view; its grid is the unnamed Pane after the search bar. View tabs refuse SelectionItem.Select and their default action (COM -2146233079), so a tab is shown with a guarded click; a view without a tab is opened with Invoke on Data > <view>.
+- Documents has a category Tree left of the grid whose selection filters the list (it was on `This transaction`, a context filter). The reader selects the configured category (`Orders`) and verifies it before reading. A workspace without any order has no `Orders` entry: that is an error for now, part J decides.
+- UIA `SetFocus` on the grid Pane gives it keyboard focus (verified via the focused element's window handle); Ctrl+A, Ctrl+C then copy all rows; clipboard owner = Fakturama's pid.
+- The copy holds **model values, no header row**: price `11.899999999999999`, empty cell `null`, date `Tue Nov 03 00:00:00 EET 2026`, state `COMMAND_ORDER_PENDING`, VAT as a Java object dump. Identifiers (Document, Cust.Ref., Item No., names) are exact. Later parts compare with these model values, not display text.
+- The header is verified by OCR of the header band (3x upscale; all 7 views read exactly, ~0.7 s each), against `tables:` in `locators.yaml`.
+- Emptiness: header line + 20-px rows separated by RGB(192,192,192) lines; a row with no "ink" ends the list. Unrecognised pictures are errors, never "empty"; ink after an empty row (an overlay) is an error; the copied row count must equal the inked rows unless every visible row is used.
 
 ### D. Order header (writes to an unsaved editor only)
 

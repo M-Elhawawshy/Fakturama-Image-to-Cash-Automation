@@ -32,9 +32,9 @@ def test_every_verified_locator_resolves_in_the_recorded_main_window(registry, m
     # main-window locators; the open File menu has its own recording (main_file_menu.json)
     verified = [
         k for k, loc in registry.locators.items()
-        if loc.status == "verified" and loc.window is None and not k.startswith("menu.file.")
+        if loc.status == "verified" and loc.window is None and not loc.transient and loc.within is None
     ]
-    assert len(verified) == 11
+    assert len(verified) == 6  # toolbar + File/Data menus; views and menus are transient
     for key in verified:
         node = registry.resolve(main, key)
         assert node.control_type == registry.get(key).named.control_type

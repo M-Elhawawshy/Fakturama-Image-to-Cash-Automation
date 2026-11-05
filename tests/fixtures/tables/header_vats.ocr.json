@@ -1,0 +1,45 @@
+{
+  "engine": "rapidocr-onnxruntime 1.4.4 (box_thresh=0.3)",
+  "boxes": [
+    {
+      "text": "Standard",
+      "score": 0.9978,
+      "box": [
+        11,
+        8,
+        160,
+        49
+      ]
+    },
+    {
+      "text": "Name",
+      "score": 0.9993,
+      "box": [
+        305,
+        5,
+        422,
+        55
+      ]
+    },
+    {
+      "text": "Description",
+      "score": 0.9992,
+      "box": [
+        608,
+        7,
+        802,
+        55
+      ]
+    },
+    {
+      "text": "Value",
+      "score": 0.9988,
+      "box": [
+        904,
+        5,
+        1012,
+        55
+      ]
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+CUST000001	Alice	Smith	Learning Labs	10115	Berlin
+CUST000002	Bob	Learner	Nimbus Demo	80331	Munich
+CUST000003	Dan	Taylor	Orion Study	80333	Munich

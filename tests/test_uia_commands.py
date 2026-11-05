@@ -62,7 +62,7 @@ def test_inspect_without_fakturama(capsys):
 def test_locate_verified_skips_closed_dialogs_and_menus(capsys):
     assert cmd_locate([], finder=finder, snapshotter=snapshotter, window_lister=no_dialogs) == 0
     out = capsys.readouterr().out
-    assert "toolbar.new_order" in out and "11/23 resolved, 0 failed, 12 skipped" in out
+    assert "toolbar.new_order" in out and "12/25 resolved, 0 failed, 13 skipped" in out
     lines = {line.split()[0]: " ".join(line.split()[1:]) for line in out.splitlines() if line.strip()}
     assert lines["menu.file.preferences"] == "SKIPPED menu.file.expanded not open"
     assert lines["menu.file.expanded"] == "SKIPPED not open"

@@ -8,7 +8,7 @@ zero matches is "unreliable", because absence cannot be trusted.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from importlib import resources
 from pathlib import Path
 from typing import Literal
@@ -59,10 +59,21 @@ class Locator(_Strict):
         return self
 
 
+class TableSpec(_Strict):
+    """A Data view read by clipboard copy. Columns are the header texts left to
+    right ("" for a header-less icon column); the copy has no header row, so the
+    header is checked by OCR before rows are trusted."""
+
+    view: str  # TabItem / Data menu item / view pane name
+    columns: list[str]
+    filter: str | None = None  # TreeItem to select first (Documents category)
+
+
 class LocatorFile(_Strict):
     version: Literal[1]
     app: str
     locators: dict[str, Locator]
+    tables: dict[str, TableSpec] = {}
 
 
 class LocatorError(LookupError):
@@ -78,6 +89,7 @@ class LocatorError(LookupError):
 class Registry:
     app: str
     locators: dict[str, Locator]
+    tables: dict[str, TableSpec] = field(default_factory=dict)
 
     @classmethod
     def load(cls, path: Path | None = None) -> Registry:
@@ -86,7 +98,7 @@ class Registry:
         else:
             text = path.read_text(encoding="utf-8")
         parsed = LocatorFile.model_validate(yaml.safe_load(text))
-        registry = cls(app=parsed.app, locators=dict(parsed.locators))
+        registry = cls(app=parsed.app, locators=dict(parsed.locators), tables=dict(parsed.tables))
         for key, loc in registry.locators.items():
             if loc.within is not None and loc.within not in registry.locators:
                 raise ValueError(f"locator {key!r}: within={loc.within!r} is not a known locator")
@@ -95,6 +107,12 @@ class Registry:
             if loc.window is not None:
                 re.compile(loc.window)
         return registry
+
+    def table(self, key: str) -> TableSpec:
+        try:
+            return self.tables[key]
+        except KeyError:
+            raise LocatorError(key, "unknown_key", f"not a table in locators.yaml; known: {sorted(self.tables)}") from None
 
     def get(self, key: str) -> Locator:
         try:

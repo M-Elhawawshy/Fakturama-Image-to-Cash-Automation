@@ -176,3 +176,61 @@ def cmd_preflight(
         json_out.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         print(f"Wrote {json_out}")
     return EXIT_OK if report.ok else EXIT_UNRESOLVED
+
+
+def format_table(read, max_width: int = 32) -> str:
+    def cell(v):
+        text = "" if v is None else str(v)
+        return text if len(text) <= max_width else text[: max_width - 1] + "~"
+
+    header = read.columns
+    body = [[cell(row[c]) for c in header] for row in read.rows]
+    widths = [max(len(h), *(len(r[i]) for r in body)) if body else len(h) for i, h in enumerate(header)]
+    lines = ["  ".join(h.ljust(w) for h, w in zip(header, widths, strict=True))]
+    lines.append("  ".join("-" * w for w in widths))
+    lines += ["  ".join(c.ljust(w) for c, w in zip(r, widths, strict=True)) for r in body]
+    return "\n".join(lines)
+
+
+def cmd_read_table(
+    key: str,
+    json_out: Path | None = None,
+    *,
+    registry: Registry | None = None,
+    finder: Callable[[], MainWindow] = find_main_window,
+    backend_factory=None,
+    ocr=None,
+) -> int:
+    from fakturama_agent.uia.locators import LocatorError
+    from fakturama_agent.uia.tables import TableError, read_table
+
+    registry = registry or Registry.load()
+    try:
+        spec = registry.table(key)
+    except LocatorError as e:
+        print(e.detail, file=sys.stderr)
+        return EXIT_ERROR
+    main = _bind(finder)
+    if main is None:
+        return EXIT_ERROR
+    if backend_factory is None:
+        from fakturama_agent.uia.views import LiveGrid
+
+        backend_factory = LiveGrid
+    if ocr is None:
+        from fakturama_agent.extract.ocr import run_ocr as ocr
+    try:
+        read = read_table(key, spec, backend_factory(main, registry), fakturama_pid=main.pid, ocr=ocr)
+    except (TableError, LocatorError, TimeoutError) as e:
+        print(f"Cannot read {spec.view}: {e}", file=sys.stderr)
+        return EXIT_UNRESOLVED
+    where = f"{spec.view}" + (f" > {spec.filter}" if spec.filter else "")
+    how = "copied twice, identical" if read.rows else "the grid is empty (judged from its pixels; not copied)"
+    print(f"{where}: {len(read.rows)} row(s); header checked by OCR; {how}\n")
+    if read.rows:
+        print(format_table(read))
+    if json_out is not None:
+        json_out.parent.mkdir(parents=True, exist_ok=True)
+        json_out.write_text(json.dumps(read.to_dict(), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(f"\nWrote {json_out}")
+    return EXIT_OK

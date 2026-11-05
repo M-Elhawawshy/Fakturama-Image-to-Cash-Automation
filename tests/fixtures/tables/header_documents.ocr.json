@@ -1,0 +1,75 @@
+{
+  "engine": "rapidocr-onnxruntime 1.4.4 (box_thresh=0.3)",
+  "boxes": [
+    {
+      "text": "Document",
+      "score": 0.9986,
+      "box": [
+        516,
+        10,
+        698,
+        51
+      ]
+    },
+    {
+      "text": "Date",
+      "score": 0.9993,
+      "box": [
+        1021,
+        7,
+        1111,
+        53
+      ]
+    },
+    {
+      "text": "Name",
+      "score": 0.9999,
+      "box": [
+        1524,
+        7,
+        1640,
+        53
+      ]
+    },
+    {
+      "text": "Cust.Ref.",
+      "score": 0.996,
+      "box": [
+        2033,
+        8,
+        2181,
+        49
+      ]
+    },
+    {
+      "text": "State",
+      "score": 0.9997,
+      "box": [
+        2533,
+        8,
+        2627,
+        51
+      ]
+    },
+    {
+      "text": "Total ",
+      "score": 0.9538,
+      "box": [
+        3036,
+        7,
+        3132,
+        53
+      ]
+    },
+    {
+      "text": "Printed",
+      "score": 0.9998,
+      "box": [
+        3543,
+        7,
+        3669,
+        53
+      ]
+    }
+  ]
+}

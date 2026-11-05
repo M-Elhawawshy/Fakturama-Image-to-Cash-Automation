@@ -1,0 +1,2 @@
+true	Tax-free	Free of Tax	0.0
+false	VAT 19%	VAT 19%	0.19

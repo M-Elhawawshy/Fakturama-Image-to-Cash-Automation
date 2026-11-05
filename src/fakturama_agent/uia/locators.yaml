@@ -136,3 +136,42 @@ locators:
     named: {control_type: Button, name: "Cancel"}
     window: "^Preferences$"
     status: verified
+
+  # --- Data menu (Invoke on the items opens or activates the view)
+  menu.data.expanded:
+    named: {control_type: Menu, name: "Data"}
+    transient: true
+    status: verified
+
+  # --- view grid search bar (scope: the active view pane, named like the view)
+  view.search_label:
+    named: {control_type: Text, name: "Search:"}
+    transient: true
+    status: verified
+    note: "resolved inside the view pane; the grid is the Pane following the search bar (parent of this label's parent)"
+
+# Data views read by Select All + Copy (part C). Headers recorded 2026-11-05 and
+# checked by OCR on every read; the copy itself has no header row.
+tables:
+  documents:
+    view: "Documents"
+    filter: "Orders"
+    columns: ["", "Document", "Date", "Name", "Cust.Ref.", "State", "Total", "Printed"]
+  debtors:
+    view: "Debtors"
+    columns: ["No.", "First Name", "Name", "Company", "ZIP", "City"]
+  creditors:
+    view: "Creditors"
+    columns: ["No.", "First Name", "Name", "Company", "ZIP", "City"]
+  products:
+    view: "Products"
+    columns: ["Item No.", "Name", "Description", "Stock", "Price", "VAT"]
+  vats:
+    view: "VATs"
+    columns: ["Standard", "Name", "Description", "Value"]
+  shippings:
+    view: "Shippings"
+    columns: ["Standard", "Name", "Description", "Value"]
+  payments:
+    view: "terms of payment"
+    columns: ["Standard", "Name", "Description", "Discount", "Disc. Days", "Net Days"]

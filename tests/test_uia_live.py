@@ -37,3 +37,18 @@ def test_preflight_live():
     from fakturama_agent.uia.binding import process_windows
 
     assert not [w for w in process_windows(main.pid) if w.title == "Preferences"]
+
+
+@pytest.mark.parametrize("table", ["documents", "vats", "payments"])
+def test_read_table_live(table):
+    """Shows the view, checks the header by OCR, copies twice (overwrites the clipboard)."""
+    from fakturama_agent.extract.ocr import run_ocr
+    from fakturama_agent.uia.tables import read_table
+    from fakturama_agent.uia.views import LiveGrid
+
+    registry = Registry.load()
+    main = find_main_window()
+    result = read_table(table, registry.table(table), LiveGrid(main, registry), fakturama_pid=main.pid, ocr=run_ocr)
+    assert result.columns == [c or "icon" for c in registry.table(table).columns]
+    if table == "vats":
+        assert any(r["Name"] == "VAT 19%" and r["Value"] == "0.19" for r in result.rows)
