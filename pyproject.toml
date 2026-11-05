@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "Turn an order image into a saved, verified Order + linked Invoice in Fakturama 2.2.0"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "google-genai>=2.34.0",
     "pydantic>=2.7",
+    "python-dotenv>=1.2.4",
 ]
 
 [dependency-groups]
