@@ -10,10 +10,13 @@ import argparse
 import sys
 from pathlib import Path
 
+from fakturama_agent.extract.crosscheck import crosscheck
 from fakturama_agent.extract.llm import ExtractionError, GeminiConfig, GeminiExtractor, VisionExtractor
 from fakturama_agent.extract.normalize import normalize
 from fakturama_agent.extract.ocr import run_ocr
+from fakturama_agent.extract.ocr_report import render_boxes, render_check, save_overlay
 from fakturama_agent.extract.pipeline import OcrFn, run_extract
+from fakturama_agent.extract.preprocess import prepare_image
 from fakturama_agent.extract.report import render_review, render_summary
 from fakturama_agent.extract.validate import validate
 from fakturama_agent.spec.models import Issue, OrderSpec, RawExtraction
@@ -34,6 +37,12 @@ def build_parser() -> argparse.ArgumentParser:
     ext.add_argument("image", type=Path, help="order image (PNG, JPEG, WebP; other formats are converted)")
     ext.add_argument("-o", "--output", type=Path, required=True, help="OrderSpec JSON to write")
     ext.add_argument("--no-cache", action="store_true", help="ignore the cached LLM response and call the API")
+
+    ocr = sub.add_parser("ocr", help="run only the OCR on an image (no LLM) and show what it read")
+    ocr.add_argument("image", type=Path, help="order image")
+    ocr.add_argument("--check", type=Path, metavar="RAW_JSON", help="cross-check a RawExtraction (e.g. out/raw.json)")
+    ocr.add_argument("--overlay", type=Path, metavar="PNG", help="save the image with numbered OCR boxes drawn on it")
+    ocr.add_argument("--json", type=Path, metavar="JSON", help="save the raw OCR result as JSON")
 
     norm = sub.add_parser("normalize", help="RawExtraction JSON (e.g. a corrected raw.json) -> OrderSpec JSON")
     norm.add_argument("raw", type=Path, help="RawExtraction JSON file")
@@ -84,6 +93,41 @@ def cmd_extract(image: Path, out_path: Path, extractor: VisionExtractor, ocr: Oc
     return EXIT_OK
 
 
+def cmd_ocr(
+    image: Path,
+    check: Path | None = None,
+    overlay: Path | None = None,
+    json_out: Path | None = None,
+    ocr: OcrFn = run_ocr,
+) -> int:
+    """OCR only. Exit 0, or 2 when --check finds issues that would stop `extract`."""
+    try:
+        prepared = prepare_image(image)
+    except ExtractionError as e:
+        print(f"OCR failed: {e}", file=sys.stderr)
+        return EXIT_ERROR
+    result = ocr(prepared.data)
+
+    prep = "; ".join(prepared.steps) if prepared.steps else "none"
+    print(f"OCR {result.engine} on {image} ({prepared.size[0]}x{prepared.size[1]}, preprocessing: {prep})")
+    print(render_boxes(result))
+
+    if json_out:
+        _write_text(json_out, result.to_json())
+        print(f"\nWrote {json_out}")
+    if overlay:
+        save_overlay(prepared.data, result, overlay)
+        print(f"\nWrote {overlay} (box numbers match the list; orange = low confidence)")
+    if check is None:
+        return EXIT_OK
+
+    raw = RawExtraction.model_validate_json(check.read_text(encoding="utf-8"))
+    checked = crosscheck(raw, result)
+    print(f"\nCross-check of {check}:")
+    print(render_check(checked))
+    return EXIT_REVIEW if checked.issues else EXIT_OK
+
+
 def cmd_normalize(raw_path: Path, out_path: Path) -> int:
     raw = RawExtraction.model_validate_json(raw_path.read_text(encoding="utf-8"))
     result = normalize(raw)
@@ -106,6 +150,8 @@ def main(argv: list[str] | None = None) -> int:
         overrides = {"cache_dir": None} if args.no_cache else {}
         extractor = GeminiExtractor(config=GeminiConfig.from_env(**overrides))
         return cmd_extract(args.image, args.output, extractor)
+    if args.command == "ocr":
+        return cmd_ocr(args.image, args.check, args.overlay, args.json)
     if args.command == "normalize":
         return cmd_normalize(args.raw, args.output)
     return EXIT_REVIEW  # pragma: no cover - argparse enforces a known command
