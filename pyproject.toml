@@ -7,6 +7,8 @@ dependencies = [
     "google-genai>=2.34.0",
     "pydantic>=2.7",
     "python-dotenv>=1.2.4",
+    "pywinauto==0.6.9",
+    "pyyaml>=6.0.3",
     "rapidocr-onnxruntime>=1.4.4",
 ]
 
@@ -24,7 +26,12 @@ packages = ["src/fakturama_agent"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra -m 'not live'"
+addopts = "-ra -m 'not live and not uia and not uia_write'"
 markers = [
     "live: hits the network (Gemini); run explicitly with -m live",
+    "uia: needs a running Fakturama, read-only; run with -m uia",
+    "uia_write: creates records in Fakturama (back up the workspace first); run with -m uia_write",
+]
+filterwarnings = [
+    "ignore:invalid escape sequence:SyntaxWarning",
 ]

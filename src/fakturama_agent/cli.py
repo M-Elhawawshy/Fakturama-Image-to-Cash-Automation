@@ -44,6 +44,17 @@ def build_parser() -> argparse.ArgumentParser:
     ocr.add_argument("--overlay", type=Path, metavar="PNG", help="save the image with numbered OCR boxes drawn on it")
     ocr.add_argument("--json", type=Path, metavar="JSON", help="save the raw OCR result as JSON")
 
+    ins = sub.add_parser("inspect", help="dump Fakturama's UIA tree (read-only)")
+    ins.add_argument("-o", "--output", type=Path, help="write the snapshot as JSON")
+    ins.add_argument("--window", metavar="TITLE_REGEX", help="a Fakturama dialog/window instead of the main window")
+    ins.add_argument("--max-depth", type=int, default=40)
+    ins.add_argument("--max-nodes", type=int, default=6000)
+    ins.add_argument("--quiet", action="store_true", help="do not print the outline")
+
+    loc = sub.add_parser("locate", help="resolve locators from locators.yaml in the live main window (read-only)")
+    loc.add_argument("keys", nargs="*", help="locator keys (default: all verified ones)")
+    loc.add_argument("--all", action="store_true", help="include unverified locators")
+
     norm = sub.add_parser("normalize", help="RawExtraction JSON (e.g. a corrected raw.json) -> OrderSpec JSON")
     norm.add_argument("raw", type=Path, help="RawExtraction JSON file")
     norm.add_argument("-o", "--output", type=Path, required=True, help="OrderSpec JSON to write")
@@ -152,6 +163,15 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_extract(args.image, args.output, extractor)
     if args.command == "ocr":
         return cmd_ocr(args.image, args.check, args.overlay, args.json)
+    if args.command in ("inspect", "locate"):
+        from fakturama_agent.uia import commands
+
+        if args.command == "inspect":
+            return commands.cmd_inspect(
+                args.output, window_regex=args.window, max_depth=args.max_depth,
+                max_nodes=args.max_nodes, show_outline=not args.quiet,
+            )
+        return commands.cmd_locate(args.keys, include_unverified=args.all)
     if args.command == "normalize":
         return cmd_normalize(args.raw, args.output)
     return EXIT_REVIEW  # pragma: no cover - argparse enforces a known command
