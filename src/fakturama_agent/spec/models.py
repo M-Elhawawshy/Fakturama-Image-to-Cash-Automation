@@ -159,9 +159,27 @@ class Derived(_Strict):
     totals: DerivedTotals
 
 
+class CheckStatus(StrEnum):
+    CONFIRMED = "confirmed"  # OCR shows the same characters
+    UNCONFIRMED = "unconfirmed"  # OCR shows nothing comparable
+    CONFLICT = "conflict"  # OCR shows a look-alike variant (0/O, 1/l, ...)
+
+
+class FieldCheck(_Strict):
+    """OCR agreement for one value the LLM read."""
+
+    field: str
+    value: str
+    status: CheckStatus
+    critical: bool  # critical values must be confirmed; others only warn
+    ocr_text: str | None = None  # the conflicting OCR text, if any
+
+
 class Provenance(_Strict):
     image_sha256: str | None = None
     model_id: str | None = None
+    ocr_engine: str | None = None
+    field_checks: list[FieldCheck] = []
 
 
 class OrderSpec(_Strict):

@@ -90,6 +90,8 @@
   },
   "provenance": {
     "image_sha256": null,
-    "model_id": null
+    "model_id": null,
+    "ocr_engine": null,
+    "field_checks": []
   }
 }
