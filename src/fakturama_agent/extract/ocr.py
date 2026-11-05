@@ -18,6 +18,13 @@ from typing import Any
 
 ENGINE_PACKAGE = "rapidocr-onnxruntime"
 
+# Text-box detection threshold (library default 0.5). At 0.5 RapidOCR drops
+# lone digits such as a quantity "3" on slightly skewed scans, which sends
+# correct readings to review. Extra boxes can only confirm a value that the LLM
+# read identically, or raise a look-alike conflict (a stop), so a lower
+# threshold never lets a wrong value through.
+BOX_THRESH = 0.3
+
 
 @dataclass(frozen=True)
 class OcrBox:
@@ -47,7 +54,7 @@ class OcrResult:
 
 
 def engine_name() -> str:
-    return f"{ENGINE_PACKAGE} {version(ENGINE_PACKAGE)}"
+    return f"{ENGINE_PACKAGE} {version(ENGINE_PACKAGE)} (box_thresh={BOX_THRESH})"
 
 
 @cache
@@ -64,7 +71,7 @@ def _bounds(quad: Any) -> tuple[int, int, int, int]:
 
 
 def run_ocr(image: bytes) -> OcrResult:
-    detections, _elapsed = _engine()(image)
+    detections, _elapsed = _engine()(image, box_thresh=BOX_THRESH)
     boxes = tuple(
         OcrBox(text=str(text), score=round(float(score), 4), box=_bounds(quad)) for quad, text, score in detections or []
     )

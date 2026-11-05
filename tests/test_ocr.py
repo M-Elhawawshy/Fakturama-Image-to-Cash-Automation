@@ -19,6 +19,7 @@ def test_engine_reads_identity_tokens(sample_ocr):
     texts = {b.text for b in sample_ocr.boxes}
     assert {"WEB-2026-0714-A17", "CHR-ERG-01", "MAT-DESK-02", "CUST-1007", "2026-07-18"} <= texts
     assert sample_ocr.engine.startswith("rapidocr-onnxruntime ")
+    assert sample_ocr.engine.endswith("(box_thresh=0.3)")
     assert all(0 <= b.score <= 1 and b.box[0] <= b.box[2] and b.box[1] <= b.box[3] for b in sample_ocr.boxes)
 
 

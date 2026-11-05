@@ -1,5 +1,5 @@
 {
-  "engine": "rapidocr-onnxruntime 1.4.4",
+  "engine": "rapidocr-onnxruntime 1.4.4 (box_thresh=0.3)",
   "boxes": [
     {
       "text": "TJM Labs|AutomationAssessment",
