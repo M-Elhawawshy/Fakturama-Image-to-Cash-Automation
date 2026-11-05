@@ -4,9 +4,14 @@
 # Query kinds:
 #   named:          exact control_type + exact name (or name_regex, full match)
 #   label_sibling:  a Text with exactly this name, then the nth following sibling
-#                   of sibling_type under the same parent
+#                   of sibling_type under the same parent (descend: true also
+#                   searches inside those siblings, in document order)
 # Optional per locator:
 #   within: <key>   resolve inside the node another locator found
+#   window: <re>    title regex of the top-level dialog window it lives in
+#                   (default: the main window)
+#   transient: true present only while a menu or view is open (locate skips it
+#                   when absent instead of failing)
 #   status:         verified (seen in a recorded tree with tests) | unverified
 #                   (from agent findings; confirmed in the part named in `note`)
 
@@ -36,21 +41,37 @@ locators:
     named: {control_type: MenuItem, name: "Data"}
     status: verified
 
+  # --- File menu, present only while expanded (Expand works; File exposes no Invoke)
+  menu.file.expanded:
+    named: {control_type: Menu, name: "File"}
+    transient: true
+    status: verified
+    note: "recorded 2026-11-05, tests/fixtures/uia/main_file_menu.json"
+  menu.file.preferences:
+    named: {control_type: MenuItem, name: "Preferences"}
+    within: menu.file.expanded
+    status: verified
+
   # --- Data view tabs (present only while the view is open)
   view.documents:
     named: {control_type: TabItem, name: "Documents"}
+    transient: true
     status: verified
   view.debtors:
     named: {control_type: TabItem, name: "Debtors"}
+    transient: true
     status: verified
   view.products:
     named: {control_type: TabItem, name: "Products"}
+    transient: true
     status: verified
   view.vats:
     named: {control_type: TabItem, name: "VATs"}
+    transient: true
     status: verified
   view.payments:
     named: {control_type: TabItem, name: "terms of payment"}
+    transient: true
     status: verified
 
   # --- Order editor (scope: the bound New Order editor)
@@ -67,14 +88,51 @@ locators:
     status: unverified
     note: "first of four icons beside Items opens Select a product. Confirm in part E"
 
-  # --- selector dialogs (scope: the dialog window)
+  # --- selector dialogs (own top-level windows; tests/fixtures/uia/select_address.json)
+  # The Search Edit sits inside a Pane after the label, hence descend.
   selector.search:
-    label_sibling: {label: "Search:", sibling_type: Edit, nth: 0}
-    status: unverified
-    note: "findings; confirm in part E"
+    label_sibling: {label: "Search:", sibling_type: Edit, nth: 0, descend: true}
+    window: "^Select (the address|a product)$"
+    status: verified
+    note: "seen in Select the address; Select a product confirmed in part E"
   selector.ok:
     named: {control_type: Button, name: "OK"}
-    status: unverified
+    window: "^Select (the address|a product)$"
+    status: verified
   selector.cancel:
     named: {control_type: Button, name: "Cancel"}
-    status: unverified
+    window: "^Select (the address|a product)$"
+    status: verified
+
+  # --- File > Preferences (dialog #32770; tests/fixtures/uia/prefs_*.json). Read, then Cancel.
+  prefs.page.general:
+    named: {control_type: TreeItem, name: "General"}
+    window: "^Preferences$"
+    status: verified
+  prefs.page.documents:
+    named: {control_type: TreeItem, name: "Documents"}
+    window: "^Preferences$"
+    status: verified
+  prefs.take_over_item_number:
+    named: {control_type: CheckBox, name: "immediately take over a clearly found item number"}
+    window: "^Preferences$"
+    status: verified
+    note: "Documents page; must be off"
+  prefs.currency_locale:
+    named: {control_type: ComboBox, name: "Currency locale"}
+    window: "^Preferences$"
+    status: verified
+    note: "General page"
+  prefs.currency_example:
+    named: {control_type: Edit, name: "Example"}
+    window: "^Preferences$"
+    status: verified
+    note: "General page; formatted -1234.57 in the current currency settings"
+  prefs.currency_decimals:
+    named: {control_type: Edit, name: "decimal places (currency)"}
+    window: "^Preferences$"
+    status: verified
+  prefs.cancel:
+    named: {control_type: Button, name: "Cancel"}
+    window: "^Preferences$"
+    status: verified

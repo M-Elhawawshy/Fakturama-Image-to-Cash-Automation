@@ -43,9 +43,8 @@ def _user32():
     return u
 
 
-def _exe_name(pid: int, cache: dict[int, str]) -> str:
-    if pid in cache:
-        return cache[pid]
+def process_image_path(pid: int) -> str:
+    """Full path of a process's executable ("" if it cannot be queried)."""
     from ctypes import wintypes as w
 
     k = ctypes.WinDLL("kernel32", use_last_error=True)
@@ -54,18 +53,24 @@ def _exe_name(pid: int, cache: dict[int, str]) -> str:
     k.QueryFullProcessImageNameW.argtypes = [w.HANDLE, w.DWORD, w.LPWSTR, ctypes.POINTER(w.DWORD)]
     k.CloseHandle.argtypes = [w.HANDLE]
     process_query_limited_information = 0x1000
-    name = ""
     handle = k.OpenProcess(process_query_limited_information, False, pid)
-    if handle:
-        try:
-            size = w.DWORD(1024)
-            buf = ctypes.create_unicode_buffer(size.value)
-            if k.QueryFullProcessImageNameW(handle, 0, buf, ctypes.byref(size)):
-                name = PureWindowsPath(buf.value).name
-        finally:
-            k.CloseHandle(handle)
-    cache[pid] = name
-    return name
+    if not handle:
+        return ""
+    try:
+        size = w.DWORD(1024)
+        buf = ctypes.create_unicode_buffer(size.value)
+        if k.QueryFullProcessImageNameW(handle, 0, buf, ctypes.byref(size)):
+            return buf.value
+        return ""
+    finally:
+        k.CloseHandle(handle)
+
+
+def _exe_name(pid: int, cache: dict[int, str]) -> str:
+    if pid not in cache:
+        path = process_image_path(pid)
+        cache[pid] = PureWindowsPath(path).name if path else ""
+    return cache[pid]
 
 
 def enum_windows() -> list[WindowInfo]:

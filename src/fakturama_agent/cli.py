@@ -51,9 +51,14 @@ def build_parser() -> argparse.ArgumentParser:
     ins.add_argument("--max-nodes", type=int, default=6000)
     ins.add_argument("--quiet", action="store_true", help="do not print the outline")
 
-    loc = sub.add_parser("locate", help="resolve locators from locators.yaml in the live main window (read-only)")
+    loc = sub.add_parser("locate", help="resolve locators from locators.yaml in the live Fakturama (read-only)")
     loc.add_argument("keys", nargs="*", help="locator keys (default: all verified ones)")
     loc.add_argument("--all", action="store_true", help="include unverified locators")
+
+    pre = sub.add_parser(
+        "preflight", help="check Fakturama is ready to automate (opens Preferences, closes it with Cancel)"
+    )
+    pre.add_argument("--json", type=Path, dest="json_out", help="also write the report as JSON")
 
     norm = sub.add_parser("normalize", help="RawExtraction JSON (e.g. a corrected raw.json) -> OrderSpec JSON")
     norm.add_argument("raw", type=Path, help="RawExtraction JSON file")
@@ -163,7 +168,7 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_extract(args.image, args.output, extractor)
     if args.command == "ocr":
         return cmd_ocr(args.image, args.check, args.overlay, args.json)
-    if args.command in ("inspect", "locate"):
+    if args.command in ("inspect", "locate", "preflight"):
         from fakturama_agent.uia import commands
 
         if args.command == "inspect":
@@ -171,6 +176,8 @@ def main(argv: list[str] | None = None) -> int:
                 args.output, window_regex=args.window, max_depth=args.max_depth,
                 max_nodes=args.max_nodes, show_outline=not args.quiet,
             )
+        if args.command == "preflight":
+            return commands.cmd_preflight(args.json_out)
         return commands.cmd_locate(args.keys, include_unverified=args.all)
     if args.command == "normalize":
         return cmd_normalize(args.raw, args.output)

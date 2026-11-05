@@ -40,12 +40,15 @@ class LabelSiblingQuery(_Strict):
     label_type: str = "Text"
     sibling_type: str
     nth: int = 0
+    descend: bool = False  # also search inside the following siblings (document order)
 
 
 class Locator(_Strict):
     named: NamedQuery | None = None
     label_sibling: LabelSiblingQuery | None = None
     within: str | None = None
+    window: str | None = None  # title regex of the top-level dialog this lives in; None = main window
+    transient: bool = False  # present only while a menu/view is open; `locate` skips it when absent
     status: Literal["verified", "unverified"] = "unverified"
     note: str | None = None
 
@@ -87,6 +90,10 @@ class Registry:
         for key, loc in registry.locators.items():
             if loc.within is not None and loc.within not in registry.locators:
                 raise ValueError(f"locator {key!r}: within={loc.within!r} is not a known locator")
+            if loc.within is not None and registry.locators[loc.within].window != loc.window:
+                raise ValueError(f"locator {key!r}: within={loc.within!r} lives in another window")
+            if loc.window is not None:
+                re.compile(loc.window)
         return registry
 
     def get(self, key: str) -> Locator:
@@ -120,7 +127,8 @@ def _describe(loc: Locator) -> str:
         q = loc.named
         return f"{q.control_type} {q.name!r}" if q.name is not None else f"{q.control_type} ~/{q.name_regex}/"
     q = loc.label_sibling
-    return f"{q.sibling_type} #{q.nth} after {q.label_type} {q.label!r}"
+    inside = " (incl. descendants)" if q.descend else ""
+    return f"{q.sibling_type} #{q.nth} after {q.label_type} {q.label!r}{inside}"
 
 
 def _named(scope: UiNode, q: NamedQuery) -> list[UiNode]:
@@ -139,5 +147,8 @@ def _label_sibling(scope: UiNode, q: LabelSiblingQuery, key: str) -> list[UiNode
         raise LocatorError(key, "ambiguous", f"{len(labels)} {q.label_type} labels named {q.label!r}", labels)
     if not labels:
         return []
-    siblings = [s for s in labels[0].siblings_after() if s.control_type == q.sibling_type]
+    following = labels[0].siblings_after()
+    if q.descend:
+        following = [n for sib in following for n in sib.walk()]
+    siblings = [s for s in following if s.control_type == q.sibling_type]
     return [siblings[q.nth]] if q.nth < len(siblings) else []

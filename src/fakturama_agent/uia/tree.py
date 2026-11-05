@@ -46,6 +46,8 @@ class UiNode:
     enabled: bool = True
     offscreen: bool = False
     value: str | None = None  # ValuePattern value, when exposed
+    toggle: str | None = None  # TogglePattern state: "on" | "off" | "indeterminate"
+    selected: bool | None = None  # SelectionItemPattern IsSelected (radio buttons, tree items, tabs)
     patterns: tuple[str, ...] = ()
     children: list[UiNode] = field(default_factory=list)
     parent: UiNode | None = field(default=None, repr=False)
@@ -96,6 +98,10 @@ class UiNode:
             data["offscreen"] = True
         if self.value is not None:
             data["value"] = self.value
+        if self.toggle is not None:
+            data["toggle"] = self.toggle
+        if self.selected is not None:
+            data["selected"] = self.selected
         if self.patterns:
             data["patterns"] = list(self.patterns)
         if self.children:
@@ -113,6 +119,8 @@ class UiNode:
             enabled=data.get("enabled", True),
             offscreen=data.get("offscreen", False),
             value=data.get("value"),
+            toggle=data.get("toggle"),
+            selected=data.get("selected"),
             patterns=tuple(data.get("patterns", ())),
             parent=parent,
         )
@@ -152,14 +160,28 @@ class Snapshot:
 
 
 def redact(snapshot: Snapshot, secret: str, replacement: str = "<workspace>") -> None:
-    """Replace a string (e.g. the workspace path) in every name/value, in place."""
+    """Replace a path (e.g. the workspace) in every name/value, in place.
+
+    Also covers its forward-slash and URL-encoded forms (the start page URL is
+    ``file:///C:/.../fakturama%20data/...``).
+    """
     if not secret:
         return
+    from urllib.parse import quote
+
+    slashed = secret.replace("\\", "/")
+    variants = sorted({secret, slashed, quote(slashed, safe="/:")}, key=len, reverse=True)
+
+    def scrub(text: str) -> str:
+        for v in variants:
+            text = text.replace(v, replacement)
+        return text
+
     for node in snapshot.root.walk():
-        node.name = node.name.replace(secret, replacement)
+        node.name = scrub(node.name)
         if node.value is not None:
-            node.value = node.value.replace(secret, replacement)
-    snapshot.meta = {k: v.replace(secret, replacement) if isinstance(v, str) else v for k, v in snapshot.meta.items()}
+            node.value = scrub(node.value)
+    snapshot.meta = {k: scrub(v) if isinstance(v, str) else v for k, v in snapshot.meta.items()}
 
 
 def outline(node: UiNode, *, max_depth: int | None = None, _depth: int = 0) -> list[str]:
@@ -167,6 +189,10 @@ def outline(node: UiNode, *, max_depth: int | None = None, _depth: int = 0) -> l
     extras = []
     if node.value:
         extras.append(f"value={node.value!r}")
+    if node.toggle is not None:
+        extras.append(f"toggle={node.toggle}")
+    if node.selected:
+        extras.append("selected")
     if node.patterns:
         extras.append("[" + ",".join(p for p in node.patterns if p != "LegacyIAccessible") + "]")
     if not node.enabled:
@@ -176,6 +202,9 @@ def outline(node: UiNode, *, max_depth: int | None = None, _depth: int = 0) -> l
         for child in node.children:
             lines += outline(child, max_depth=max_depth, _depth=_depth + 1)
     return lines
+
+
+_TOGGLE_STATES = {0: "off", 1: "on", 2: "indeterminate"}
 
 
 def _pattern_property_ids() -> dict[str, int]:
@@ -194,6 +223,14 @@ def _node_from_element(info: Any, pattern_ids: dict[str, int], parent: UiNode | 
     value = None
     if "Value" in patterns:
         value = _safe(lambda: element.GetCurrentPropertyValue(dll.UIA_ValueValuePropertyId), None)
+    toggle = None
+    if "Toggle" in patterns:
+        state = _safe(lambda: element.GetCurrentPropertyValue(dll.UIA_ToggleToggleStatePropertyId), None)
+        toggle = _TOGGLE_STATES.get(state)
+    selected = None
+    if "SelectionItem" in patterns:
+        sel = _safe(lambda: element.GetCurrentPropertyValue(dll.UIA_SelectionItemIsSelectedPropertyId), None)
+        selected = bool(sel) if isinstance(sel, (bool, int)) else None
     r = _safe(lambda: info.rectangle, None)
     rect = (r.left, r.top, r.right, r.bottom) if r is not None else (0, 0, 0, 0)
     return UiNode(
@@ -205,6 +242,8 @@ def _node_from_element(info: Any, pattern_ids: dict[str, int], parent: UiNode | 
         enabled=bool(_safe(lambda: info.enabled, True)),
         offscreen=bool(_safe(lambda: element.GetCurrentPropertyValue(dll.UIA_IsOffscreenPropertyId), False)),
         value=value if isinstance(value, str) else None,
+        toggle=toggle,
+        selected=selected,
         patterns=patterns,
         parent=parent,
         element=info,

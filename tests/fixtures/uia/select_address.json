@@ -1,0 +1,284 @@
+{
+ "meta": {
+  "window_title": "Select the address",
+  "source": "transcribed from live inspect outline 2026-11-05; rects not recorded"
+ },
+ "node_count": 22,
+ "truncated": false,
+ "root": {
+  "control_type": "Window",
+  "name": "Select the address",
+  "rect": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "patterns": [
+   "Window"
+  ],
+  "children": [
+   {
+    "control_type": "Pane",
+    "name": "",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "children": [
+     {
+      "control_type": "Pane",
+      "name": "",
+      "rect": [
+       0,
+       0,
+       0,
+       0
+      ],
+      "children": [
+       {
+        "control_type": "Pane",
+        "name": "",
+        "rect": [
+         0,
+         0,
+         0,
+         0
+        ],
+        "children": [
+         {
+          "control_type": "Pane",
+          "name": "",
+          "rect": [
+           0,
+           0,
+           0,
+           0
+          ],
+          "children": [
+           {
+            "control_type": "Pane",
+            "name": "",
+            "rect": [
+             0,
+             0,
+             0,
+             0
+            ],
+            "children": [
+             {
+              "control_type": "Pane",
+              "name": "",
+              "rect": [
+               0,
+               0,
+               0,
+               0
+              ],
+              "children": [
+               {
+                "control_type": "Text",
+                "name": "Search:",
+                "rect": [
+                 0,
+                 0,
+                 0,
+                 0
+                ]
+               },
+               {
+                "control_type": "Pane",
+                "name": "",
+                "rect": [
+                 0,
+                 0,
+                 0,
+                 0
+                ],
+                "children": [
+                 {
+                  "control_type": "Edit",
+                  "name": "",
+                  "rect": [
+                   0,
+                   0,
+                   0,
+                   0
+                  ],
+                  "patterns": [
+                   "Value"
+                  ],
+                  "value": "",
+                  "children": [
+                   {
+                    "control_type": "Image",
+                    "name": "",
+                    "rect": [
+                     0,
+                     0,
+                     0,
+                     0
+                    ]
+                   }
+                  ]
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           },
+           {
+            "control_type": "Pane",
+            "name": "",
+            "rect": [
+             0,
+             0,
+             0,
+             0
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "control_type": "Pane",
+      "name": "",
+      "rect": [
+       0,
+       0,
+       0,
+       0
+      ],
+      "children": [
+       {
+        "control_type": "Pane",
+        "name": "",
+        "rect": [
+         0,
+         0,
+         0,
+         0
+        ],
+        "children": [
+         {
+          "control_type": "Button",
+          "name": "OK",
+          "rect": [
+           0,
+           0,
+           0,
+           0
+          ],
+          "patterns": [
+           "Invoke"
+          ]
+         },
+         {
+          "control_type": "Button",
+          "name": "Cancel",
+          "rect": [
+           0,
+           0,
+           0,
+           0
+          ],
+          "patterns": [
+           "Invoke"
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "control_type": "TitleBar",
+    "name": "",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "value": "Select the address",
+    "patterns": [
+     "Value"
+    ],
+    "children": [
+     {
+      "control_type": "MenuBar",
+      "name": "System",
+      "rect": [
+       0,
+       0,
+       0,
+       0
+      ],
+      "children": [
+       {
+        "control_type": "MenuItem",
+        "name": "System",
+        "rect": [
+         0,
+         0,
+         0,
+         0
+        ],
+        "patterns": [
+         "ExpandCollapse"
+        ]
+       }
+      ]
+     },
+     {
+      "control_type": "Button",
+      "name": "Minimize",
+      "rect": [
+       0,
+       0,
+       0,
+       0
+      ],
+      "enabled": false,
+      "patterns": [
+       "Invoke"
+      ]
+     },
+     {
+      "control_type": "Button",
+      "name": "Maximize",
+      "rect": [
+       0,
+       0,
+       0,
+       0
+      ],
+      "patterns": [
+       "Invoke"
+      ]
+     },
+     {
+      "control_type": "Button",
+      "name": "Close",
+      "rect": [
+       0,
+       0,
+       0,
+       0
+      ],
+      "patterns": [
+       "Invoke"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

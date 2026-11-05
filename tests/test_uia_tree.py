@@ -60,3 +60,14 @@ def test_outline_and_redact():
         "  Image",
         "  Edit 'secret <workspace>'  value='<workspace>\\\\x' [Value]",
     ]
+
+
+def test_redact_covers_url_and_slash_forms():
+    ws = r"C:\Users\me\My Data"
+    root = UiNode.from_dict({"control_type": "Pane", "children": [
+        {"control_type": "Edit", "value": "file:///C:/Users/me/My%20Data/Templates/start.html"},
+        {"control_type": "Edit", "value": "C:/Users/me/My Data/x"},
+    ]})
+    snap = Snapshot(root=root, node_count=3, truncated=False)
+    redact(snap, ws)
+    assert [c.value for c in root.children] == ["file:///<workspace>/Templates/start.html", "<workspace>/x"]

@@ -1,0 +1,1907 @@
+{
+ "meta": {
+  "window_title": "Fakturama - <workspace>",
+  "pid": 39000,
+  "recorded": "2026-11-05"
+ },
+ "node_count": 122,
+ "truncated": false,
+ "root": {
+  "control_type": "Window",
+  "name": "Fakturama - <workspace>",
+  "class_name": "SWT_Window0",
+  "rect": [
+   -8,
+   -8,
+   1928,
+   1040
+  ],
+  "patterns": [
+   "Window",
+   "LegacyIAccessible"
+  ],
+  "children": [
+   {
+    "control_type": "Menu",
+    "name": "File",
+    "class_name": "#32768",
+    "rect": [
+     0,
+     42,
+     190,
+     344
+    ],
+    "patterns": [
+     "LegacyIAccessible"
+    ],
+    "children": [
+     {
+      "control_type": "MenuItem",
+      "name": "Close",
+      "automation_id": "131",
+      "rect": [
+       3,
+       45,
+       187,
+       67
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "Close All",
+      "automation_id": "132",
+      "rect": [
+       3,
+       67,
+       187,
+       89
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "Save",
+      "automation_id": "134",
+      "rect": [
+       3,
+       98,
+       187,
+       120
+      ],
+      "enabled": false,
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "Save All",
+      "automation_id": "135",
+      "rect": [
+       3,
+       120,
+       187,
+       142
+      ],
+      "enabled": false,
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "Print",
+      "automation_id": "137",
+      "rect": [
+       3,
+       151,
+       187,
+       173
+      ],
+      "enabled": false,
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "Select Workspace",
+      "automation_id": "139",
+      "rect": [
+       3,
+       182,
+       187,
+       204
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "Preferences",
+      "automation_id": "141",
+      "rect": [
+       3,
+       213,
+       187,
+       235
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "Web Shop",
+      "automation_id": "143",
+      "rect": [
+       3,
+       244,
+       187,
+       266
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "Import..",
+      "automation_id": "144",
+      "rect": [
+       3,
+       266,
+       187,
+       288
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "Export..",
+      "automation_id": "145",
+      "rect": [
+       3,
+       288,
+       187,
+       310
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "Quit Fakturama",
+      "automation_id": "147",
+      "rect": [
+       3,
+       319,
+       187,
+       341
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     }
+    ]
+   },
+   {
+    "control_type": "Pane",
+    "name": "",
+    "automation_id": "133948",
+    "class_name": "SWT_Window0",
+    "rect": [
+     0,
+     115,
+     1920,
+     1032
+    ],
+    "patterns": [
+     "LegacyIAccessible"
+    ],
+    "children": [
+     {
+      "control_type": "Pane",
+      "name": "",
+      "automation_id": "133952",
+      "class_name": "SWT_Window0",
+      "rect": [
+       0,
+       115,
+       1920,
+       1032
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "Pane",
+        "name": "Fakturama Perspective",
+        "automation_id": "133950",
+        "class_name": "SWT_Window0",
+        "rect": [
+         0,
+         115,
+         1920,
+         1032
+        ],
+        "patterns": [
+         "LegacyIAccessible"
+        ],
+        "children": [
+         {
+          "control_type": "Pane",
+          "name": "",
+          "automation_id": "133946",
+          "class_name": "SWT_Window0",
+          "rect": [
+           0,
+           115,
+           1920,
+           1032
+          ],
+          "patterns": [
+           "LegacyIAccessible"
+          ],
+          "children": [
+           {
+            "control_type": "Pane",
+            "name": "Navigation View",
+            "automation_id": "133942",
+            "class_name": "SWT_Window0",
+            "rect": [
+             0,
+             115,
+             383,
+             1032
+            ],
+            "patterns": [
+             "LegacyIAccessible"
+            ],
+            "children": [
+             {
+              "control_type": "Pane",
+              "name": "",
+              "automation_id": "133944",
+              "class_name": "SWT_Window0",
+              "rect": [
+               0,
+               115,
+               383,
+               1032
+              ],
+              "patterns": [
+               "LegacyIAccessible"
+              ],
+              "children": [
+               {
+                "control_type": "Pane",
+                "name": "",
+                "automation_id": "68424",
+                "class_name": "SWT_Window0",
+                "rect": [
+                 5,
+                 120,
+                 378,
+                 190
+                ],
+                "patterns": [
+                 "LegacyIAccessible"
+                ],
+                "children": [
+                 {
+                  "control_type": "Text",
+                  "name": "Web Shop",
+                  "automation_id": "68428",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   159,
+                   92,
+                   181
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 }
+                ]
+               },
+               {
+                "control_type": "Pane",
+                "name": "",
+                "automation_id": "68430",
+                "class_name": "SWT_Window0",
+                "rect": [
+                 5,
+                 195,
+                 378,
+                 535
+                ],
+                "patterns": [
+                 "LegacyIAccessible"
+                ],
+                "children": [
+                 {
+                  "control_type": "Text",
+                  "name": "Documents",
+                  "automation_id": "68432",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   234,
+                   99,
+                   256
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 },
+                 {
+                  "control_type": "Text",
+                  "name": "Products",
+                  "automation_id": "68434",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   261,
+                   85,
+                   283
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 },
+                 {
+                  "control_type": "Text",
+                  "name": "Creditors",
+                  "automation_id": "68436",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   288,
+                   86,
+                   310
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 },
+                 {
+                  "control_type": "Text",
+                  "name": "Debtors",
+                  "automation_id": "68438",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   315,
+                   79,
+                   337
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 },
+                 {
+                  "control_type": "Text",
+                  "name": "terms of payment",
+                  "automation_id": "68440",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   342,
+                   132,
+                   364
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 },
+                 {
+                  "control_type": "Text",
+                  "name": "Shippings",
+                  "automation_id": "68442",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   369,
+                   90,
+                   391
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 },
+                 {
+                  "control_type": "Text",
+                  "name": "VATs",
+                  "automation_id": "68444",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   396,
+                   62,
+                   418
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 },
+                 {
+                  "control_type": "Text",
+                  "name": "Texts",
+                  "automation_id": "68446",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   423,
+                   64,
+                   445
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 },
+                 {
+                  "control_type": "Text",
+                  "name": "Lists",
+                  "automation_id": "68448",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   450,
+                   61,
+                   472
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 },
+                 {
+                  "control_type": "Text",
+                  "name": "Expenditure Vouchers",
+                  "automation_id": "68450",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   477,
+                   151,
+                   499
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 },
+                 {
+                  "control_type": "Text",
+                  "name": "Receipt Vouchers",
+                  "automation_id": "68452",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   504,
+                   128,
+                   526
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 }
+                ]
+               },
+               {
+                "control_type": "Pane",
+                "name": "",
+                "automation_id": "68454",
+                "class_name": "SWT_Window0",
+                "rect": [
+                 5,
+                 540,
+                 378,
+                 637
+                ],
+                "patterns": [
+                 "LegacyIAccessible"
+                ],
+                "children": [
+                 {
+                  "control_type": "Text",
+                  "name": "New product",
+                  "automation_id": "68456",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   579,
+                   107,
+                   601
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 },
+                 {
+                  "control_type": "Text",
+                  "name": "New Contact",
+                  "automation_id": "68458",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   606,
+                   107,
+                   628
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 }
+                ]
+               },
+               {
+                "control_type": "Pane",
+                "name": "",
+                "automation_id": "68460",
+                "class_name": "SWT_Window0",
+                "rect": [
+                 5,
+                 642,
+                 378,
+                 766
+                ],
+                "patterns": [
+                 "LegacyIAccessible"
+                ],
+                "children": [
+                 {
+                  "control_type": "Text",
+                  "name": "ParcelService",
+                  "automation_id": "68462",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   681,
+                   107,
+                   703
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 },
+                 {
+                  "control_type": "Text",
+                  "name": "www.fakturama.info",
+                  "automation_id": "68464",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   708,
+                   146,
+                   730
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 },
+                 {
+                  "control_type": "Text",
+                  "name": "Calculator",
+                  "automation_id": "68466",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   11,
+                   735,
+                   92,
+                   757
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ]
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           },
+           {
+            "control_type": "Tab",
+            "name": "Fakturama",
+            "automation_id": "68468",
+            "class_name": "SWT_Window0",
+            "rect": [
+             387,
+             115,
+             1920,
+             637
+            ],
+            "patterns": [
+             "Selection",
+             "LegacyIAccessible"
+            ],
+            "children": [
+             {
+              "control_type": "ToolBar",
+              "name": "",
+              "automation_id": "68616",
+              "class_name": "ToolbarWindow32",
+              "rect": [
+               1868,
+               116,
+               1914,
+               138
+              ],
+              "patterns": [
+               "LegacyIAccessible"
+              ],
+              "children": [
+               {
+                "control_type": "Button",
+                "name": "Minimize",
+                "rect": [
+                 1868,
+                 116,
+                 1891,
+                 138
+                ],
+                "patterns": [
+                 "Invoke",
+                 "LegacyIAccessible"
+                ]
+               },
+               {
+                "control_type": "Button",
+                "name": "Maximize",
+                "rect": [
+                 1891,
+                 116,
+                 1914,
+                 138
+                ],
+                "patterns": [
+                 "Invoke",
+                 "LegacyIAccessible"
+                ]
+               }
+              ]
+             },
+             {
+              "control_type": "Pane",
+              "name": "Fakturama",
+              "automation_id": "68474",
+              "class_name": "SWT_Window0",
+              "rect": [
+               390,
+               141,
+               1917,
+               634
+              ],
+              "patterns": [
+               "LegacyIAccessible"
+              ],
+              "children": [
+               {
+                "control_type": "Pane",
+                "name": "",
+                "automation_id": "68476",
+                "class_name": "SWT_Window0",
+                "rect": [
+                 390,
+                 141,
+                 1917,
+                 634
+                ],
+                "patterns": [
+                 "LegacyIAccessible"
+                ],
+                "children": [
+                 {
+                  "control_type": "Pane",
+                  "name": "",
+                  "automation_id": "68478",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   390,
+                   141,
+                   1917,
+                   162
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ],
+                  "children": [
+                   {
+                    "control_type": "Image",
+                    "name": "",
+                    "automation_id": "68480",
+                    "class_name": "Static",
+                    "rect": [
+                     390,
+                     141,
+                     410,
+                     161
+                    ],
+                    "patterns": [
+                     "LegacyIAccessible"
+                    ]
+                   },
+                   {
+                    "control_type": "Image",
+                    "name": "",
+                    "automation_id": "68482",
+                    "class_name": "Static",
+                    "rect": [
+                     416,
+                     141,
+                     436,
+                     161
+                    ],
+                    "patterns": [
+                     "LegacyIAccessible"
+                    ]
+                   },
+                   {
+                    "control_type": "Image",
+                    "name": "",
+                    "automation_id": "68484",
+                    "class_name": "Static",
+                    "rect": [
+                     442,
+                     141,
+                     462,
+                     161
+                    ],
+                    "patterns": [
+                     "LegacyIAccessible"
+                    ]
+                   },
+                   {
+                    "control_type": "Image",
+                    "name": "",
+                    "automation_id": "68486",
+                    "class_name": "Static",
+                    "rect": [
+                     468,
+                     141,
+                     488,
+                     161
+                    ],
+                    "patterns": [
+                     "LegacyIAccessible"
+                    ]
+                   },
+                   {
+                    "control_type": "Image",
+                    "name": "",
+                    "automation_id": "68488",
+                    "class_name": "Static",
+                    "rect": [
+                     494,
+                     141,
+                     514,
+                     161
+                    ],
+                    "patterns": [
+                     "LegacyIAccessible"
+                    ]
+                   },
+                   {
+                    "control_type": "Edit",
+                    "name": "",
+                    "automation_id": "68490",
+                    "class_name": "Edit",
+                    "rect": [
+                     520,
+                     141,
+                     1917,
+                     162
+                    ],
+                    "value": "file:///<workspace>/Templates/Start/start.html",
+                    "patterns": [
+                     "Value",
+                     "LegacyIAccessible"
+                    ]
+                   }
+                  ]
+                 },
+                 {
+                  "control_type": "Pane",
+                  "name": "",
+                  "automation_id": "68492",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   390,
+                   162,
+                   1917,
+                   634
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ],
+                  "children": [
+                   {
+                    "control_type": "Pane",
+                    "name": "",
+                    "automation_id": "68494",
+                    "class_name": "SWT_Window0",
+                    "rect": [
+                     390,
+                     162,
+                     1917,
+                     634
+                    ],
+                    "patterns": [
+                     "LegacyIAccessible"
+                    ],
+                    "children": [
+                     {
+                      "control_type": "Pane",
+                      "name": "",
+                      "automation_id": "68496",
+                      "class_name": "SWT_Window0",
+                      "rect": [
+                       390,
+                       162,
+                       1917,
+                       634
+                      ],
+                      "patterns": [
+                       "LegacyIAccessible"
+                      ],
+                      "children": [
+                       {
+                        "control_type": "Pane",
+                        "name": "",
+                        "class_name": "Shell Embedding",
+                        "rect": [
+                         390,
+                         162,
+                         1917,
+                         634
+                        ],
+                        "patterns": [
+                         "LegacyIAccessible"
+                        ],
+                        "children": [
+                         {
+                          "control_type": "Pane",
+                          "name": "",
+                          "class_name": "Shell DocObject View",
+                          "rect": [
+                           390,
+                           162,
+                           1917,
+                           634
+                          ],
+                          "patterns": [
+                           "LegacyIAccessible"
+                          ],
+                          "children": [
+                           {
+                            "control_type": "Pane",
+                            "name": "file://<workspace>\\Templates\\Start\\start.html",
+                            "class_name": "Internet Explorer_Server",
+                            "rect": [
+                             390,
+                             162,
+                             1917,
+                             634
+                            ],
+                            "patterns": [
+                             "Scroll",
+                             "LegacyIAccessible"
+                            ],
+                            "children": [
+                             {
+                              "control_type": "Pane",
+                              "name": "Fakturama",
+                              "rect": [
+                               398,
+                               170,
+                               1909,
+                               626
+                              ],
+                              "patterns": [
+                               "Text",
+                               "LegacyIAccessible"
+                              ],
+                              "children": [
+                               {
+                                "control_type": "Image",
+                                "name": "",
+                                "rect": [
+                                 1007,
+                                 220,
+                                 1301,
+                                 399
+                                ],
+                                "patterns": [
+                                 "LegacyIAccessible"
+                                ]
+                               },
+                               {
+                                "control_type": "Text",
+                                "name": "You can edit this page.",
+                                "rect": [
+                                 1079,
+                                 170,
+                                 1351,
+                                 465
+                                ],
+                                "patterns": [
+                                 "LegacyIAccessible"
+                                ]
+                               }
+                              ]
+                             }
+                            ]
+                           }
+                          ]
+                         }
+                        ]
+                       }
+                      ]
+                     }
+                    ]
+                   }
+                  ]
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "control_type": "TabItem",
+              "name": "Fakturama",
+              "rect": [
+               387,
+               115,
+               496,
+               138
+              ],
+              "selected": true,
+              "patterns": [
+               "SelectionItem",
+               "LegacyIAccessible"
+              ]
+             }
+            ]
+           },
+           {
+            "control_type": "Tab",
+            "name": "VATs",
+            "automation_id": "68570",
+            "class_name": "SWT_Window0",
+            "rect": [
+             387,
+             641,
+             1920,
+             1032
+            ],
+            "patterns": [
+             "Selection",
+             "LegacyIAccessible"
+            ],
+            "children": [
+             {
+              "control_type": "Pane",
+              "name": "",
+              "automation_id": "68572",
+              "class_name": "SWT_Window0",
+              "rect": [
+               1822,
+               642,
+               1868,
+               664
+              ],
+              "patterns": [
+               "LegacyIAccessible"
+              ],
+              "children": [
+               {
+                "control_type": "ToolBar",
+                "name": "",
+                "automation_id": "134890",
+                "class_name": "ToolbarWindow32",
+                "rect": [
+                 1822,
+                 642,
+                 1868,
+                 664
+                ],
+                "patterns": [
+                 "LegacyIAccessible"
+                ],
+                "children": [
+                 {
+                  "control_type": "Button",
+                  "name": "Create a new tax rate",
+                  "rect": [
+                   1822,
+                   642,
+                   1845,
+                   664
+                  ],
+                  "patterns": [
+                   "Invoke",
+                   "LegacyIAccessible"
+                  ]
+                 },
+                 {
+                  "control_type": "Button",
+                  "name": "Delete the marked entry",
+                  "rect": [
+                   1845,
+                   642,
+                   1868,
+                   664
+                  ],
+                  "enabled": false,
+                  "patterns": [
+                   "Invoke",
+                   "LegacyIAccessible"
+                  ]
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "control_type": "ToolBar",
+              "name": "",
+              "automation_id": "68608",
+              "class_name": "ToolbarWindow32",
+              "rect": [
+               1868,
+               642,
+               1914,
+               664
+              ],
+              "patterns": [
+               "LegacyIAccessible"
+              ],
+              "children": [
+               {
+                "control_type": "Button",
+                "name": "Minimize",
+                "rect": [
+                 1868,
+                 642,
+                 1891,
+                 664
+                ],
+                "patterns": [
+                 "Invoke",
+                 "LegacyIAccessible"
+                ]
+               },
+               {
+                "control_type": "Button",
+                "name": "Maximize",
+                "rect": [
+                 1891,
+                 642,
+                 1914,
+                 664
+                ],
+                "patterns": [
+                 "Invoke",
+                 "LegacyIAccessible"
+                ]
+               }
+              ]
+             },
+             {
+              "control_type": "Pane",
+              "name": "VATs",
+              "automation_id": "528000",
+              "class_name": "SWT_Window0",
+              "rect": [
+               390,
+               667,
+               1917,
+               1029
+              ],
+              "patterns": [
+               "LegacyIAccessible"
+              ],
+              "children": [
+               {
+                "control_type": "Pane",
+                "name": "",
+                "automation_id": "134910",
+                "class_name": "SWT_Window0",
+                "rect": [
+                 390,
+                 667,
+                 1917,
+                 1029
+                ],
+                "patterns": [
+                 "LegacyIAccessible"
+                ],
+                "children": [
+                 {
+                  "control_type": "Pane",
+                  "name": "",
+                  "automation_id": "134882",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   420,
+                   669,
+                   1915,
+                   1027
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ],
+                  "children": [
+                   {
+                    "control_type": "Pane",
+                    "name": "",
+                    "automation_id": "134908",
+                    "class_name": "SWT_Window0",
+                    "rect": [
+                     420,
+                     669,
+                     1915,
+                     700
+                    ],
+                    "patterns": [
+                     "LegacyIAccessible"
+                    ],
+                    "children": [
+                     {
+                      "control_type": "Text",
+                      "name": "",
+                      "automation_id": "134906",
+                      "class_name": "Static",
+                      "rect": [
+                       739,
+                       676,
+                       740,
+                       692
+                      ],
+                      "patterns": [
+                       "LegacyIAccessible"
+                      ]
+                     },
+                     {
+                      "control_type": "Pane",
+                      "name": "",
+                      "automation_id": "134904",
+                      "class_name": "SWT_Window0",
+                      "rect": [
+                       1706,
+                       669,
+                       1909,
+                       700
+                      ],
+                      "patterns": [
+                       "LegacyIAccessible"
+                      ],
+                      "children": [
+                       {
+                        "control_type": "Text",
+                        "name": "Search:",
+                        "automation_id": "134902",
+                        "class_name": "Static",
+                        "rect": [
+                         1711,
+                         677,
+                         1749,
+                         692
+                        ],
+                        "patterns": [
+                         "LegacyIAccessible"
+                        ]
+                       },
+                       {
+                        "control_type": "Pane",
+                        "name": "",
+                        "automation_id": "134900",
+                        "class_name": "SWT_Window0",
+                        "rect": [
+                         1754,
+                         674,
+                         1904,
+                         695
+                        ],
+                        "patterns": [
+                         "LegacyIAccessible"
+                        ],
+                        "children": [
+                         {
+                          "control_type": "Edit",
+                          "name": "",
+                          "automation_id": "134894",
+                          "class_name": "Edit",
+                          "rect": [
+                           1754,
+                           674,
+                           1904,
+                           695
+                          ],
+                          "value": "",
+                          "patterns": [
+                           "Value",
+                           "LegacyIAccessible"
+                          ],
+                          "children": [
+                           {
+                            "control_type": "Image",
+                            "name": "",
+                            "automation_id": "512",
+                            "class_name": "Static",
+                            "rect": [
+                             1756,
+                             676,
+                             1772,
+                             693
+                            ],
+                            "patterns": [
+                             "LegacyIAccessible"
+                            ]
+                           }
+                          ]
+                         }
+                        ]
+                       }
+                      ]
+                     }
+                    ]
+                   },
+                   {
+                    "control_type": "Pane",
+                    "name": "",
+                    "automation_id": "134892",
+                    "class_name": "SWT_Window0",
+                    "rect": [
+                     420,
+                     705,
+                     1915,
+                     1027
+                    ],
+                    "patterns": [
+                     "LegacyIAccessible"
+                    ]
+                   }
+                  ]
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "control_type": "TabItem",
+              "name": "Documents",
+              "rect": [
+               387,
+               641,
+               476,
+               664
+              ],
+              "selected": false,
+              "patterns": [
+               "SelectionItem",
+               "LegacyIAccessible"
+              ]
+             },
+             {
+              "control_type": "TabItem",
+              "name": "Creditors",
+              "rect": [
+               476,
+               641,
+               552,
+               664
+              ],
+              "selected": false,
+              "patterns": [
+               "SelectionItem",
+               "LegacyIAccessible"
+              ]
+             },
+             {
+              "control_type": "TabItem",
+              "name": "Debtors",
+              "rect": [
+               552,
+               641,
+               621,
+               664
+              ],
+              "selected": false,
+              "patterns": [
+               "SelectionItem",
+               "LegacyIAccessible"
+              ]
+             },
+             {
+              "control_type": "TabItem",
+              "name": "Products",
+              "rect": [
+               621,
+               641,
+               696,
+               664
+              ],
+              "selected": false,
+              "patterns": [
+               "SelectionItem",
+               "LegacyIAccessible"
+              ]
+             },
+             {
+              "control_type": "TabItem",
+              "name": "VATs",
+              "rect": [
+               696,
+               641,
+               795,
+               664
+              ],
+              "selected": true,
+              "patterns": [
+               "SelectionItem",
+               "LegacyIAccessible"
+              ]
+             },
+             {
+              "control_type": "TabItem",
+              "name": "Shippings",
+              "rect": [
+               783,
+               641,
+               863,
+               664
+              ],
+              "selected": false,
+              "patterns": [
+               "SelectionItem",
+               "LegacyIAccessible"
+              ]
+             },
+             {
+              "control_type": "TabItem",
+              "name": "terms of payment",
+              "rect": [
+               863,
+               641,
+               985,
+               664
+              ],
+              "selected": false,
+              "patterns": [
+               "SelectionItem",
+               "LegacyIAccessible"
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "control_type": "Pane",
+    "name": "",
+    "automation_id": "591104",
+    "class_name": "SWT_Window0",
+    "rect": [
+     0,
+     43,
+     1920,
+     115
+    ],
+    "patterns": [
+     "LegacyIAccessible"
+    ],
+    "children": [
+     {
+      "control_type": "Pane",
+      "name": "",
+      "automation_id": "658088",
+      "class_name": "ReBarWindow32",
+      "rect": [
+       5,
+       48,
+       1915,
+       110
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "ToolBar",
+        "name": "",
+        "automation_id": "1313444",
+        "class_name": "ToolbarWindow32",
+        "rect": [
+         16,
+         52,
+         159,
+         106
+        ],
+        "patterns": [
+         "LegacyIAccessible"
+        ],
+        "children": [
+         {
+          "control_type": "Button",
+          "name": "Get new orders and products from web shop",
+          "rect": [
+           16,
+           52,
+           81,
+           106
+          ],
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "Button",
+          "name": "Print/Export this document as an OpenOffice Writer document",
+          "rect": [
+           81,
+           52,
+           120,
+           106
+          ],
+          "enabled": false,
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "Button",
+          "name": "Save the current contents",
+          "rect": [
+           120,
+           52,
+           159,
+           106
+          ],
+          "enabled": false,
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         }
+        ]
+       },
+       {
+        "control_type": "ToolBar",
+        "name": "",
+        "automation_id": "1116962",
+        "class_name": "ToolbarWindow32",
+        "rect": [
+         174,
+         52,
+         317,
+         106
+        ],
+        "patterns": [
+         "LegacyIAccessible"
+        ],
+        "children": [
+         {
+          "control_type": "Button",
+          "name": "Create: New Order",
+          "rect": [
+           174,
+           52,
+           215,
+           106
+          ],
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "Button",
+          "name": "Create: New Invoice",
+          "rect": [
+           215,
+           52,
+           264,
+           106
+          ],
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "Button",
+          "name": "Create: New Delivery Note",
+          "rect": [
+           264,
+           52,
+           317,
+           106
+          ],
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         }
+        ]
+       },
+       {
+        "control_type": "ToolBar",
+        "name": "",
+        "automation_id": "68610",
+        "class_name": "ToolbarWindow32",
+        "rect": [
+         332,
+         48,
+         608,
+         110
+        ],
+        "patterns": [
+         "LegacyIAccessible"
+        ],
+        "children": [
+         {
+          "control_type": "Button",
+          "name": "Create a new product",
+          "rect": [
+           332,
+           48,
+           385,
+           110
+          ],
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "SplitButton",
+          "name": "Create a new contact",
+          "rect": [
+           385,
+           48,
+           459,
+           110
+          ],
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "Button",
+          "name": "Create: New Expenditure",
+          "rect": [
+           459,
+           48,
+           558,
+           110
+          ],
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "Button",
+          "name": "Create: New Receipt Voucher",
+          "rect": [
+           558,
+           48,
+           608,
+           110
+          ],
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         }
+        ]
+       },
+       {
+        "control_type": "ToolBar",
+        "name": "",
+        "automation_id": "68612",
+        "class_name": "ToolbarWindow32",
+        "rect": [
+         623,
+         52,
+         1915,
+         106
+        ],
+        "patterns": [
+         "LegacyIAccessible"
+        ],
+        "children": [
+         {
+          "control_type": "Button",
+          "name": "Open the web site of the parcel service.",
+          "rect": [
+           623,
+           52,
+           666,
+           106
+          ],
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "Button",
+          "name": "Open the project web site www.fakturama.info",
+          "rect": [
+           666,
+           52,
+           705,
+           106
+          ],
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "Button",
+          "name": "Open the calculator",
+          "rect": [
+           705,
+           52,
+           770,
+           106
+          ],
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "control_type": "TitleBar",
+    "name": "",
+    "rect": [
+     16,
+     -5,
+     1920,
+     23
+    ],
+    "value": "Fakturama - <workspace>",
+    "patterns": [
+     "Value",
+     "LegacyIAccessible"
+    ],
+    "children": [
+     {
+      "control_type": "MenuBar",
+      "name": "System",
+      "automation_id": "MenuBar",
+      "rect": [
+       0,
+       0,
+       22,
+       22
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "MenuItem",
+        "name": "System",
+        "rect": [
+         0,
+         0,
+         22,
+         22
+        ],
+        "patterns": [
+         "Invoke",
+         "ExpandCollapse",
+         "LegacyIAccessible"
+        ]
+       }
+      ]
+     },
+     {
+      "control_type": "Button",
+      "name": "Minimize",
+      "rect": [
+       1779,
+       0,
+       1826,
+       22
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Button",
+      "name": "Restore",
+      "rect": [
+       1826,
+       0,
+       1872,
+       22
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Button",
+      "name": "Close",
+      "rect": [
+       1872,
+       0,
+       1920,
+       22
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     }
+    ]
+   },
+   {
+    "control_type": "MenuBar",
+    "name": "Application",
+    "automation_id": "MenuBar",
+    "rect": [
+     0,
+     23,
+     1920,
+     42
+    ],
+    "patterns": [
+     "LegacyIAccessible"
+    ],
+    "children": [
+     {
+      "control_type": "MenuItem",
+      "name": "File",
+      "rect": [
+       0,
+       23,
+       32,
+       42
+      ],
+      "patterns": [
+       "Invoke",
+       "ExpandCollapse",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "Edit",
+      "rect": [
+       32,
+       23,
+       66,
+       42
+      ],
+      "patterns": [
+       "Invoke",
+       "ExpandCollapse",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "Data",
+      "rect": [
+       66,
+       23,
+       104,
+       42
+      ],
+      "patterns": [
+       "Invoke",
+       "ExpandCollapse",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "New",
+      "rect": [
+       104,
+       23,
+       142,
+       42
+      ],
+      "patterns": [
+       "Invoke",
+       "ExpandCollapse",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "Extra",
+      "rect": [
+       142,
+       23,
+       181,
+       42
+      ],
+      "patterns": [
+       "Invoke",
+       "ExpandCollapse",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "Window",
+      "rect": [
+       181,
+       23,
+       239,
+       42
+      ],
+      "patterns": [
+       "Invoke",
+       "ExpandCollapse",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "MenuItem",
+      "name": "Help",
+      "rect": [
+       239,
+       23,
+       278,
+       42
+      ],
+      "patterns": [
+       "Invoke",
+       "ExpandCollapse",
+       "LegacyIAccessible"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

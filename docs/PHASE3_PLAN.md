@@ -16,7 +16,7 @@ Workspace: `C:\Users\ma774\OneDrive\Desktop\work\fakturama data TJM Labs` (HSQLD
 | Orders | PO000001–PO000003 (earlier exploration) | next proposed No. should be PO000004 |
 | Products | none of `CHR-ERG-01`, `MAT-DESK-02` | create both |
 | VAT | `VAT 19%`, 0.19, code S | reuse |
-| Terms of payment | `Cash`, `Bank Transfer` (payment-code column looks empty) | **check live in part F** |
+| Terms of payment | `Cash` (code `ZZZ`); `Bank Transfer` had no code and was deleted by hand on 2026-11-05 | Bank Transfer missing → create (part G) |
 
 The existing debtors give us a free "existing Debtor" case: a hand-written test OrderSpec for Learning Labs / Alice Smith exercises the select branch without creating anything.
 
@@ -42,6 +42,14 @@ The existing debtors give us a free "existing Debtor" case: a hand-written test 
 Checks, each reported as ok/failed with what was seen: one main window, visible and not minimized; Fakturama 2.2.0; English labels (toolbar names); no dirty editors (no tab title starting with `*`); File > Preferences read and **closed with Cancel**: `immediately take over a clearly found item number` must be **off**, currency locale is read and handed to the money parser (never changed); foreground window is Fakturama.
 
 **Live check:** `preflight` prints the checklist. Turn the "take over item number" preference on and it fails naming that setting. Afterwards, Preferences shows nothing changed.
+
+**Done 2026-11-05.** What the live work showed:
+- Version comes from the plugin jar names (`plugins/com.sebulli.fakturama.rcp_2.2.0.jar`); `Fakturama.exe` has no version resource.
+- Preferences is a top-level `#32770` window titled `Preferences`; pages are TreeItems (SelectionItem.Select switches the page); the take-over CheckBox is on **Documents**, currency on **General**. Toggle and selection states are now part of every snapshot.
+- Money format is learned from the `Example` field (-1234.57 formatted by Fakturama, `$-1,234.57` here) plus `decimal places (currency)`; the locale is never changed.
+- Opening the File menu: Invoke, Expand and the accessible default action were all refused (COM -2146233079) on an enabled, collapsed item, while they had worked minutes earlier; a real click always worked. `open_menu` tries the UIA methods, then a **guarded click** (Fakturama in front + UIA hit test confirms the item is under the point). Part D reuses `guarded_click`.
+- Open tabs: views and editors are both TabItems and cannot be told apart reliably, so all are listed and only a leading `*` fails.
+- `Select the address` is its own top-level window; its Search Edit sits inside a Pane after the `Search:` label (`label_sibling` with `descend: true`). Locators now carry `window` (dialog title regex) and `transient` (menus/views); `locate` resolves each in its window and skips closed ones.
 
 ### C. Table reader (read-only)
 

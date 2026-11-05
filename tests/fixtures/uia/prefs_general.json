@@ -1,0 +1,1323 @@
+{
+ "meta": {
+  "window_title": "Preferences",
+  "pid": 39000,
+  "recorded": "2026-11-05"
+ },
+ "node_count": 79,
+ "truncated": false,
+ "root": {
+  "control_type": "Window",
+  "name": "Preferences",
+  "class_name": "#32770",
+  "rect": [
+   634,
+   126,
+   1286,
+   711
+  ],
+  "patterns": [
+   "Window",
+   "LegacyIAccessible"
+  ],
+  "children": [
+   {
+    "control_type": "Pane",
+    "name": "",
+    "automation_id": "4001340",
+    "class_name": "SWT_Window0",
+    "rect": [
+     642,
+     157,
+     1278,
+     703
+    ],
+    "patterns": [
+     "LegacyIAccessible"
+    ],
+    "children": [
+     {
+      "control_type": "Pane",
+      "name": "",
+      "automation_id": "986708",
+      "class_name": "SWT_Window0",
+      "rect": [
+       642,
+       157,
+       1278,
+       650
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "Tree",
+        "name": "",
+        "automation_id": "986810",
+        "class_name": "SysTreeView32",
+        "rect": [
+         642,
+         157,
+         839,
+         650
+        ],
+        "patterns": [
+         "Selection",
+         "LegacyIAccessible"
+        ],
+        "children": [
+         {
+          "control_type": "TreeItem",
+          "name": "Contacts",
+          "rect": [
+           661,
+           157,
+           712,
+           175
+          ],
+          "selected": false,
+          "patterns": [
+           "ExpandCollapse",
+           "SelectionItem",
+           "LegacyIAccessible"
+          ],
+          "children": [
+           {
+            "control_type": "TreeItem",
+            "name": "Format",
+            "rect": [
+             677,
+             175,
+             719,
+             193
+            ],
+            "selected": false,
+            "patterns": [
+             "ExpandCollapse",
+             "SelectionItem",
+             "LegacyIAccessible"
+            ]
+           }
+          ]
+         },
+         {
+          "control_type": "TreeItem",
+          "name": "Documents",
+          "rect": [
+           661,
+           193,
+           726,
+           211
+          ],
+          "selected": false,
+          "patterns": [
+           "ExpandCollapse",
+           "SelectionItem",
+           "LegacyIAccessible"
+          ],
+          "children": [
+           {
+            "control_type": "TreeItem",
+            "name": "Optional Items",
+            "rect": [
+             677,
+             211,
+             759,
+             229
+            ],
+            "selected": false,
+            "patterns": [
+             "ExpandCollapse",
+             "SelectionItem",
+             "LegacyIAccessible"
+            ]
+           }
+          ]
+         },
+         {
+          "control_type": "TreeItem",
+          "name": "Export",
+          "rect": [
+           661,
+           229,
+           698,
+           247
+          ],
+          "selected": false,
+          "patterns": [
+           "ExpandCollapse",
+           "SelectionItem",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "TreeItem",
+          "name": "General",
+          "rect": [
+           661,
+           247,
+           705,
+           265
+          ],
+          "selected": true,
+          "patterns": [
+           "ExpandCollapse",
+           "SelectionItem",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "TreeItem",
+          "name": "Mail-Service",
+          "rect": [
+           661,
+           265,
+           730,
+           283
+          ],
+          "selected": false,
+          "patterns": [
+           "ExpandCollapse",
+           "SelectionItem",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "TreeItem",
+          "name": "Number Range",
+          "rect": [
+           661,
+           283,
+           745,
+           301
+          ],
+          "selected": false,
+          "patterns": [
+           "ExpandCollapse",
+           "SelectionItem",
+           "LegacyIAccessible"
+          ],
+          "children": [
+           {
+            "control_type": "TreeItem",
+            "name": "Format",
+            "rect": [
+             677,
+             301,
+             719,
+             319
+            ],
+            "selected": false,
+            "patterns": [
+             "ExpandCollapse",
+             "SelectionItem",
+             "LegacyIAccessible"
+            ]
+           }
+          ]
+         },
+         {
+          "control_type": "TreeItem",
+          "name": "Office Integration",
+          "rect": [
+           661,
+           319,
+           758,
+           337
+          ],
+          "selected": false,
+          "patterns": [
+           "ExpandCollapse",
+           "SelectionItem",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "TreeItem",
+          "name": "Products",
+          "rect": [
+           661,
+           337,
+           712,
+           355
+          ],
+          "selected": false,
+          "patterns": [
+           "ExpandCollapse",
+           "SelectionItem",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "TreeItem",
+          "name": "Toolbar",
+          "rect": [
+           661,
+           355,
+           705,
+           373
+          ],
+          "selected": false,
+          "patterns": [
+           "ExpandCollapse",
+           "SelectionItem",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "TreeItem",
+          "name": "Web Browser / Start Page",
+          "rect": [
+           661,
+           373,
+           798,
+           391
+          ],
+          "selected": false,
+          "patterns": [
+           "ExpandCollapse",
+           "SelectionItem",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "TreeItem",
+          "name": "Web Shop",
+          "rect": [
+           661,
+           391,
+           719,
+           409
+          ],
+          "selected": false,
+          "patterns": [
+           "ExpandCollapse",
+           "SelectionItem",
+           "LegacyIAccessible"
+          ],
+          "children": [
+           {
+            "control_type": "TreeItem",
+            "name": "Web shop authorization",
+            "rect": [
+             677,
+             409,
+             807,
+             427
+            ],
+            "selected": false,
+            "patterns": [
+             "ExpandCollapse",
+             "SelectionItem",
+             "LegacyIAccessible"
+            ]
+           }
+          ]
+         },
+         {
+          "control_type": "TreeItem",
+          "name": "Your Company",
+          "rect": [
+           661,
+           427,
+           744,
+           445
+          ],
+          "selected": false,
+          "patterns": [
+           "ExpandCollapse",
+           "SelectionItem",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "TreeItem",
+          "name": "ZUGFeRD settings",
+          "rect": [
+           661,
+           445,
+           759,
+           463
+          ],
+          "selected": false,
+          "patterns": [
+           "ExpandCollapse",
+           "SelectionItem",
+           "LegacyIAccessible"
+          ]
+         }
+        ]
+       },
+       {
+        "control_type": "Pane",
+        "name": "",
+        "automation_id": "1183390",
+        "class_name": "SWT_Window0",
+        "rect": [
+         839,
+         157,
+         842,
+         650
+        ],
+        "patterns": [
+         "LegacyIAccessible"
+        ]
+       },
+       {
+        "control_type": "Image",
+        "name": "",
+        "automation_id": "1052302",
+        "class_name": "Static",
+        "rect": [
+         842,
+         157,
+         844,
+         650
+        ],
+        "patterns": [
+         "LegacyIAccessible"
+        ]
+       },
+       {
+        "control_type": "Pane",
+        "name": "",
+        "automation_id": "6229550",
+        "class_name": "SWT_Window0",
+        "rect": [
+         844,
+         157,
+         1291,
+         650
+        ],
+        "patterns": [
+         "LegacyIAccessible"
+        ],
+        "children": [
+         {
+          "control_type": "Pane",
+          "name": "",
+          "automation_id": "10161696",
+          "class_name": "SWT_Window0",
+          "rect": [
+           851,
+           157,
+           1291,
+           184
+          ],
+          "patterns": [
+           "LegacyIAccessible"
+          ],
+          "children": [
+           {
+            "control_type": "Pane",
+            "name": "",
+            "automation_id": "659006",
+            "class_name": "SWT_Window0",
+            "rect": [
+             851,
+             157,
+             1291,
+             184
+            ],
+            "patterns": [
+             "LegacyIAccessible"
+            ],
+            "children": [
+             {
+              "control_type": "Pane",
+              "name": "",
+              "automation_id": "593638",
+              "class_name": "SWT_Window0",
+              "rect": [
+               851,
+               157,
+               1291,
+               179
+              ],
+              "patterns": [
+               "LegacyIAccessible"
+              ],
+              "children": [
+               {
+                "control_type": "Text",
+                "name": "General",
+                "automation_id": "1115066",
+                "class_name": "SWT_Window0",
+                "rect": [
+                 853,
+                 157,
+                 1289,
+                 179
+                ],
+                "patterns": [
+                 "LegacyIAccessible"
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         },
+         {
+          "control_type": "Image",
+          "name": "",
+          "automation_id": "1642012",
+          "class_name": "Static",
+          "rect": [
+           844,
+           184,
+           1291,
+           186
+          ],
+          "patterns": [
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "Pane",
+          "name": "",
+          "automation_id": "397028",
+          "class_name": "SWT_Window0",
+          "rect": [
+           851,
+           186,
+           1291,
+           650
+          ],
+          "patterns": [
+           "LegacyIAccessible"
+          ],
+          "children": [
+           {
+            "control_type": "Pane",
+            "name": "",
+            "automation_id": "1248908",
+            "class_name": "SWT_Window0",
+            "rect": [
+             856,
+             191,
+             1286,
+             645
+            ],
+            "patterns": [
+             "LegacyIAccessible"
+            ],
+            "children": [
+             {
+              "control_type": "Pane",
+              "name": "",
+              "automation_id": "1049518",
+              "class_name": "SWT_Window0",
+              "rect": [
+               856,
+               191,
+               1286,
+               645
+              ],
+              "patterns": [
+               "LegacyIAccessible"
+              ],
+              "children": [
+               {
+                "control_type": "Pane",
+                "name": "",
+                "automation_id": "593448",
+                "class_name": "SWT_Window0",
+                "rect": [
+                 856,
+                 191,
+                 1286,
+                 645
+                ],
+                "patterns": [
+                 "LegacyIAccessible"
+                ],
+                "children": [
+                 {
+                  "control_type": "Pane",
+                  "name": "",
+                  "automation_id": "331488",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   856,
+                   191,
+                   1286,
+                   615
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ],
+                  "children": [
+                   {
+                    "control_type": "CheckBox",
+                    "name": "Navigation view: Collapse expand bar",
+                    "automation_id": "921182",
+                    "class_name": "Button",
+                    "rect": [
+                     856,
+                     191,
+                     1074,
+                     207
+                    ],
+                    "toggle": "off",
+                    "patterns": [
+                     "Invoke",
+                     "Toggle",
+                     "LegacyIAccessible"
+                    ]
+                   },
+                   {
+                    "control_type": "CheckBox",
+                    "name": "Close other editors",
+                    "automation_id": "918654",
+                    "class_name": "Button",
+                    "rect": [
+                     856,
+                     212,
+                     976,
+                     228
+                    ],
+                    "toggle": "off",
+                    "patterns": [
+                     "Invoke",
+                     "Toggle",
+                     "LegacyIAccessible"
+                    ]
+                   },
+                   {
+                    "control_type": "Group",
+                    "name": "currency settings",
+                    "automation_id": "397020",
+                    "class_name": "SWT_GROUP",
+                    "rect": [
+                     855,
+                     243,
+                     1286,
+                     419
+                    ],
+                    "patterns": [
+                     "LegacyIAccessible"
+                    ],
+                    "children": [
+                     {
+                      "control_type": "Text",
+                      "name": "Currency locale",
+                      "automation_id": "2558506",
+                      "class_name": "Static",
+                      "rect": [
+                       858,
+                       262,
+                       940,
+                       277
+                      ],
+                      "patterns": [
+                       "LegacyIAccessible"
+                      ]
+                     },
+                     {
+                      "control_type": "ComboBox",
+                      "name": "Currency locale",
+                      "automation_id": "2098300",
+                      "class_name": "ComboBox",
+                      "rect": [
+                       1001,
+                       258,
+                       1283,
+                       281
+                      ],
+                      "value": "United States",
+                      "patterns": [
+                       "Value",
+                       "ExpandCollapse",
+                       "LegacyIAccessible"
+                      ],
+                      "children": [
+                       {
+                        "control_type": "Text",
+                        "name": "Currency locale",
+                        "rect": [
+                         3,
+                         3,
+                         262,
+                         20
+                        ],
+                        "offscreen": true,
+                        "value": "United States",
+                        "patterns": [
+                         "Value",
+                         "LegacyIAccessible"
+                        ]
+                       },
+                       {
+                        "control_type": "Button",
+                        "name": "Open",
+                        "automation_id": "DropDown",
+                        "rect": [
+                         1267,
+                         259,
+                         1282,
+                         280
+                        ],
+                        "patterns": [
+                         "Invoke",
+                         "LegacyIAccessible"
+                        ]
+                       }
+                      ]
+                     },
+                     {
+                      "control_type": "Text",
+                      "name": "Example",
+                      "automation_id": "593512",
+                      "class_name": "Static",
+                      "rect": [
+                       858,
+                       289,
+                       902,
+                       304
+                      ],
+                      "patterns": [
+                       "LegacyIAccessible"
+                      ]
+                     },
+                     {
+                      "control_type": "Edit",
+                      "name": "Example",
+                      "automation_id": "1838912",
+                      "class_name": "Edit",
+                      "rect": [
+                       1001,
+                       286,
+                       1283,
+                       307
+                      ],
+                      "value": "$-1,234.57",
+                      "patterns": [
+                       "Value",
+                       "LegacyIAccessible"
+                      ]
+                     },
+                     {
+                      "control_type": "CheckBox",
+                      "name": "use cash rounding",
+                      "automation_id": "790122",
+                      "class_name": "Button",
+                      "rect": [
+                       858,
+                       312,
+                       976,
+                       328
+                      ],
+                      "enabled": false,
+                      "toggle": "off",
+                      "patterns": [
+                       "Toggle",
+                       "LegacyIAccessible"
+                      ]
+                     },
+                     {
+                      "control_type": "Pane",
+                      "name": "",
+                      "automation_id": "1576842",
+                      "class_name": "SWT_Window0",
+                      "rect": [
+                       866,
+                       353,
+                       1157,
+                       369
+                      ],
+                      "patterns": [
+                       "LegacyIAccessible"
+                      ],
+                      "children": [
+                       {
+                        "control_type": "RadioButton",
+                        "name": "use currency symbol",
+                        "automation_id": "6097468",
+                        "class_name": "Button",
+                        "rect": [
+                         866,
+                         353,
+                         996,
+                         369
+                        ],
+                        "toggle": "on",
+                        "selected": true,
+                        "patterns": [
+                         "Invoke",
+                         "SelectionItem",
+                         "Toggle",
+                         "LegacyIAccessible"
+                        ]
+                       },
+                       {
+                        "control_type": "RadioButton",
+                        "name": "ISO code",
+                        "automation_id": "528090",
+                        "class_name": "Button",
+                        "rect": [
+                         1004,
+                         353,
+                         1072,
+                         369
+                        ],
+                        "toggle": "off",
+                        "selected": false,
+                        "patterns": [
+                         "Invoke",
+                         "SelectionItem",
+                         "Toggle",
+                         "LegacyIAccessible"
+                        ]
+                       },
+                       {
+                        "control_type": "RadioButton",
+                        "name": "no symbol",
+                        "automation_id": "1115246",
+                        "class_name": "Button",
+                        "rect": [
+                         1080,
+                         353,
+                         1157,
+                         369
+                        ],
+                        "toggle": "off",
+                        "selected": false,
+                        "patterns": [
+                         "Invoke",
+                         "SelectionItem",
+                         "Toggle",
+                         "LegacyIAccessible"
+                        ]
+                       }
+                      ]
+                     },
+                     {
+                      "control_type": "CheckBox",
+                      "name": "Thousands separator",
+                      "automation_id": "1379990",
+                      "class_name": "Button",
+                      "rect": [
+                       858,
+                       374,
+                       989,
+                       390
+                      ],
+                      "toggle": "on",
+                      "patterns": [
+                       "Invoke",
+                       "Toggle",
+                       "LegacyIAccessible"
+                      ]
+                     },
+                     {
+                      "control_type": "Text",
+                      "name": "decimal places (currency)",
+                      "automation_id": "2821574",
+                      "class_name": "Static",
+                      "rect": [
+                       858,
+                       398,
+                       993,
+                       413
+                      ],
+                      "patterns": [
+                       "LegacyIAccessible"
+                      ]
+                     },
+                     {
+                      "control_type": "Edit",
+                      "name": "decimal places (currency)",
+                      "automation_id": "10095836",
+                      "class_name": "Edit",
+                      "rect": [
+                       1001,
+                       395,
+                       1283,
+                       416
+                      ],
+                      "value": "2",
+                      "patterns": [
+                       "Value",
+                       "LegacyIAccessible"
+                      ]
+                     }
+                    ]
+                   },
+                   {
+                    "control_type": "Text",
+                    "name": "decimal places",
+                    "automation_id": "462594",
+                    "class_name": "Static",
+                    "rect": [
+                     856,
+                     427,
+                     934,
+                     442
+                    ],
+                    "patterns": [
+                     "LegacyIAccessible"
+                    ]
+                   },
+                   {
+                    "control_type": "Edit",
+                    "name": "decimal places",
+                    "automation_id": "855698",
+                    "class_name": "Edit",
+                    "rect": [
+                     974,
+                     424,
+                     1286,
+                     445
+                    ],
+                    "value": "2",
+                    "patterns": [
+                     "Value",
+                     "LegacyIAccessible"
+                    ]
+                   },
+                   {
+                    "control_type": "Group",
+                    "name": "backup strategy",
+                    "automation_id": "3214826",
+                    "class_name": "SWT_GROUP",
+                    "rect": [
+                     856,
+                     450,
+                     1286,
+                     529
+                    ],
+                    "patterns": [
+                     "LegacyIAccessible"
+                    ],
+                    "children": [
+                     {
+                      "control_type": "Pane",
+                      "name": "",
+                      "automation_id": "790208",
+                      "class_name": "SWT_Window0",
+                      "rect": [
+                       861,
+                       472,
+                       1022,
+                       512
+                      ],
+                      "patterns": [
+                       "LegacyIAccessible"
+                      ],
+                      "children": [
+                       {
+                        "control_type": "RadioButton",
+                        "name": "Delete backups older than ",
+                        "automation_id": "3149354",
+                        "class_name": "Button",
+                        "rect": [
+                         861,
+                         472,
+                         1022,
+                         488
+                        ],
+                        "toggle": "on",
+                        "selected": true,
+                        "patterns": [
+                         "Invoke",
+                         "SelectionItem",
+                         "Toggle",
+                         "LegacyIAccessible"
+                        ]
+                       },
+                       {
+                        "control_type": "RadioButton",
+                        "name": "Keep only ",
+                        "automation_id": "855662",
+                        "class_name": "Button",
+                        "rect": [
+                         861,
+                         496,
+                         937,
+                         512
+                        ],
+                        "toggle": "off",
+                        "selected": false,
+                        "patterns": [
+                         "Invoke",
+                         "SelectionItem",
+                         "Toggle",
+                         "LegacyIAccessible"
+                        ]
+                       }
+                      ]
+                     },
+                     {
+                      "control_type": "Pane",
+                      "name": "",
+                      "automation_id": "527970",
+                      "class_name": "SWT_Window0",
+                      "rect": [
+                       1028,
+                       472,
+                       1228,
+                       519
+                      ],
+                      "patterns": [
+                       "LegacyIAccessible"
+                      ],
+                      "children": [
+                       {
+                        "control_type": "Edit",
+                        "name": "",
+                        "automation_id": "659140",
+                        "class_name": "Edit",
+                        "rect": [
+                         1036,
+                         472,
+                         1228,
+                         493
+                        ],
+                        "value": "0",
+                        "patterns": [
+                         "Value",
+                         "LegacyIAccessible"
+                        ]
+                       },
+                       {
+                        "control_type": "Edit",
+                        "name": "",
+                        "automation_id": "18550302",
+                        "class_name": "Edit",
+                        "rect": [
+                         1036,
+                         498,
+                         1228,
+                         519
+                        ],
+                        "value": "10",
+                        "patterns": [
+                         "Value",
+                         "LegacyIAccessible"
+                        ]
+                       }
+                      ]
+                     },
+                     {
+                      "control_type": "Text",
+                      "name": " days.",
+                      "automation_id": "855728",
+                      "class_name": "Static",
+                      "rect": [
+                       1234,
+                       472,
+                       1264,
+                       487
+                      ],
+                      "patterns": [
+                       "LegacyIAccessible"
+                      ]
+                     },
+                     {
+                      "control_type": "Text",
+                      "name": " backups",
+                      "automation_id": "921278",
+                      "class_name": "Static",
+                      "rect": [
+                       1234,
+                       499,
+                       1281,
+                       514
+                      ],
+                      "patterns": [
+                       "LegacyIAccessible"
+                      ]
+                     }
+                    ]
+                   },
+                   {
+                    "control_type": "Text",
+                    "name": "database connection",
+                    "automation_id": "1574000",
+                    "class_name": "Static",
+                    "rect": [
+                     856,
+                     537,
+                     966,
+                     552
+                    ],
+                    "patterns": [
+                     "LegacyIAccessible"
+                    ]
+                   },
+                   {
+                    "control_type": "Edit",
+                    "name": "database connection",
+                    "automation_id": "1773180",
+                    "class_name": "Edit",
+                    "rect": [
+                     974,
+                     534,
+                     1286,
+                     555
+                    ],
+                    "value": "jdbc:hsqldb:hsql://localhost:9001/fakdbneu",
+                    "patterns": [
+                     "Value",
+                     "LegacyIAccessible"
+                    ]
+                   },
+                   {
+                    "control_type": "Button",
+                    "name": "reset all stored dialog settings",
+                    "automation_id": "855716",
+                    "class_name": "Button",
+                    "rect": [
+                     855,
+                     565,
+                     1023,
+                     590
+                    ],
+                    "patterns": [
+                     "Invoke",
+                     "LegacyIAccessible"
+                    ]
+                   }
+                  ]
+                 },
+                 {
+                  "control_type": "Pane",
+                  "name": "",
+                  "automation_id": "986746",
+                  "class_name": "SWT_Window0",
+                  "rect": [
+                   1092,
+                   620,
+                   1286,
+                   645
+                  ],
+                  "patterns": [
+                   "LegacyIAccessible"
+                  ],
+                  "children": [
+                   {
+                    "control_type": "Button",
+                    "name": "Restore Defaults",
+                    "automation_id": "331476",
+                    "class_name": "Button",
+                    "rect": [
+                     1092,
+                     620,
+                     1189,
+                     645
+                    ],
+                    "patterns": [
+                     "Invoke",
+                     "LegacyIAccessible"
+                    ]
+                   },
+                   {
+                    "control_type": "Button",
+                    "name": "Apply",
+                    "automation_id": "1246270",
+                    "class_name": "Button",
+                    "rect": [
+                     1194,
+                     620,
+                     1286,
+                     645
+                    ],
+                    "patterns": [
+                     "Invoke",
+                     "LegacyIAccessible"
+                    ]
+                   }
+                  ]
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "control_type": "Image",
+      "name": "",
+      "automation_id": "1117746",
+      "class_name": "Static",
+      "rect": [
+       642,
+       650,
+       1291,
+       652
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Pane",
+      "name": "",
+      "automation_id": "1052290",
+      "class_name": "SWT_Window0",
+      "rect": [
+       642,
+       652,
+       1291,
+       703
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "Pane",
+        "name": "",
+        "automation_id": "527968",
+        "class_name": "SWT_Window0",
+        "rect": [
+         1067,
+         652,
+         1291,
+         703
+        ],
+        "patterns": [
+         "LegacyIAccessible"
+        ],
+        "children": [
+         {
+          "control_type": "Button",
+          "name": "Apply and Close",
+          "automation_id": "135086",
+          "class_name": "Button",
+          "rect": [
+           1078,
+           665,
+           1176,
+           690
+          ],
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "Button",
+          "name": "Cancel",
+          "automation_id": "5442310",
+          "class_name": "Button",
+          "rect": [
+           1182,
+           665,
+           1280,
+           690
+          ],
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "control_type": "TitleBar",
+    "name": "",
+    "rect": [
+     658,
+     129,
+     1291,
+     157
+    ],
+    "value": "Preferences",
+    "patterns": [
+     "Value",
+     "LegacyIAccessible"
+    ],
+    "children": [
+     {
+      "control_type": "MenuBar",
+      "name": "System",
+      "automation_id": "MenuBar",
+      "rect": [
+       642,
+       134,
+       664,
+       156
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "MenuItem",
+        "name": "System",
+        "rect": [
+         642,
+         134,
+         664,
+         156
+        ],
+        "patterns": [
+         "Invoke",
+         "ExpandCollapse",
+         "LegacyIAccessible"
+        ]
+       }
+      ]
+     },
+     {
+      "control_type": "Button",
+      "name": "Minimize",
+      "rect": [
+       1152,
+       127,
+       1199,
+       157
+      ],
+      "enabled": false,
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Button",
+      "name": "Maximize",
+      "rect": [
+       1199,
+       127,
+       1245,
+       157
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Button",
+      "name": "Close",
+      "rect": [
+       1245,
+       127,
+       1292,
+       157
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}
