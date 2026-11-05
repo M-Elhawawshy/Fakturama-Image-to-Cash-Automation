@@ -76,12 +76,17 @@ def choose(
     refresh: Callable[[], UiNode],
     *,
     timeout: float = 5.0,
+    strip: bool = False,
 ) -> None:
     """Pick ``item`` in a dropdown: expand, click the exact ListItem, verify the value.
 
-    ``refresh`` returns a fresh live node for the same ComboBox.
+    ``refresh`` returns a fresh live node for the same ComboBox. ``strip`` ignores
+    leading/trailing spaces (payment codes are shown as 'Credit transfer ').
+    The dropdown is only opened when the value must change: opening it and
+    pressing Escape already marks an editor as changed (seen 2026-11-05).
     """
-    if combo.value == item:
+    same = (lambda a, b: (a or "").strip() == (b or "").strip()) if strip else (lambda a, b: a == b)
+    if same(combo.value, item):
         return
     if not actions.bring_to_front(owner_hwnd):
         raise InputError("Fakturama could not be brought to the front")
@@ -96,7 +101,7 @@ def choose(
         actions.guarded_click(opener[0], owner_hwnd)
 
     def exact_item() -> UiNode | None:
-        found = [n for n in list_items(refresh()) if n.name == item]
+        found = [n for n in list_items(refresh()) if same(n.name, item)]
         if len(found) > 1:
             raise InputError(f"{len(found)} entries named {item!r} in {combo.label()}")
         return found[0] if found else None
@@ -111,5 +116,5 @@ def choose(
         actions.press_escape(owner_hwnd)
         raise
     value = refresh().value
-    if value != item:
+    if not same(value, item):
         raise InputError(f"{combo.label()} shows {value!r} after choosing {item!r}")

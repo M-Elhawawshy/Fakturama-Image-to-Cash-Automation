@@ -1,0 +1,352 @@
+{
+ "meta": {
+  "window_title": "New TAX Rate editor",
+  "recorded": "2026-11-05"
+ },
+ "node_count": 21,
+ "truncated": false,
+ "root": {
+  "control_type": "Pane",
+  "name": "New TAX Rate",
+  "automation_id": "1969782",
+  "class_name": "SWT_Window0",
+  "rect": [
+   390,
+   141,
+   1917,
+   634
+  ],
+  "patterns": [
+   "LegacyIAccessible"
+  ],
+  "children": [
+   {
+    "control_type": "Pane",
+    "name": "",
+    "automation_id": "1182692",
+    "class_name": "SWT_Window0",
+    "rect": [
+     390,
+     141,
+     1917,
+     634
+    ],
+    "patterns": [
+     "LegacyIAccessible"
+    ],
+    "children": [
+     {
+      "control_type": "Text",
+      "name": "TAX Rate",
+      "automation_id": "2101150",
+      "class_name": "Static",
+      "rect": [
+       1124,
+       146,
+       1183,
+       162
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "Name",
+      "automation_id": "11472416",
+      "class_name": "Static",
+      "rect": [
+       472,
+       170,
+       504,
+       185
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Edit",
+      "name": "Name",
+      "automation_id": "528514",
+      "class_name": "Edit",
+      "rect": [
+       509,
+       167,
+       1912,
+       188
+      ],
+      "value": "",
+      "patterns": [
+       "Value",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "Category",
+      "automation_id": "462952",
+      "class_name": "Static",
+      "rect": [
+       456,
+       196,
+       504,
+       211
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "ComboBox",
+      "name": "Category",
+      "automation_id": "2491310",
+      "class_name": "SWT_Window0",
+      "rect": [
+       509,
+       193,
+       1912,
+       214
+      ],
+      "value": "",
+      "patterns": [
+       "Value",
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "Edit",
+        "name": "Category",
+        "automation_id": "1642196",
+        "class_name": "Edit",
+        "rect": [
+         511,
+         195,
+         1893,
+         212
+        ],
+        "value": "",
+        "patterns": [
+         "Value",
+         "LegacyIAccessible"
+        ]
+       },
+       {
+        "control_type": "Button",
+        "name": "Open",
+        "automation_id": "462954",
+        "class_name": "Button",
+        "rect": [
+         1893,
+         195,
+         1910,
+         212
+        ],
+        "patterns": [
+         "Invoke",
+         "LegacyIAccessible"
+        ]
+       }
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "Description",
+      "automation_id": "725188",
+      "class_name": "Static",
+      "rect": [
+       444,
+       222,
+       504,
+       237
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Edit",
+      "name": "Description",
+      "automation_id": "463036",
+      "class_name": "Edit",
+      "rect": [
+       509,
+       219,
+       1912,
+       240
+      ],
+      "value": "",
+      "patterns": [
+       "Value",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "VAT code (E-Invoice)",
+      "automation_id": "3477182",
+      "class_name": "Static",
+      "rect": [
+       395,
+       249,
+       504,
+       264
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "ComboBox",
+      "name": "VAT code (E-Invoice)",
+      "automation_id": "2363040",
+      "class_name": "ComboBox",
+      "rect": [
+       509,
+       245,
+       1912,
+       268
+      ],
+      "value": "S (Standard rate)",
+      "patterns": [
+       "Value",
+       "ExpandCollapse",
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "Text",
+        "name": "VAT code (E-Invoice)",
+        "rect": [
+         3,
+         3,
+         1383,
+         20
+        ],
+        "offscreen": true,
+        "value": "S (Standard rate)",
+        "patterns": [
+         "Value",
+         "LegacyIAccessible"
+        ]
+       },
+       {
+        "control_type": "Button",
+        "name": "Open",
+        "automation_id": "DropDown",
+        "rect": [
+         1896,
+         246,
+         1911,
+         267
+        ],
+        "patterns": [
+         "Invoke",
+         "LegacyIAccessible"
+        ]
+       }
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "Value",
+      "automation_id": "397498",
+      "class_name": "Static",
+      "rect": [
+       476,
+       276,
+       504,
+       291
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Edit",
+      "name": "Value",
+      "automation_id": "528606",
+      "class_name": "Edit",
+      "rect": [
+       509,
+       273,
+       1912,
+       294
+      ],
+      "value": "0%",
+      "patterns": [
+       "Value",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "Standard",
+      "automation_id": "463560",
+      "class_name": "Static",
+      "rect": [
+       457,
+       306,
+       504,
+       321
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Pane",
+      "name": "",
+      "automation_id": "3803690",
+      "class_name": "SWT_Window0",
+      "rect": [
+       509,
+       299,
+       1912,
+       328
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "Edit",
+        "name": "",
+        "automation_id": "593968",
+        "class_name": "Edit",
+        "rect": [
+         509,
+         303,
+         721,
+         324
+        ],
+        "value": "Tax-free",
+        "patterns": [
+         "Value",
+         "LegacyIAccessible"
+        ]
+       },
+       {
+        "control_type": "Button",
+        "name": "Set as standard",
+        "automation_id": "1511330",
+        "class_name": "Button",
+        "rect": [
+         727,
+         299,
+         822,
+         328
+        ],
+        "enabled": false,
+        "patterns": [
+         "Invoke",
+         "LegacyIAccessible"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

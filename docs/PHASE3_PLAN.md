@@ -117,6 +117,13 @@ Each creates one record, saves once, and verifies by searching again:
 
 **Live check:** `create-product` for `CHR-ERG-01` → Data > Products shows it with gross 297.50 and VAT 19%; reselecting from the Order adds the line. VAT and term creation are tested with test specs (VAT 7%, Credit Card), since the sample's VAT already exists.
 
+**Built 2026-11-05** (`create-payment`, `create-vat`, `create-product [--sku] [--reselect]`, `create-master SPEC`; each runs preflight first). Created live: term `Bank Transfer` (code `Credit transfer`, the sample needs it), test VAT `VAT 7%`, product `CHR-ERG-01` (gross 297.50, VAT 19%). What the live work showed:
+- Create buttons: `Create a new term of payment` / `Create a new tax rate` in the view toolbars (next to `Delete the marked entry`, never used), `Create a new product` in the main toolbar. Editors `New Term of Payment` (code defaults to `Mutually defined `; 12 codes incl. `Credit transfer `, `Credit card `, `SEPA direct debit `), `New TAX Rate` (code defaults to `S (Standard rate)`, Value `0%`), `New product` (unnamed gross/cost price Edits showing `$0.00`, `VAT` lists the VAT names).
+- Typing with a verified UIA focus worked in all of them, including the VAT Value (no extra click needed here, unlike R7). Every field is read back before Save; Save is the toolbar's `Save the current contents`, once; success = our (selected) tab carries the record's name without `*`. After Save the record is checked again through its Data view.
+- **Opening a dropdown and pressing Escape marks an editor as changed.** Dropdowns are now only opened when the value must change.
+- **Closing a changed editor shows `Save Parts`** (a list of parts with OK/Cancel, no "don't save" button); OK saves what is ticked. The tool never answers it: an unsaved editor is left for the user.
+- Editors with the same name can coexist (an abandoned `*New TAX Rate`): tabs are matched by window handle (visible = active, then the *selected* tab with that name).
+
 ### H. Create Debtor (persists; backup first)
 
 New Contact → keep the proposed Customer ID; Company with real key events (UIA writes are not persisted, and Tab types a tab into it **[R5]**); First/Last name; Main address: street, ZIP, city, country, e-mail, phone; role Invoice (+ Delivery if identical; the role popup needs a real click **[R8]**); a second address with the Delivery role when they differ (the sample's case); Miscellaneous: alias, discount 0, Net; Payment combo = the method; Save once; reselect from the Order and verify both addresses.

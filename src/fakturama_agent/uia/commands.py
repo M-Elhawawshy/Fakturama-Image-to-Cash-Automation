@@ -146,7 +146,7 @@ _MARK = {"ok": "ok  ", "failed": "FAIL", "skipped": "skip"}
 
 
 def print_report(report: PreflightReport) -> None:
-    width = max(len(c.name) for c in report.checks)
+    width = max((len(c.name) for c in report.checks), default=0)
     for c in report.checks:
         print(f"[{_MARK[c.status]}] {c.name:<{width}}  {c.seen}")
         if c.status != "ok" and c.hint:
@@ -397,3 +397,109 @@ def cmd_check_master(
     if payment is not None and not any(c.error for c in checks):
         checks.append(payment_checker(main, registry, payment, ocr))
     return EXIT_OK if print_master_checks(checks) else EXIT_UNRESOLVED
+
+
+def cmd_create(
+    kind: str,
+    *,
+    rate: str | None = None,
+    method: str | None = None,
+    spec_path: Path | None = None,
+    sku: str | None = None,
+    reselect: bool = False,
+    registry: Registry | None = None,
+    finder: Callable[[], MainWindow] = find_main_window,
+    preflight=None,
+    creators: dict | None = None,
+    ocr=None,
+) -> int:
+    """create-payment / create-vat / create-product / create-master. PERSISTS records (back up first)."""
+    from decimal import Decimal, InvalidOperation
+
+    from pydantic import ValidationError
+
+    from fakturama_agent.spec.models import OrderSpec, PaymentMethod
+
+    spec = None
+    if spec_path is not None:
+        try:
+            spec = OrderSpec.model_validate_json(spec_path.read_text(encoding="utf-8"))
+        except (OSError, ValidationError) as e:
+            print(f"Cannot load {spec_path}: {e}", file=sys.stderr)
+            return EXIT_ERROR
+    try:
+        vat_rate = Decimal(rate) if rate is not None else None
+        payment = PaymentMethod(method) if method is not None else None
+    except (InvalidOperation, ValueError):
+        print(f"Unknown rate or payment method (known methods: {[m.value for m in PaymentMethod]})", file=sys.stderr)
+        return EXIT_ERROR
+    items = []
+    if spec is not None:
+        pairs = list(zip(spec.items, spec.derived.items, strict=True))
+        if sku is not None:
+            pairs = [(i, d) for i, d in pairs if i.sku == sku]
+            if not pairs:
+                print(f"{sku!r} is not an item of {spec_path}", file=sys.stderr)
+                return EXIT_ERROR
+        items = [(i, d.product_gross_price) for i, d in pairs]
+
+    registry = registry or Registry.load()
+    main = _bind(finder)
+    if main is None:
+        return EXIT_ERROR
+    if ocr is None:
+        from fakturama_agent.extract.ocr import run_ocr as ocr
+    if preflight is None:
+        from fakturama_agent.uia.preflight import LiveProbe, run_preflight
+
+        preflight = lambda m, r: run_preflight(m, LiveProbe(r), r)  # noqa: E731
+    report = preflight(main, registry)
+    if not report.ok:
+        print_report(report)
+        print("\nNot creating anything until preflight is clean.")
+        return EXIT_UNRESOLVED
+    if creators is None:
+        from fakturama_agent.flow import create_master as cm
+
+        creators = {"payment": cm.create_payment, "vat": cm.create_vat, "product": cm.create_product}
+
+    plan = []  # (creator, args) in the safe order: payment terms, VAT rates, products
+    if kind in ("payment", "master"):
+        plan.append(("payment", payment if payment is not None else spec.payment.method))
+    if kind in ("vat", "master"):
+        rates = [vat_rate] if vat_rate is not None else sorted({i.vat_percent for i, _ in items})
+        plan += [("vat", r) for r in rates]
+    if kind in ("product", "master"):
+        plan += [("product", pair) for pair in items]
+
+    results = []
+    for what, arg in plan:
+        if what == "product":
+            item, gross = arg
+            result = creators["product"](main, registry, item, gross, report.money, ocr)
+        else:
+            result = creators[what](main, registry, arg, ocr)
+        results.append(result)
+        if not result.ok:
+            break  # never continue after a stop or a review case
+    width = max(len(r.what) for r in results)
+    for r in results:
+        mark = {"created": "NEW ", "exists": "ok  ", "review": "REVW", "stopped": "STOP"}[r.status]
+        print(f"[{mark}] {r.what:<{width}}  {r.detail}")
+    if len(results) < len(plan):
+        print(f"       {len(plan) - len(results)} later step(s) not run")
+    if any(r.saved and r.status == "stopped" for r in results):
+        print("\nA Save was attempted and its outcome is not confirmed: check the data view by hand; do not rerun blindly.")
+    ok = all(r.ok for r in results) and len(results) == len(plan)
+
+    if ok and reselect and kind == "product":
+        from fakturama_agent.flow.order_header import OrderEditor
+        from fakturama_agent.flow.order_select import check_product
+
+        editor = OrderEditor.open_new(main, registry)
+        for item, _gross in items:
+            outcome = check_product(editor, item.sku, ocr)
+            print(f"[{'ok  ' if outcome.ok else 'FAIL'}] reselect {item.sku} from a New Order: {outcome.summary()}")
+            ok = ok and outcome.ok
+        print("The New Order is not saved: close it and answer No.")
+    return EXIT_OK if ok else EXIT_UNRESOLVED

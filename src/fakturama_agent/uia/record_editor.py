@@ -57,6 +57,26 @@ class RecordEditor:
         hwnd = actions.wait_until(opened, timeout=timeout, what=f"the editor of {name!r}")
         return cls(main, registry, hwnd, name)
 
+    @classmethod
+    def open_new(cls, main: MainWindow, registry: Registry, button_key: str, editor_name: str,
+                 *, timeout: float = 10.0) -> RecordEditor:
+        """Invoke a create button (view toolbar or main toolbar) and bind the new editor."""
+        snap = snapshot_hwnd(main.hwnd)
+        before = _named_panes(snap, editor_name)
+        button = registry.resolve(snap, button_key)
+        if not button.enabled:
+            raise EditorError(f"{button.label()} is disabled")
+        actions.invoke(button)
+
+        def opened() -> int | None:
+            fresh = _named_panes(snapshot_hwnd(main.hwnd), editor_name) - before
+            if len(fresh) > 1:
+                raise EditorError(f"{len(fresh)} '{editor_name}' editors opened")
+            return int(fresh.pop()) if fresh else None
+
+        hwnd = actions.wait_until(opened, timeout=timeout, what=f"a '{editor_name}' editor")
+        return cls(main, registry, hwnd, editor_name)
+
     def snapshot(self) -> Snapshot:
         if not ctypes.windll.user32.IsWindowVisible(self.hwnd):
             raise EditorError(f"the {self.name!r} editor is not visible")
@@ -65,25 +85,68 @@ class RecordEditor:
     def value(self, key: str) -> str:
         return self.registry.resolve(self.snapshot(), key).value or ""
 
+    def save(self, *, timeout: float = 15.0) -> str:
+        """Save this editor ONCE with the toolbar's Save; returns the record name the editor
+        then carries. Never retried: if the outcome is unclear, the caller must stop and the
+        user checks by hand (a second Save could create a duplicate)."""
+        self.activate()
+        if not self._dirty():
+            raise EditorError(f"the {self.name!r} editor has no unsaved changes; nothing to save")
+        save = self.registry.resolve(snapshot_hwnd(self.main.hwnd), "toolbar.save")
+        if not save.enabled:
+            raise EditorError("'Save the current contents' is disabled")
+        actions.invoke(save)
+
+        def saved() -> str | None:
+            dialogs = [w.title for w in process_windows(self.main.pid) if w.hwnd != self.main.hwnd and w.title]
+            if dialogs:
+                raise EditorError(f"a dialog appeared while saving: {dialogs}; handle it by hand")
+            name = snapshot_hwnd(self.hwnd).root.name
+            tabs = [n.name for n in snapshot_hwnd(self.main.hwnd).root.walk()
+                    if n.control_type == "TabItem" and n.selected]
+            if name and name != self.name and name in tabs:  # our (selected) tab, renamed and clean
+                return name
+            return None
+
+        try:
+            new_name = actions.wait_until(saved, timeout=timeout, what="the editor to show the saved record")
+        except TimeoutError as e:
+            raise EditorError(f"Save outcome unclear ({e}); check the data view by hand before any rerun") from e
+        self.name = new_name
+        return new_name
+
+    def _own_tab(self):
+        """This editor's tab: it is the active one when its window is visible, so it is the
+        *selected* tab with its name (other editors may carry the same name, e.g. an
+        abandoned '*New TAX Rate')."""
+        if not ctypes.windll.user32.IsWindowVisible(self.hwnd):
+            raise EditorError(f"the {self.name!r} editor is not the active tab")
+        tabs = [n for n in snapshot_hwnd(self.main.hwnd).root.walk()
+                if n.control_type == "TabItem" and n.selected and n.name in (self.name, f"*{self.name}")]
+        if len(tabs) != 1:
+            raise EditorError(f"{len(tabs)} selected tabs named {self.name!r}; cannot tell which is this editor")
+        return tabs[0]
+
     def _dirty(self) -> bool:
-        tabs = [n.name for n in snapshot_hwnd(self.main.hwnd).root.walk() if n.control_type == "TabItem"]
-        return f"*{self.name}" in tabs
+        return self._own_tab().name.startswith("*")
 
     def activate(self) -> None:
         """Bring this editor's tab to the front (keys go to the active part only)."""
+        if ctypes.windll.user32.IsWindowVisible(self.hwnd):
+            return
         tabs = [n for n in snapshot_hwnd(self.main.hwnd).root.walk()
                 if n.control_type == "TabItem" and n.name in (self.name, f"*{self.name}")]
         if len(tabs) != 1:
-            raise EditorError(f"{len(tabs)} tabs named {self.name!r}; cannot tell which is this editor")
-        if not tabs[0].selected:
-            actions.guarded_click(tabs[0], self.main.hwnd)
-            actions.wait_until(lambda: True if ctypes.windll.user32.IsWindowVisible(self.hwnd) else None,
-                               timeout=5.0, what=f"the {self.name!r} editor in front")
+            raise EditorError(f"{len(tabs)} tabs named {self.name!r} and this editor is not in front; "
+                              "cannot tell which tab is this editor")
+        actions.guarded_click(tabs[0], self.main.hwnd)
+        actions.wait_until(lambda: True if ctypes.windll.user32.IsWindowVisible(self.hwnd) else None,
+                           timeout=5.0, what=f"the {self.name!r} editor in front")
 
     def close_unchanged(self, focus_key: str, *, timeout: float = 5.0) -> None:
-        if self._dirty():
-            raise EditorError(f"the {self.name!r} editor shows unsaved changes; close it by hand and choose No")
         self.activate()
+        if self._dirty():
+            raise EditorError(f"the {self.name!r} editor shows unsaved changes; it is left open for you")
         inputs.focus(self.registry.resolve(self.snapshot(), focus_key), self.main.hwnd)
         inputs.send("^w")
         try:

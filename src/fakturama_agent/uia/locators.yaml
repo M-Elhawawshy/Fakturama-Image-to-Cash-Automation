@@ -3,6 +3,7 @@
 #
 # Query kinds:
 #   named:          exact control_type + exact name (or name_regex, full match)
+#   holder:         a container of control_type with a direct child matching a named query
 #   label_sibling:  a Text with exactly this name, then the nth following sibling
 #                   of sibling_type under the same parent (descend: true also
 #                   searches inside those siblings, in document order)
@@ -26,11 +27,17 @@ locators:
   toolbar.save:
     named: {control_type: Button, name: "Save the current contents"}
     status: verified
+  toolbar.master_group:
+    holder: {control_type: ToolBar, contains: {control_type: SplitButton, name: "Create a new contact"}}
+    status: verified
+    note: "the main-toolbar group; the Products view has its own 'Create a new product' button"
   toolbar.new_product:
     named: {control_type: Button, name: "Create a new product"}
+    within: toolbar.master_group
     status: verified
   toolbar.new_contact:
     named: {control_type: SplitButton, name: "Create a new contact"}
+    within: toolbar.master_group
     status: verified
 
   # --- top-level menus (Invoke works; Expand intermittently fails, per findings)
@@ -212,6 +219,68 @@ locators:
     transient: true
     status: verified
     note: "untranslated label in 2.2.0; values carry a trailing space, e.g. 'Credit transfer '"
+
+  vat.description:
+    named: {control_type: Edit, name: "Description"}
+    transient: true
+    status: verified
+  payment.description:
+    named: {control_type: Edit, name: "Description"}
+    transient: true
+    status: verified
+  payment.discount:
+    named: {control_type: Edit, name: "Cash discount"}
+    transient: true
+    status: verified
+  payment.discount_days:
+    named: {control_type: Edit, name: "Discount Days"}
+    transient: true
+    status: verified
+  payment.net_days:
+    named: {control_type: Edit, name: "Net Days"}
+    transient: true
+    status: verified
+
+  # --- creating master data (part G; tests/fixtures/uia/editor_*_new.json)
+  view.payments.create:
+    named: {control_type: Button, name: "Create a new term of payment"}
+    transient: true
+    status: verified
+    note: "in the terms of payment view toolbar; its neighbour 'Delete the marked entry' is never used"
+  view.vats.create:
+    named: {control_type: Button, name: "Create a new tax rate"}
+    transient: true
+    status: verified
+  product.item_no:
+    named: {control_type: Edit, name: "Item Number"}
+    transient: true
+    status: verified
+  product.name:
+    named: {control_type: Edit, name: "Name"}
+    transient: true
+    status: verified
+  product.description:
+    named: {control_type: Edit, name: "Description"}
+    transient: true
+    status: verified
+  product.gross_price:
+    label_sibling: {label: "Price (gross)", sibling_type: Edit, nth: 0, descend: true}
+    transient: true
+    status: verified
+    note: "unnamed Edit in a Pane after the label; shows money, e.g. '$0.00'"
+  product.cost_price:
+    label_sibling: {label: "cost price (net)", sibling_type: Edit, nth: 0, descend: true}
+    transient: true
+    status: verified
+  product.vat:
+    named: {control_type: ComboBox, name: "VAT"}
+    transient: true
+    status: verified
+    note: "lists the VAT names, e.g. 'Free of Tax', 'VAT 19%'; select it BEFORE the gross price (it recalculates gross)"
+  product.stock:
+    named: {control_type: Edit, name: "Stock"}
+    transient: true
+    status: verified
 
 # Data views read by Select All + Copy (part C). Headers recorded 2026-11-05 and
 # checked by OCR on every read; the copy itself has no header row.

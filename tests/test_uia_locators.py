@@ -32,12 +32,15 @@ def test_every_verified_locator_resolves_in_the_recorded_main_window(registry, m
     # main-window locators; the open File menu has its own recording (main_file_menu.json)
     verified = [
         k for k, loc in registry.locators.items()
-        if loc.status == "verified" and loc.window is None and not loc.transient and loc.within is None
+        if loc.status == "verified" and loc.window is None and not loc.transient
+        and (loc.within is None or not registry.get(loc.within).transient)
     ]
-    assert len(verified) == 6  # toolbar + File/Data menus; views and menus are transient
+    # toolbar (3 + its group) + File/Data menus; views, menus and editors are transient
+    assert len(verified) == 7
     for key in verified:
         node = registry.resolve(main, key)
-        assert node.control_type == registry.get(key).named.control_type
+        loc = registry.get(key)
+        assert node.control_type == (loc.named or loc.holder).control_type
 
 
 def test_toolbar_buttons_expose_invoke(registry, main):
@@ -210,3 +213,23 @@ def test_within_across_windows_is_rejected(tmp_path):
             "  b:\n    named: {control_type: Button, name: b}\n    within: a\n")
     with pytest.raises(ValueError, match="another window"):
         Registry.load(_write(tmp_path, body))
+
+
+def test_product_button_is_the_main_toolbar_one_when_the_products_view_has_its_own(registry, main):
+    # live 2026-11-05: with the Products view active, 'Create a new product' exists twice
+    view_bar = UiNode.from_dict({"control_type": "ToolBar", "children": [
+        {"control_type": "Button", "name": "Create a new product", "rect": [9, 9, 10, 10]},
+        {"control_type": "Button", "name": "Delete the marked entry"}]})
+    view_bar.parent = main.root
+    main.root.children.append(view_bar)
+    try:
+        node = registry.resolve(main, "toolbar.new_product")
+        assert node.rect != (9, 9, 10, 10) and node.parent.control_type == "ToolBar"
+        assert any(c.name == "Create a new contact" for c in node.parent.children)
+    finally:
+        main.root.children.remove(view_bar)
+
+
+def test_holder_query(tmp_path):
+    reg = Registry.load(_write(tmp_path, "  bar:\n    holder: {control_type: Pane, contains: {control_type: Image, name_regex: '.*'}}\n"))
+    assert reg.resolve(UiNode.from_dict(TREE), "bar").name == "editor"

@@ -43,9 +43,18 @@ class LabelSiblingQuery(_Strict):
     descend: bool = False  # also search inside the following siblings (document order)
 
 
+class HolderQuery(_Strict):
+    """A container of ``control_type`` that has a direct child matching ``contains``
+    (e.g. the main toolbar group holding SplitButton 'Create a new contact')."""
+
+    control_type: str
+    contains: NamedQuery
+
+
 class Locator(_Strict):
     named: NamedQuery | None = None
     label_sibling: LabelSiblingQuery | None = None
+    holder: HolderQuery | None = None
     within: str | None = None
     window: str | None = None  # title regex of the top-level dialog this lives in; None = main window
     transient: bool = False  # present only while a menu/view is open; `locate` skips it when absent
@@ -54,8 +63,8 @@ class Locator(_Strict):
 
     @model_validator(mode="after")
     def _one_query(self) -> Locator:
-        if (self.named is None) == (self.label_sibling is None):
-            raise ValueError("locator needs exactly one of named / label_sibling")
+        if sum(q is not None for q in (self.named, self.label_sibling, self.holder)) != 1:
+            raise ValueError("locator needs exactly one of named / label_sibling / holder")
         return self
 
 
@@ -137,6 +146,10 @@ class Registry:
         scope = self.resolve(Snapshot(root, 0, truncated), loc.within) if loc.within else root
         if loc.named is not None:
             matches = _named(scope, loc.named)
+        elif loc.holder is not None:
+            q = loc.holder
+            matches = [n for n in scope.walk() if n.control_type == q.control_type
+                       and any(_matches(c, q.contains) for c in n.children)]
         else:
             matches = _label_sibling(scope, loc.label_sibling, key)
         if len(matches) == 1:
@@ -151,19 +164,23 @@ def _describe(loc: Locator) -> str:
     if loc.named is not None:
         q = loc.named
         return f"{q.control_type} {q.name!r}" if q.name is not None else f"{q.control_type} ~/{q.name_regex}/"
+    if loc.holder is not None:
+        return f"{loc.holder.control_type} holding {_describe(Locator(named=loc.holder.contains))}"
     q = loc.label_sibling
     inside = " (incl. descendants)" if q.descend else ""
     return f"{q.sibling_type} #{q.nth} after {q.label_type} {q.label!r}{inside}"
 
 
+def _matches(n: UiNode, q: NamedQuery) -> bool:
+    if n.control_type != q.control_type:
+        return False
+    if q.name_regex is None:
+        return n.name == q.name
+    return re.fullmatch(q.name_regex, n.name) is not None
+
+
 def _named(scope: UiNode, q: NamedQuery) -> list[UiNode]:
-    pattern = re.compile(q.name_regex) if q.name_regex is not None else None
-    return [
-        n
-        for n in scope.walk()
-        if n.control_type == q.control_type
-        and (n.name == q.name if pattern is None else pattern.fullmatch(n.name) is not None)
-    ]
+    return [n for n in scope.walk() if _matches(n, q)]
 
 
 def _label_sibling(scope: UiNode, q: LabelSiblingQuery, key: str) -> list[UiNode]:

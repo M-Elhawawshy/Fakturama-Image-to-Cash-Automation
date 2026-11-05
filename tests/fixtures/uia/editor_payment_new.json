@@ -1,0 +1,716 @@
+{
+ "meta": {
+  "window_title": "New Term of Payment editor",
+  "recorded": "2026-11-05"
+ },
+ "node_count": 43,
+ "truncated": false,
+ "root": {
+  "control_type": "Pane",
+  "name": "New Term of Payment",
+  "automation_id": "2690702",
+  "class_name": "SWT_Window0",
+  "rect": [
+   390,
+   141,
+   1917,
+   634
+  ],
+  "patterns": [
+   "LegacyIAccessible"
+  ],
+  "children": [
+   {
+    "control_type": "Pane",
+    "name": "",
+    "automation_id": "11734236",
+    "class_name": "SWT_Window0",
+    "rect": [
+     390,
+     141,
+     1917,
+     634
+    ],
+    "patterns": [
+     "LegacyIAccessible"
+    ],
+    "children": [
+     {
+      "control_type": "Text",
+      "name": "Payment",
+      "automation_id": "5115804",
+      "class_name": "Static",
+      "rect": [
+       1125,
+       146,
+       1182,
+       162
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "Name",
+      "automation_id": "2297612",
+      "class_name": "Static",
+      "rect": [
+       520,
+       170,
+       552,
+       185
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Edit",
+      "name": "Name",
+      "automation_id": "2232486",
+      "class_name": "Edit",
+      "rect": [
+       557,
+       167,
+       1912,
+       188
+      ],
+      "value": "",
+      "patterns": [
+       "Value",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "Account",
+      "automation_id": "856614",
+      "class_name": "Static",
+      "rect": [
+       507,
+       196,
+       552,
+       211
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "ComboBox",
+      "name": "Account",
+      "automation_id": "4263558",
+      "class_name": "SWT_Window0",
+      "rect": [
+       557,
+       193,
+       1912,
+       214
+      ],
+      "value": "",
+      "patterns": [
+       "Value",
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "Edit",
+        "name": "Account",
+        "automation_id": "2952898",
+        "class_name": "Edit",
+        "rect": [
+         559,
+         195,
+         1893,
+         212
+        ],
+        "value": "",
+        "patterns": [
+         "Value",
+         "LegacyIAccessible"
+        ]
+       },
+       {
+        "control_type": "Button",
+        "name": "Open",
+        "automation_id": "724928",
+        "class_name": "Button",
+        "rect": [
+         1893,
+         195,
+         1910,
+         212
+        ],
+        "patterns": [
+         "Invoke",
+         "LegacyIAccessible"
+        ]
+       }
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "Description",
+      "automation_id": "2166998",
+      "class_name": "Static",
+      "rect": [
+       492,
+       222,
+       552,
+       237
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Edit",
+      "name": "Description",
+      "automation_id": "1904582",
+      "class_name": "Edit",
+      "rect": [
+       557,
+       219,
+       1912,
+       240
+      ],
+      "value": "",
+      "patterns": [
+       "Value",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "!editorPaymentPaymentcode!",
+      "automation_id": "3867686",
+      "class_name": "Static",
+      "rect": [
+       395,
+       249,
+       552,
+       264
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "ComboBox",
+      "name": "!editorPaymentPaymentcode!",
+      "automation_id": "4919106",
+      "class_name": "ComboBox",
+      "rect": [
+       557,
+       245,
+       1912,
+       268
+      ],
+      "value": "Mutually defined ",
+      "patterns": [
+       "Value",
+       "ExpandCollapse",
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "Text",
+        "name": "!editorPaymentPaymentcode!",
+        "rect": [
+         3,
+         3,
+         1335,
+         20
+        ],
+        "offscreen": true,
+        "value": "Mutually defined ",
+        "patterns": [
+         "Value",
+         "LegacyIAccessible"
+        ]
+       },
+       {
+        "control_type": "Button",
+        "name": "Open",
+        "automation_id": "DropDown",
+        "rect": [
+         1896,
+         246,
+         1911,
+         267
+        ],
+        "patterns": [
+         "Invoke",
+         "LegacyIAccessible"
+        ]
+       }
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "Cash discount",
+      "automation_id": "528508",
+      "class_name": "Static",
+      "rect": [
+       477,
+       276,
+       552,
+       291
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Edit",
+      "name": "Cash discount",
+      "automation_id": "594002",
+      "class_name": "Edit",
+      "rect": [
+       557,
+       273,
+       1912,
+       294
+      ],
+      "value": "0%",
+      "patterns": [
+       "Value",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "Discount Days",
+      "automation_id": "528502",
+      "class_name": "Static",
+      "rect": [
+       477,
+       302,
+       552,
+       317
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Edit",
+      "name": "Discount Days",
+      "automation_id": "594000",
+      "class_name": "Edit",
+      "rect": [
+       557,
+       299,
+       1912,
+       320
+      ],
+      "value": "0",
+      "patterns": [
+       "Value",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "Net Days",
+      "automation_id": "528496",
+      "class_name": "Static",
+      "rect": [
+       505,
+       328,
+       552,
+       343
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Edit",
+      "name": "Net Days",
+      "automation_id": "528510",
+      "class_name": "Edit",
+      "rect": [
+       557,
+       325,
+       1912,
+       346
+      ],
+      "value": "0",
+      "patterns": [
+       "Value",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "Text 'unpaid'",
+      "automation_id": "659584",
+      "class_name": "Static",
+      "rect": [
+       485,
+       382,
+       552,
+       397
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Edit",
+      "name": "Text 'unpaid'",
+      "automation_id": "1970290",
+      "class_name": "Edit",
+      "rect": [
+       557,
+       351,
+       1868,
+       429
+      ],
+      "value": "",
+      "patterns": [
+       "Value",
+       "Scroll",
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "ScrollBar",
+        "name": "Vertical",
+        "automation_id": "NonClientVerticalScrollBar",
+        "rect": [
+         1849,
+         353,
+         1866,
+         427
+        ],
+        "enabled": false,
+        "patterns": [
+         "LegacyIAccessible"
+        ],
+        "children": [
+         {
+          "control_type": "Button",
+          "name": "Line up",
+          "automation_id": "UpButton",
+          "rect": [
+           1849,
+           353,
+           1866,
+           370
+          ],
+          "enabled": false,
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "Button",
+          "name": "Line down",
+          "automation_id": "DownButton",
+          "rect": [
+           1849,
+           410,
+           1866,
+           427
+          ],
+          "enabled": false,
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "control_type": "Button",
+      "name": "",
+      "automation_id": "1446596",
+      "class_name": "Button",
+      "rect": [
+       1873,
+       351,
+       1912,
+       372
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "Text 'deposit'",
+      "automation_id": "2494312",
+      "class_name": "Static",
+      "rect": [
+       483,
+       465,
+       552,
+       480
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Edit",
+      "name": "Text 'deposit'",
+      "automation_id": "2625422",
+      "class_name": "Edit",
+      "rect": [
+       557,
+       434,
+       1868,
+       512
+      ],
+      "value": "",
+      "patterns": [
+       "Value",
+       "Scroll",
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "ScrollBar",
+        "name": "Vertical",
+        "automation_id": "NonClientVerticalScrollBar",
+        "rect": [
+         1849,
+         436,
+         1866,
+         510
+        ],
+        "enabled": false,
+        "patterns": [
+         "LegacyIAccessible"
+        ],
+        "children": [
+         {
+          "control_type": "Button",
+          "name": "Line up",
+          "automation_id": "UpButton",
+          "rect": [
+           1849,
+           436,
+           1866,
+           453
+          ],
+          "enabled": false,
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "Button",
+          "name": "Line down",
+          "automation_id": "DownButton",
+          "rect": [
+           1849,
+           493,
+           1866,
+           510
+          ],
+          "enabled": false,
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "control_type": "Button",
+      "name": "",
+      "automation_id": "9700388",
+      "class_name": "Button",
+      "rect": [
+       1873,
+       434,
+       1912,
+       455
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "Text 'paid'",
+      "automation_id": "1249478",
+      "class_name": "Static",
+      "rect": [
+       499,
+       548,
+       552,
+       563
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Edit",
+      "name": "Text 'paid'",
+      "automation_id": "725182",
+      "class_name": "Edit",
+      "rect": [
+       557,
+       517,
+       1868,
+       595
+      ],
+      "value": "",
+      "patterns": [
+       "Value",
+       "Scroll",
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "ScrollBar",
+        "name": "Vertical",
+        "automation_id": "NonClientVerticalScrollBar",
+        "rect": [
+         1849,
+         519,
+         1866,
+         593
+        ],
+        "enabled": false,
+        "patterns": [
+         "LegacyIAccessible"
+        ],
+        "children": [
+         {
+          "control_type": "Button",
+          "name": "Line up",
+          "automation_id": "UpButton",
+          "rect": [
+           1849,
+           519,
+           1866,
+           536
+          ],
+          "enabled": false,
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         },
+         {
+          "control_type": "Button",
+          "name": "Line down",
+          "automation_id": "DownButton",
+          "rect": [
+           1849,
+           576,
+           1866,
+           593
+          ],
+          "enabled": false,
+          "patterns": [
+           "Invoke",
+           "LegacyIAccessible"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "control_type": "Button",
+      "name": "",
+      "automation_id": "1970378",
+      "class_name": "Button",
+      "rect": [
+       1873,
+       517,
+       1912,
+       538
+      ],
+      "patterns": [
+       "Invoke",
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Text",
+      "name": "Standard",
+      "automation_id": "856174",
+      "class_name": "Static",
+      "rect": [
+       505,
+       607,
+       552,
+       622
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ]
+     },
+     {
+      "control_type": "Pane",
+      "name": "",
+      "automation_id": "1118400",
+      "class_name": "SWT_Window0",
+      "rect": [
+       557,
+       600,
+       1912,
+       629
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "Edit",
+        "name": "",
+        "automation_id": "462950",
+        "class_name": "Edit",
+        "rect": [
+         557,
+         604,
+         769,
+         625
+        ],
+        "value": "Cash",
+        "patterns": [
+         "Value",
+         "LegacyIAccessible"
+        ]
+       },
+       {
+        "control_type": "Button",
+        "name": "Set as standard",
+        "automation_id": "463410",
+        "class_name": "Button",
+        "rect": [
+         775,
+         600,
+         870,
+         629
+        ],
+        "enabled": false,
+        "patterns": [
+         "Invoke",
+         "LegacyIAccessible"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}
