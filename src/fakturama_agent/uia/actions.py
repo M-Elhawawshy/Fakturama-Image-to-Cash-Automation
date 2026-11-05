@@ -80,7 +80,7 @@ def guarded_click(node: UiNode, owner_hwnd: int) -> None:
     w.click_input()
 
 
-def guarded_click_at(node: UiNode, dx: int, dy: int, owner_hwnd: int) -> None:
+def guarded_click_at(node: UiNode, dx: int, dy: int, owner_hwnd: int, *, double: bool = False) -> None:
     """Real left click at (dx, dy) inside ``node``'s UIA rectangle (e.g. a row band of a
     NatTable grid, whose rows are not UIA elements), with the same guards."""
     from pywinauto import mouse
@@ -95,7 +95,10 @@ def guarded_click_at(node: UiNode, dx: int, dy: int, owner_hwnd: int) -> None:
         raise ActionError("the window could not be brought to the front; refusing to click")
     if not _same_element(_element_at(x, y), node.element.element):
         raise ActionError(f"{node.label()} is not the element at {x},{y} (covered or moved); refusing to click")
-    mouse.click(coords=(x, y))
+    if double:
+        mouse.double_click(coords=(x, y))
+    else:
+        mouse.click(coords=(x, y))
 
 
 def park_mouse(owner_hwnd: int) -> None:

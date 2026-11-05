@@ -188,6 +188,31 @@ locators:
     status: verified
     note: "resolved inside the view pane; the grid is the Pane following the search bar (parent of this label's parent)"
 
+  # --- master-data editors opened from a Data view row (part F; tests/fixtures/uia/editor_*.json)
+  vat.name:
+    named: {control_type: Edit, name: "Name"}
+    transient: true
+    status: verified
+  vat.value:
+    named: {control_type: Edit, name: "Value"}
+    transient: true
+    status: verified
+    note: "shows e.g. '19%'"
+  vat.code:
+    named: {control_type: ComboBox, name: "VAT code (E-Invoice)"}
+    transient: true
+    status: verified
+    note: "e.g. 'S (Standard rate)'"
+  payment.name:
+    named: {control_type: Edit, name: "Name"}
+    transient: true
+    status: verified
+  payment.code:
+    named: {control_type: ComboBox, name: "!editorPaymentPaymentcode!"}
+    transient: true
+    status: verified
+    note: "untranslated label in 2.2.0; values carry a trailing space, e.g. 'Credit transfer '"
+
 # Data views read by Select All + Copy (part C). Headers recorded 2026-11-05 and
 # checked by OCR on every read; the copy itself has no header row.
 tables:

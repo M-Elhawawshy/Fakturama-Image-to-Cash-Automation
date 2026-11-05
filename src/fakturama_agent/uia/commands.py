@@ -332,3 +332,68 @@ def cmd_order_select(
     ok = all(o.ok for o in outcomes) and not skipped
     print(f"\n{'All checks decided.' if ok else 'Manual review needed.'} Nothing was saved. {left_open}")
     return EXIT_OK if ok else EXIT_UNRESOLVED
+
+
+def print_master_checks(checks) -> bool:
+    width = max(len(c.what) for c in checks)
+    for c in checks:
+        mark = "ok  " if c.ok else ("STOP" if c.error else "REVW")
+        print(f"[{mark}] {c.what:<{width}}  {c.summary()}")
+    ok = all(c.ok for c in checks)
+    print(f"\n{'All master data decided.' if ok else 'Manual review needed.'} Nothing was changed.")
+    return ok
+
+
+def cmd_check_master(
+    *,
+    rates: list | None = None,
+    method: str | None = None,
+    spec_path: Path | None = None,
+    registry: Registry | None = None,
+    finder: Callable[[], MainWindow] = find_main_window,
+    vat_checker=None,
+    payment_checker=None,
+    ocr=None,
+) -> int:
+    """check-vat / check-payment / check-master: read-only master-data checks."""
+    from decimal import Decimal, InvalidOperation
+
+    from pydantic import ValidationError
+
+    from fakturama_agent.spec.models import OrderSpec, PaymentMethod
+
+    rates = list(rates or [])
+    if spec_path is not None:
+        try:
+            spec = OrderSpec.model_validate_json(spec_path.read_text(encoding="utf-8"))
+        except (OSError, ValidationError) as e:
+            print(f"Cannot load {spec_path}: {e}", file=sys.stderr)
+            return EXIT_ERROR
+        rates = sorted({item.vat_percent for item in spec.items})
+        method = spec.payment.method.value
+    try:
+        rates = [Decimal(str(r)) for r in rates]
+        payment = PaymentMethod(method) if method is not None else None
+    except (InvalidOperation, ValueError):
+        known = ", ".join(m.value for m in PaymentMethod)
+        print(f"Unknown rate or payment method {method!r} (known methods: {known})", file=sys.stderr)
+        return EXIT_ERROR
+    registry = registry or Registry.load()
+    main = _bind(finder)
+    if main is None:
+        return EXIT_ERROR
+    if ocr is None:
+        from fakturama_agent.extract.ocr import run_ocr as ocr
+    if vat_checker is None or payment_checker is None:
+        from fakturama_agent.flow.master_data import check_payment, check_vat
+
+        vat_checker = vat_checker or check_vat
+        payment_checker = payment_checker or check_payment
+    checks = []
+    for rate in rates:
+        checks.append(vat_checker(main, registry, rate, ocr))
+        if checks[-1].error:
+            break
+    if payment is not None and not any(c.error for c in checks):
+        checks.append(payment_checker(main, registry, payment, ocr))
+    return EXIT_OK if print_master_checks(checks) else EXIT_UNRESOLVED

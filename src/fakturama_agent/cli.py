@@ -80,6 +80,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     osel.add_argument("spec", type=Path, help="OrderSpec JSON")
 
+    cv = sub.add_parser("check-vat", help="is 'VAT <rate>%%' defined with that value and code S? (read-only)")
+    cv.add_argument("rate", help="VAT percent, e.g. 19")
+    cp = sub.add_parser("check-payment", help="is the term of payment defined with the brief's code? (read-only)")
+    cp.add_argument("method", help="Bank Transfer | Credit Card | SEPA Direct Debit")
+    cm = sub.add_parser("check-master", help="check-vat for every rate in an OrderSpec plus its payment (read-only)")
+    cm.add_argument("spec", type=Path, help="OrderSpec JSON")
+
     norm = sub.add_parser("normalize", help="RawExtraction JSON (e.g. a corrected raw.json) -> OrderSpec JSON")
     norm.add_argument("raw", type=Path, help="RawExtraction JSON file")
     norm.add_argument("-o", "--output", type=Path, required=True, help="OrderSpec JSON to write")
@@ -188,7 +195,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_extract(args.image, args.output, extractor)
     if args.command == "ocr":
         return cmd_ocr(args.image, args.check, args.overlay, args.json)
-    if args.command in ("inspect", "locate", "preflight", "read-table", "order-open", "order-select"):
+    if args.command in ("inspect", "locate", "preflight", "read-table", "order-open", "order-select",
+                        "check-vat", "check-payment", "check-master"):
         from fakturama_agent.uia import commands
 
         if args.command == "inspect":
@@ -196,6 +204,12 @@ def main(argv: list[str] | None = None) -> int:
                 args.output, window_regex=args.window, max_depth=args.max_depth,
                 max_nodes=args.max_nodes, show_outline=not args.quiet,
             )
+        if args.command == "check-vat":
+            return commands.cmd_check_master(rates=[args.rate])
+        if args.command == "check-payment":
+            return commands.cmd_check_master(method=args.method)
+        if args.command == "check-master":
+            return commands.cmd_check_master(spec_path=args.spec)
         if args.command == "order-select":
             return commands.cmd_order_select(args.spec)
         if args.command == "order-open":

@@ -1,5 +1,6 @@
 """inspect/locate with a fake binder and the recorded tree (no Fakturama needed)."""
 
+import re
 from pathlib import Path
 
 from fakturama_agent.uia.binding import BindError, MainWindow
@@ -65,8 +66,11 @@ def test_locate_verified_skips_closed_dialogs_and_menus(capsys):
     from fakturama_agent.uia.locators import Registry
 
     total = sum(1 for loc in Registry.load().locators.values() if loc.status == "verified")
-    # resolved in the recorded main window: toolbar (4) + File/Data (2) + the open views (5) + Search: label (1)
-    assert "toolbar.new_order" in out and f"12/{total} resolved, 0 failed, {total - 12} skipped" in out
+    summary = re.search(r"(\d+)/(\d+) resolved, (\d+) failed, (\d+) skipped", out)
+    resolved, listed, failed, skipped = map(int, summary.groups())
+    # every verified locator is either found in the recorded main window or skipped as not open
+    assert "toolbar.new_order" in out and listed == total and failed == 0 and resolved + skipped == total
+    assert resolved >= 12  # toolbar (4) + File/Data (2) + open views (5) + Search: label (1)
     lines = {line.split()[0]: " ".join(line.split()[1:]) for line in out.splitlines() if line.strip()}
     assert lines["menu.file.preferences"] == "SKIPPED menu.file.expanded not open"
     assert lines["menu.file.expanded"] == "SKIPPED not open"

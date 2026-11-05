@@ -102,6 +102,11 @@ Data > VATs: exact `VAT 19%` row; open it and read Name, Value and `VAT code (E-
 
 **Live check:** `check-vat 19` → reusable; `check-payment "Bank Transfer"` → shows the stored code. If the code is empty, as the database suggests, that is a review case and you decide how to fix it *(Decision 4)*.
 
+**Done 2026-11-05** (`check-vat RATE`, `check-payment METHOD`, `check-master SPEC`). Live: `VAT 19%` reusable (Value `19%`, code `S (Standard rate)`); `Bank Transfer` missing (deleted by hand) -> create in part G; `VAT 7%` missing. What the live work showed:
+- A row's editor opens with a guarded double-click on its band; it is a Pane named like the record with its own window handle (bound like the Order editor). Fields: VAT `Name`, `Value` (`19%`), ComboBox `VAT code (E-Invoice)`; payment `Name`, `Description`, ComboBox `!editorPaymentPaymentcode!` (untranslated label; values end with a space, e.g. `Mutually defined ` for Cash).
+- Ctrl+W closes an unchanged editor without a prompt. Before it: the tab must not show `*`, the editor's own tab is activated (keys go to the active part) and focus verified; if the editor does not close, any dialog is left for the user.
+- The Error view that appeared during part E holds one entry, the copiedCells NPE triggered while exploring (logged in `~/.fakturama2/Logs/Error.log`, under the Items icon's handler because the dialog runs inside it). Idea for part J: note Error.log's size at the start and stop for review if Fakturama logs anything new during a run.
+
 ### G. Create payment term, VAT and Product (persists records; backup first)
 
 Each creates one record, saves once, and verifies by searching again:
