@@ -268,3 +268,11 @@ def test_verify_needs_exactly_one_order_for_the_ref(docs):
     assert "0 Orders carry" in verify_documents(MAIN, REG, SPEC, ocr=None).detail
     docs["rows"] = [*DOCS, SAVED, {**SAVED, "Document": "PO000005"}]
     assert "2 Orders carry" in verify_documents(MAIN, REG, SPEC, ocr=None).detail
+
+
+def test_cleared_addresses_are_named_plainly():
+    from fakturama_agent.flow.order_lines import addresses_cleared
+
+    assert addresses_cleared("Northstar Office GmbH\r\nMarta Klein") == []
+    for empty in ("", "  ", None):
+        assert "addresses were cleared" in addresses_cleared(empty)[0]

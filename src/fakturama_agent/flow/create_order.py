@@ -26,6 +26,7 @@ from fakturama_agent.flow.create_debtor import debtor_plan, saved_title
 from fakturama_agent.flow.order_header import HeaderError, HeaderWanted, OrderEditor, compare
 from fakturama_agent.flow.order_lines import (
     LineError,
+    addresses_cleared,
     documents_problems,
     duplicates,
     footer_problems,
@@ -107,7 +108,18 @@ def create_order(main: MainWindow, registry: Registry, spec: OrderSpec, money: M
         if not run.add("totals", footer_problems(read_footer(editor), spec, money),
                        f"net {t.net}, VAT {t.vat}, total {t.gross}; discount 0%, free shipping"):
             return run
-        bad = check_delivery(editor, spec) if (spec.delivery_address and not spec.derived.billing_equals_delivery) else []
+        # Seen live: the Order's addresses were cleared between the Debtor selection and this
+        # step (its Debtor had been deleted). Say so plainly instead of "0 Delivery tabs".
+        cleared = addresses_cleared(editor.node("order.invoice_address").value)
+        if cleared:
+            run.add("addresses", cleared, "")
+            return run
+        bad = []
+        if spec.delivery_address and not spec.derived.billing_equals_delivery:
+            try:
+                bad = check_delivery(editor, spec)
+            except TableError as e:
+                bad = [f"the Order shows no delivery address ({e}), but the Debtor should have one"]
         bad += invoice_tab_problems(editor, debtor_key(spec))
         if not run.add("addresses", bad, "delivery address checked; Invoice address tab selected and verified"):
             return run

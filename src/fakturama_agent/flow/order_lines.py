@@ -263,3 +263,13 @@ def invoice_tab_problems(editor: OrderEditor, key: DebtorKey) -> list[str]:
     problems = [] if selected == ["Invoice address"] else [f"selected address tab is {selected}"]
     return problems + address_shows(text, key)
 
+
+
+def addresses_cleared(invoice_text: str | None) -> list[str]:
+    """Pure: an empty invoice address after the Debtor was selected and verified means
+    Fakturama cleared the Order's addresses (seen live 2026-11-05 when that Debtor had
+    been deleted). Never saved; a person checks the Debtor."""
+    if (invoice_text or "").strip():
+        return []
+    return ["the Order's invoice address is EMPTY: its addresses were cleared after the Debtor was "
+            "selected (was the Debtor deleted or changed meanwhile? check Data > Debtors, then rerun)"]

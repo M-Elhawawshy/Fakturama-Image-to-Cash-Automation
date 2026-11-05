@@ -158,6 +158,12 @@ Per item, after selection: set Qty., U.Price, Discount through the inline editor
 
 ### J. `run`: the state machine end to end
 
+**Handoff (2026-11-05, before J starts).**
+- *Building blocks ready* (each tested offline and live): `preflight`; `create-master SPEC [--without-email]` (payment → VAT → products → Debtor; each check-first, create-if-missing, save once, read back); `create-order SPEC [--no-save] [--allow-duplicate]` (duplicate guard → header → selections → lines → totals → addresses → Save once → Documents); `check-order SPEC` (read-only). J wires these as steps of one `run`, it does not rewrite them: `flow/create_master.py` / `create_debtor.py` return `Created(status created|exists|review|stopped, saved)`, `flow/create_order.py` returns `OrderRun(steps, number, saved, unsaved_left_open)`.
+- *Still to build:* the `run` command and step interface; the journal (`attempting`/`done` per Save, from the `saved` flags); evidence (screenshot of the bound editor before/after, read-backs, UIA dump on failure, `report.md`); the Error.log check (note its size at start, stop for review on new entries: `~/.fakturama2/Logs/Error.log`, currently 4980 bytes, one old copiedCells NPE); the `FakeFakturama` simulator and decision-tree tests (all exist / all missing / ambiguous Debtor / failure after a master Save / failure after the Order Save / addresses cleared).
+- *Workspace state at handoff:* PO000004 and Debtor CUST000004 were deleted by hand; products CHR-ERG-01, MAT-DESK-02, term Bank Transfer, VAT 19% and test VAT 7% remain; an unsaved New Order (PO000005) from a stopped run may still be open (close without saving). For J's live check either restore the pre-G backup (shows the create branches) or run `create-master --without-email` first.
+- *Open question:* in the stopped run the deleted Debtor was still selectable in `Select the address`, then the Order's addresses were cleared before Save. Either it was deleted during the run, or the dialog showed stale data. `create-order` now names this plainly (`addresses_cleared`); if it recurs with a Debtor deleted *before* the run, add a guard (cross-check the Debtors list before selecting).
+
 Wire A–I as explicit steps (precondition → one action → read-back) with outcomes ok / create / review, per the design. Plus:
 - **Journal** (`out/runs/<timestamp>/journal.jsonl`): attempting/done per write; a Save whose outcome is uncertain is never repeated.
 - **Evidence**: before/after screenshot of the bound editor per step, values read back, a UIA dump on failure, `report.md`.
