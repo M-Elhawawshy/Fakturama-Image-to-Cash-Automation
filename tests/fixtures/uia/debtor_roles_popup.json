@@ -1,0 +1,91 @@
+{
+ "meta": {},
+ "node_count": 5,
+ "truncated": false,
+ "root": {
+  "control_type": "Pane",
+  "name": "",
+  "class_name": "#32770",
+  "rect": [
+   1175,
+   551,
+   1423,
+   581
+  ],
+  "patterns": [
+   "LegacyIAccessible"
+  ],
+  "children": [
+   {
+    "control_type": "Pane",
+    "name": "",
+    "automation_id": "922162",
+    "class_name": "SWT_Window0",
+    "rect": [
+     1175,
+     551,
+     1423,
+     581
+    ],
+    "patterns": [
+     "LegacyIAccessible"
+    ],
+    "children": [
+     {
+      "control_type": "Pane",
+      "name": "",
+      "automation_id": "1577152",
+      "class_name": "SWT_Window0",
+      "rect": [
+       1177,
+       553,
+       1404,
+       579
+      ],
+      "patterns": [
+       "LegacyIAccessible"
+      ],
+      "children": [
+       {
+        "control_type": "CheckBox",
+        "name": "Invoice address",
+        "automation_id": "1249832",
+        "class_name": "Button",
+        "rect": [
+         1182,
+         558,
+         1284,
+         574
+        ],
+        "toggle": "off",
+        "patterns": [
+         "Invoke",
+         "Toggle",
+         "LegacyIAccessible"
+        ]
+       },
+       {
+        "control_type": "CheckBox",
+        "name": "Delivery address",
+        "automation_id": "2560706",
+        "class_name": "Button",
+        "rect": [
+         1293,
+         558,
+         1399,
+         574
+        ],
+        "toggle": "off",
+        "patterns": [
+         "Invoke",
+         "Toggle",
+         "LegacyIAccessible"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

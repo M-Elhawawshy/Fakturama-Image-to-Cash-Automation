@@ -282,6 +282,98 @@ locators:
     transient: true
     status: verified
 
+  # --- Debtor editor (part H; tests/fixtures/uia/editor_debtor_*.json). Only the selected
+  # tab's fields are exposed, so address.* resolve in whichever address tab is selected.
+  debtor.customer_id:
+    named: {control_type: Edit, name: "Customer ID"}
+    transient: true
+    status: verified
+    note: "proposed, e.g. CUST000004; kept, never typed"
+  debtor.company:
+    named: {control_type: Edit, name: "Company"}
+    transient: true
+    status: verified
+    note: "multi-line; Tab would type a tab character (R5), blur by focusing Customer ID"
+  debtor.first_name:
+    label_sibling: {label: "First Name Last Name", sibling_type: Edit, nth: 0, descend: true}
+    transient: true
+    status: verified
+  debtor.last_name:
+    label_sibling: {label: "First Name Last Name", sibling_type: Edit, nth: 1, descend: true}
+    transient: true
+    status: verified
+  debtor.tab.addresses:
+    named: {control_type: TabItem, name: "Addresses"}
+    transient: true
+    status: verified
+  debtor.tab.misc:
+    named: {control_type: TabItem, name: "Miscellaneous"}
+    transient: true
+    status: verified
+  debtor.add_address:
+    named: {control_type: Button, name: "+"}
+    transient: true
+    status: verified
+    note: "adds and selects a tab 'additional address #N'"
+  address.additional_name:
+    named: {control_type: Edit, name: "additional name"}
+    transient: true
+    status: verified
+  address.street:
+    named: {control_type: Edit, name: "Street"}
+    transient: true
+    status: verified
+  address.email:
+    named: {control_type: Edit, name: "E-Mail"}
+    transient: true
+    status: verified
+    note: "validated: a red mark left of the field ('Please enter a valid e-mail address') rejects e.g. example.test"
+  address.phone:
+    named: {control_type: Edit, name: "Telephone"}
+    transient: true
+    status: verified
+  address.zip:
+    label_sibling: {label: "ZIP - City", sibling_type: Edit, nth: 0, descend: true}
+    transient: true
+    status: verified
+  address.city:
+    label_sibling: {label: "ZIP - City", sibling_type: Edit, nth: 1, descend: true}
+    transient: true
+    status: verified
+  address.country:
+    named: {control_type: ComboBox, name: "Country"}
+    transient: true
+    status: verified
+    note: "251 countries, default United States; off-screen entries are scrolled into view before the click"
+  address.roles:
+    label_sibling: {label: "address type", sibling_type: Edit, nth: 0, descend: true}
+    transient: true
+    status: verified
+    note: "shows the ticked roles, e.g. 'Invoice address'"
+  address.roles_button:
+    label_sibling: {label: "address type", sibling_type: Button, nth: 0, descend: true}
+    transient: true
+    status: verified
+    note: "opens an untitled popup with CheckBoxes 'Invoice address' / 'Delivery address' (Toggle works; Escape closes it)"
+  debtor.alias:
+    named: {control_type: Edit, name: "Alias name"}
+    transient: true
+    status: verified
+  debtor.payment:
+    named: {control_type: ComboBox, name: "Payment"}
+    transient: true
+    status: verified
+    note: "lists the terms' DESCRIPTIONS (e.g. 'Pay Cash' for Cash), not their names"
+  debtor.discount:
+    named: {control_type: Edit, name: "Discount"}
+    transient: true
+    status: verified
+  debtor.net_gross:
+    named: {control_type: ComboBox, name: "Net or Gross"}
+    transient: true
+    status: verified
+    note: "--- / Net / Gross"
+
 # Data views read by Select All + Copy (part C). Headers recorded 2026-11-05 and
 # checked by OCR on every read; the copy itself has no header row.
 tables:

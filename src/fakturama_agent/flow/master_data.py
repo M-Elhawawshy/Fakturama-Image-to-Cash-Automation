@@ -148,7 +148,9 @@ def check_payment(main: MainWindow, registry: Registry, method: PaymentMethod, o
     out = MasterCheck(f"Payment {name}")
 
     def read_editor(ed: RecordEditor) -> dict[str, str]:
-        return {"Name": ed.value("payment.name"), "Payment code": ed.value("payment.code")}
+        # Description too: the Debtor's Payment dropdown lists terms by description (part H)
+        return {"Name": ed.value("payment.name"), "Description": ed.value("payment.description"),
+                "Payment code": ed.value("payment.code")}
 
     return _check(main, registry, ocr, out, "payments", name, read_editor,
                   lambda row, shown: judge_payment(name, code, shown), "payment.name")

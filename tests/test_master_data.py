@@ -142,7 +142,7 @@ def test_zero_rate_is_unsupported(fake):
 
 def test_payment_conflict_is_review(fake):
     fake["rows"] = [{"Name": "Bank Transfer"}]
-    fake["fields"] = {"payment.name": "Bank Transfer", "payment.code": ""}
+    fake["fields"] = {"payment.name": "Bank Transfer", "payment.description": "Bank Transfer", "payment.code": ""}
     out = md.check_payment(MAIN, REG, PaymentMethod.BANK_TRANSFER, ocr=None)
     assert out.kind == "conflict" and not out.ok and FakeEditor.instances[0].closed
 

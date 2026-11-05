@@ -97,9 +97,18 @@ def build_parser() -> argparse.ArgumentParser:
     crpr.add_argument("--sku", help="only this item")
     crpr.add_argument("--reselect", action="store_true",
                       help="afterwards select each product from a New Order as proof (not saved)")
-    crm = sub.add_parser("create-master", help="create the payment term, VAT rates and products an OrderSpec "
-                         "needs, in that order." + warn)
+    email_help = ("if Fakturama rejects the e-mail (e.g. the .test domain), save the Debtor with an EMPTY "
+                  "E-Mail instead of stopping for review")
+    crd = sub.add_parser("create-debtor", help="create the missing Debtor of an OrderSpec (both addresses, "
+                         "payment)." + warn)
+    crd.add_argument("spec", type=Path, help="OrderSpec JSON")
+    crd.add_argument("--without-email", action="store_true", help=email_help)
+    crd.add_argument("--reselect", action="store_true",
+                     help="afterwards select the Debtor from a New Order and check both addresses (not saved)")
+    crm = sub.add_parser("create-master", help="create the payment term, VAT rates, products and Debtor an "
+                         "OrderSpec needs, in that order." + warn)
     crm.add_argument("spec", type=Path, help="OrderSpec JSON")
+    crm.add_argument("--without-email", action="store_true", help=email_help)
 
     norm = sub.add_parser("normalize", help="RawExtraction JSON (e.g. a corrected raw.json) -> OrderSpec JSON")
     norm.add_argument("raw", type=Path, help="RawExtraction JSON file")
@@ -211,7 +220,7 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_ocr(args.image, args.check, args.overlay, args.json)
     if args.command in ("inspect", "locate", "preflight", "read-table", "order-open", "order-select",
                         "check-vat", "check-payment", "check-master",
-                        "create-payment", "create-vat", "create-product", "create-master"):
+                        "create-payment", "create-vat", "create-product", "create-debtor", "create-master"):
         from fakturama_agent.uia import commands
 
         if args.command == "inspect":
@@ -225,8 +234,11 @@ def main(argv: list[str] | None = None) -> int:
             return commands.cmd_create("vat", rate=args.rate)
         if args.command == "create-product":
             return commands.cmd_create("product", spec_path=args.spec, sku=args.sku, reselect=args.reselect)
+        if args.command == "create-debtor":
+            return commands.cmd_create("debtor", spec_path=args.spec, without_email=args.without_email,
+                                       reselect=args.reselect)
         if args.command == "create-master":
-            return commands.cmd_create("master", spec_path=args.spec)
+            return commands.cmd_create("master", spec_path=args.spec, without_email=args.without_email)
         if args.command == "check-vat":
             return commands.cmd_check_master(rates=[args.rate])
         if args.command == "check-payment":

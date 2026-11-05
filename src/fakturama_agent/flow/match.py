@@ -106,3 +106,21 @@ def line_added(before: list[dict], after: list[dict], sku: str) -> list[str]:
     if after[: len(before)] != before:
         problems.append("existing lines changed")
     return problems
+
+
+def delivery_shows(text: str, key: DebtorKey, street: str) -> list[str]:
+    """Problems with the Order's delivery address text (empty = ok). Recorded 2026-11-05:
+    'Northstar Office GmbH / Marta Klein / Beusselstrasse 44 / DE-10553 Berlin / Germany':
+    company and person as on the invoice address, then the delivery street and place
+    (``key`` carries the delivery ZIP/City). The address's 'additional name' (e.g.
+    'Northstar Office Warehouse') is NOT part of Fakturama's address text; it is
+    checked on the contact itself (part H read-back)."""
+    zip_code, city = key.zip, key.city
+    lines = [line.strip() for line in re.split(r"\r?\n", text or "")]
+    problems = [p for p in address_shows(text, key) if not p.startswith("no line with")]
+    if street not in lines:
+        problems.append(f"no line {street!r}")
+    place = re.compile(rf"^(?:[A-Z]{{2}}-)?{re.escape(zip_code)} {re.escape(city)}$")
+    if not any(place.match(line) for line in lines):
+        problems.append(f"no line with {zip_code} {city}")
+    return problems

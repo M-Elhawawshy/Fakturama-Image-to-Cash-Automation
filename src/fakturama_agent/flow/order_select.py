@@ -180,3 +180,40 @@ def check_all(editor: OrderEditor, spec: OrderSpec, ocr: Callable) -> list[Outco
             break  # a stop leaves Fakturama in an unknown state: no further steps
         outcomes.append(check_product(editor, item.sku, ocr))
     return outcomes
+
+
+def _address_tab_text(editor: OrderEditor, tab_name: str) -> str:
+    """Select the Order's address tab ``tab_name`` and return its text."""
+    from fakturama_agent.uia import actions
+
+    def find(kind: str) -> list[UiNode]:
+        return [n for n in editor.snapshot().root.walk() if n.control_type == kind and n.name == tab_name]
+
+    items = find("TabItem")
+    if len(items) != 1:
+        raise TableError(f"{len(items)} '{tab_name}' tabs in the Order")
+    if not items[0].selected:
+        actions.guarded_click(items[0], editor.main.hwnd)
+        actions.wait_until(lambda: True if find("TabItem")[0].selected else None, timeout=5.0,
+                           what=f"'{tab_name}' selected")
+        time.sleep(0.3)
+    holders = find("Tab")  # the Tab control is named after its selected tab
+    edits = [n for n in holders[0].walk() if n.control_type == "Edit"] if len(holders) == 1 else []
+    if len(edits) != 1:
+        raise TableError(f"cannot find the text of the Order's '{tab_name}' tab")
+    return edits[0].value or ""
+
+
+def check_delivery(editor: OrderEditor, spec: OrderSpec) -> list[str]:
+    """After the Debtor was selected: the Delivery address tab shows the spec's delivery
+    address. The Invoice address tab is selected again afterwards (saving with the
+    Delivery tab selected crashes 2.2.0, R11) and that is verified."""
+    from fakturama_agent.flow.match import delivery_shows
+
+    a = spec.delivery_address
+    try:
+        text = _address_tab_text(editor, "Delivery address")
+    finally:
+        _address_tab_text(editor, "Invoice address")
+    key = DebtorKey(spec.debtor.company, spec.debtor.contact_first_name, spec.debtor.contact_last_name, a.zip, a.city)
+    return delivery_shows(text, key, a.street)

@@ -40,8 +40,10 @@ class RecordEditor:
 
     @classmethod
     def open_row(cls, main: MainWindow, registry: Registry, grid: LiveGrid, read: TableRead, index: int,
-                 *, timeout: float = 10.0) -> RecordEditor:
-        name = read.rows[index]["Name"]
+                 *, editor_name: str | None = None, timeout: float = 10.0) -> RecordEditor:
+        """``editor_name``: the editor's title when it is not the row's Name (a Debtor's
+        editor is titled 'Company, First Last' while its Name column is the last name)."""
+        name = editor_name or read.rows[index]["Name"]
         if not name:
             raise EditorError(f"row {index + 1} has no Name")
         before = _named_panes(snapshot_hwnd(main.hwnd), name)

@@ -132,6 +132,16 @@ Known risk: Fakturama's e-mail validator rejects the `.test` domain and the refe
 
 **Live check:** `create-debtor out/order.json` → Data > Debtors shows Northstar Office GmbH / Marta Klein with both addresses and Bank Transfer; selecting it from the Order fills both address tabs.
 
+**Done 2026-11-05** (`create-debtor SPEC [--without-email] [--reselect]`; `create-master` now ends with the Debtor). Created live: `CUST000004` Northstar Office GmbH / Marta Klein, Main address = billing (role Invoice), `additional address #1` = delivery (name `Northstar Office Warehouse`, role Delivery), alias, payment Bank Transfer, Net, discount 0%, E-Mail empty (see Decision 5). What the live work showed:
+- Editor `New Debtor` proposes the Customer ID (kept). Only the *selected* tab's fields are exposed, so address locators resolve in whichever address tab is selected; '+' adds and selects `additional address #N`.
+- Address type: the unnamed Button beside `address type` opens an untitled popup with CheckBoxes `Invoice address` / `Delivery address`; the button needs a real click (R8 confirmed), the CheckBoxes accept UIA Toggle, Escape closes the popup only while it has the focus.
+- Country lists 251 entries; an entry scrolled out of view has an empty rectangle: `choose` now scrolls it into view (ScrollItem) before the guarded click.
+- Payment dropdown lists the terms' **descriptions** (`Pay Cash` for Cash), so the description is read from the verified term (part F now reads it too).
+- **`.test` e-mail (R10 confirmed):** Fakturama shows a red mark at the field's top-left corner, tooltip "Please enter a valid e-mail address" (`example.com` passes). UIA exposes nothing; the mark is read from pixels (`uia/marks.py`) on every typed field. Default: stop for review before saving; `--without-email` clears the field and saves, the report says so. **Decision 5 settled this way.**
+- Closing an unsaved editor: `Save Parts` lists it ticked; unticking + OK discards (done only by hand / in exploration, never by the tool).
+- **The Debtors list shows the delivery address's ZIP/City** for a contact with a delivery address (CUST000004: 10553), while `Select the address` shows the billing one (10117, type BILLING). The Debtors-list decision accepts the ZIP/City of either address; two contacts matching → ambiguous. After Save the contact is reopened from that list and read back field by field (all 25 fields matched).
+- The Order's delivery address text is `Company / First Last / Street / DE-ZIP City / Country`: the address's `additional name` is not printed there, so it is verified on the contact only.
+
 ### I. Lines, Order verification and Save (persists the Order; backup first)
 
 Per item, after selection: set Qty., U.Price, Discount through the inline editors (double-click, type, commit, leave the editor); check the line VAT popup text (`VAT 19% (19.0%)`); read the item grid with the table reader (twice, stable) and compare every line with `derived.expected_line_net`. Then: overall Discount 0, Shipping free; Total Net / VAT / Total equal the spec; **select the Invoice address tab** (saving with the Delivery tab selected crashes 2.2.0 **[R11]**); journal `attempting save_order`; Save once; handle the known contact-confirmation popup on save **[R12]**; verify the Documents row: number, Date, Cust.Ref., state open, Total; journal `done`.
@@ -175,7 +185,7 @@ Wire A–I as explicit steps (precondition → one action → read-back) with ou
 2. **Duplicate guard on Cust.Ref.**: a run refuses to start when an Order with the same Cust.Ref. exists, unless `--allow-duplicate`.
 3. **You start Fakturama**; the tool never launches it. Preflight only checks.
 4. **Payment codes follow the brief's mapping** (2.10.4): Bank Transfer = `Credit transfer`, Credit Card = `Credit card`, SEPA Direct Debit = `SEPA direct debit`. An existing term is reused only if its code matches; an existing term with a missing or different code is a conflicting definition → manual review (brief 2.10.2). The tool creates missing terms but never edits existing ones.
-5. **`.test` e-mail** (open until part H): if Fakturama rejects it, the run stops for review rather than dropping the e-mail silently. Revisit once part H shows the real behavior.
+5. **`.test` e-mail** (settled in part H): Fakturama rejects it (validation mark). Default: stop for review before saving; `--without-email` saves the Debtor with an empty E-Mail and the report says so. Never dropped silently.
 
 ## Lessons from the reference implementation
 

@@ -231,12 +231,13 @@ def run(capsys, kind, results=None, preflight_ok=True, **kw):
     results = dict(results or {})
 
     def maker(what):
-        def create(main, registry, *args):
-            calls.append((what, args[0] if what != "product" else args[0].sku))
-            return results.get((what, calls[-1][1]), Created(f"{what}", "created", "ok", saved=True))
+        def create(main, registry, *args, **kwargs):
+            key = {"product": lambda a: a.sku, "debtor": lambda a: a.debtor.company}.get(what, lambda a: a)(args[0])
+            calls.append((what, key) + ((kwargs,) if kwargs else ()))
+            return results.get((what, key), Created(f"{what}", "created", "ok", saved=True))
         return create
 
-    creators = {w: maker(w) for w in ("payment", "vat", "product")}
+    creators = {w: maker(w) for w in ("payment", "vat", "product", "debtor")}
     code = cmd_create(kind, registry=REG, finder=lambda: MAIN, preflight=lambda m, r: Report(preflight_ok),
                       creators=creators, ocr=object(), **kw)
     return code, calls, capsys.readouterr()
@@ -246,13 +247,14 @@ def test_create_master_order(capsys):
     code, calls, _ = run(capsys, "master", spec_path=GOLDEN)
     assert code == 0
     assert calls == [("payment", PaymentMethod.BANK_TRANSFER), ("vat", Decimal("19")),
-                     ("product", "CHR-ERG-01"), ("product", "MAT-DESK-02")]
+                     ("product", "CHR-ERG-01"), ("product", "MAT-DESK-02"),
+                     ("debtor", "Northstar Office GmbH", {"without_email": False})]
 
 
 def test_stop_ends_the_run(capsys):
     stop = {("vat", Decimal("19")): Created("VAT 19%", "review", "conflicting")}
     code, calls, out = run(capsys, "master", results=stop, spec_path=GOLDEN)
-    assert code == 2 and calls[-1] == ("vat", Decimal("19")) and "2 later step(s) not run" in out.out
+    assert code == 2 and calls[-1] == ("vat", Decimal("19")) and "3 later step(s) not run" in out.out
 
 
 def test_unclear_save_warning(capsys):
@@ -269,3 +271,8 @@ def test_preflight_must_be_clean(capsys):
 def test_single_product_and_unknown_sku(capsys):
     assert run(capsys, "product", spec_path=GOLDEN, sku="MAT-DESK-02")[1] == [("product", "MAT-DESK-02")]
     assert run(capsys, "product", spec_path=GOLDEN, sku="NOPE")[0] == 1
+
+
+def test_create_debtor_passes_the_email_choice(capsys):
+    code, calls, _ = run(capsys, "debtor", spec_path=GOLDEN, without_email=True)
+    assert code == 0 and calls == [("debtor", "Northstar Office GmbH", {"without_email": True})]

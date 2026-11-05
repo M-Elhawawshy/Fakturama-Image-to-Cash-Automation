@@ -407,13 +407,14 @@ def cmd_create(
     spec_path: Path | None = None,
     sku: str | None = None,
     reselect: bool = False,
+    without_email: bool = False,
     registry: Registry | None = None,
     finder: Callable[[], MainWindow] = find_main_window,
     preflight=None,
     creators: dict | None = None,
     ocr=None,
 ) -> int:
-    """create-payment / create-vat / create-product / create-master. PERSISTS records (back up first)."""
+    """create-payment / create-vat / create-product / create-debtor / create-master. PERSISTS records (back up first)."""
     from decimal import Decimal, InvalidOperation
 
     from pydantic import ValidationError
@@ -459,9 +460,11 @@ def cmd_create(
         print("\nNot creating anything until preflight is clean.")
         return EXIT_UNRESOLVED
     if creators is None:
+        from fakturama_agent.flow import create_debtor as cd
         from fakturama_agent.flow import create_master as cm
 
-        creators = {"payment": cm.create_payment, "vat": cm.create_vat, "product": cm.create_product}
+        creators = {"payment": cm.create_payment, "vat": cm.create_vat, "product": cm.create_product,
+                    "debtor": cd.create_debtor}
 
     plan = []  # (creator, args) in the safe order: payment terms, VAT rates, products
     if kind in ("payment", "master"):
@@ -471,12 +474,16 @@ def cmd_create(
         plan += [("vat", r) for r in rates]
     if kind in ("product", "master"):
         plan += [("product", pair) for pair in items]
+    if kind in ("debtor", "master"):  # after its term of payment (R6)
+        plan.append(("debtor", spec))
 
     results = []
     for what, arg in plan:
         if what == "product":
             item, gross = arg
             result = creators["product"](main, registry, item, gross, report.money, ocr)
+        elif what == "debtor":
+            result = creators["debtor"](main, registry, arg, ocr, without_email=without_email)
         else:
             result = creators[what](main, registry, arg, ocr)
         results.append(result)
@@ -501,5 +508,19 @@ def cmd_create(
             outcome = check_product(editor, item.sku, ocr)
             print(f"[{'ok  ' if outcome.ok else 'FAIL'}] reselect {item.sku} from a New Order: {outcome.summary()}")
             ok = ok and outcome.ok
-        print("The New Order is not saved: close it and answer No.")
+        print("The New Order is not saved: close it without saving (Save Parts: untick it, OK).")
+    if ok and reselect and kind == "debtor":
+        from fakturama_agent.flow.order_header import OrderEditor
+        from fakturama_agent.flow.order_select import check_debtor, check_delivery
+
+        editor = OrderEditor.open_new(main, registry)
+        outcome = check_debtor(editor, spec, ocr)
+        print(f"[{'ok  ' if outcome.ok else 'FAIL'}] reselect the Debtor from a New Order: {outcome.summary()}")
+        ok = ok and outcome.ok
+        if outcome.ok and not spec.derived.billing_equals_delivery and spec.delivery_address is not None:
+            problems = check_delivery(editor, spec)
+            print(f"[{'ok  ' if not problems else 'FAIL'}] delivery address in the Order: "
+                  f"{'matches the spec' if not problems else problems}")
+            ok = ok and not problems
+        print("The New Order is not saved: close it without saving (Save Parts: untick it, OK).")
     return EXIT_OK if ok else EXIT_UNRESOLVED

@@ -108,6 +108,10 @@ def choose(
 
     try:
         entry = actions.wait_until(exact_item, timeout=timeout, what=f"entry {item!r} in {combo.label()}")
+        if entry.rect == (0, 0, 0, 0):  # scrolled out of a long list (Country): scroll it in first
+            UIAWrapper(entry.element).iface_scroll_item.ScrollIntoView()
+            entry = actions.wait_until(lambda: (e := exact_item()) and e.rect != (0, 0, 0, 0) and e or None,
+                                       timeout=timeout, what=f"entry {item!r} scrolled into view")
         actions.guarded_click(entry, owner_hwnd)
         actions.wait_until(
             lambda: True if not list_items(refresh()) else None, timeout=timeout, what="the dropdown to close"
