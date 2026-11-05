@@ -75,6 +75,13 @@ The date field is the riskiest control. If segment entry proves unreliable we st
 
 **Live check:** `order-open out/order.json` leaves a New Order tab with No. PO000004, Date 14 Jul 2026, Cust.Ref. WEB-2026-0714-A17, Net, With VAT. Nothing is saved; you close the tab and answer **No** to "Save changes?".
 
+**Done 2026-11-05.** What the live work showed:
+- The editor is a Pane `New Order` with its own native window handle; that handle binds "our" editor (the tab is renamed `*New Order` once dirty, and two unsaved orders both propose PO000004: the number is fixed only on Save, relevant for part I). Reads snapshot that handle only.
+- No. and Date are unnamed Edits after their labels (inside a Pane, so `label_sibling` with `descend`); the price-mode ComboBox (`---`/`Net`/`Gross`, default **Gross** here) is the ComboBox after `Date`; `VAT` offers `With VAT`/`Free of Tax`.
+- Dropdowns: UIA Expand opens them; the ListItems appear under the ComboBox; a guarded click on the exact ListItem sets the value (read back after the list closed).
+- Cust.Ref.: UIA SetFocus (verified with CompareElements on the focused element), Ctrl+A/Backspace as real key events, text as Unicode input, blur by focusing `Consultant`, read back.
+- Date (`MMM d, yyyy`): the active segment is remembered between uses (it was month once, year the next time), Up/Down change only that segment, Right moves on and wraps, digits fill a segment and auto-advance. Entry: find the active segment with two probes (Up/Down and Down/Up; the segment changed by both, most significant first, which stays unambiguous at month ends where a month step clamps the day), go Right to it, type zero-padded digits year -> month -> day, verify each, blur, verify the whole date. No OCR needed. Tested offline against a simulator with Calendar.add semantics from every start segment and edge dates.
+
 ### E. Selectors as existence checks (unsaved editor only)
 
 From the open Order: upper icon beside `Addresses` → `Select the address`, search Company, read rows (part C), decide **select / not found / ambiguous** on exact Company, First Name, Name, ZIP, City. Upper icon beside `Items` → `Select a product`, search the full SKU, exact match on Item No. Select = click the exact row (Select All does not select a row; ground the copied identifier in the grid with OCR, click it, re-copy the selection and verify it is that row **[R3]**), then OK, then verify the Order: addresses populated / exactly one new line with that SKU. Not found → Cancel. Ambiguous → review. Handle the product dialog closing itself when a search leaves one product **[R4]**.

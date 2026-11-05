@@ -74,19 +74,46 @@ locators:
     transient: true
     status: verified
 
-  # --- Order editor (scope: the bound New Order editor)
+  # --- Order editor (resolved in the bound editor pane; tests/fixtures/uia/order_editor*.json)
+  order.no:
+    label_sibling: {label: "No.", sibling_type: Edit, nth: 0, descend: true}
+    transient: true
+    status: verified
+    note: "proposed number, e.g. PO000004; read, never typed"
+  order.date:
+    label_sibling: {label: "Date", sibling_type: Edit, nth: 0, descend: true}
+    transient: true
+    status: verified
+    note: "segmented CDateTime, shows 'MMM d, yyyy'"
+  order.price_mode:
+    label_sibling: {label: "Date", sibling_type: ComboBox, nth: 0, descend: true}
+    transient: true
+    status: verified
+    note: "unnamed ComboBox after Date: --- / Net / Gross"
   order.cust_ref:
     named: {control_type: Edit, name: "Cust.Ref."}
-    status: unverified
-    note: "findings; confirm in part D"
+    transient: true
+    status: verified
+  order.vat_mode:
+    named: {control_type: ComboBox, name: "VAT"}
+    transient: true
+    status: verified
+    note: "With VAT / Free of Tax"
+  order.consultant:
+    named: {control_type: Edit, name: "Consultant"}
+    transient: true
+    status: verified
+    note: "focus target to blur the header fields; never typed into"
   order.addresses.select_icon:
     label_sibling: {label: "Addresses", sibling_type: Image, nth: 0}
-    status: unverified
-    note: "upper icon (existing contact); nth 1 is the green + (new Debtor). Confirm in part E"
+    transient: true
+    status: verified
+    note: "upper icon (existing contact); nth 1 is the green + (new Debtor). Behaviour confirmed in part E"
   order.items.select_icon:
     label_sibling: {label: "Items", sibling_type: Image, nth: 0}
-    status: unverified
-    note: "first of four icons beside Items opens Select a product. Confirm in part E"
+    transient: true
+    status: verified
+    note: "first of four icons beside Items opens Select a product. Behaviour confirmed in part E"
 
   # --- selector dialogs (own top-level windows; tests/fixtures/uia/select_address.json)
   # The Search Edit sits inside a Pane after the label, hence descend.

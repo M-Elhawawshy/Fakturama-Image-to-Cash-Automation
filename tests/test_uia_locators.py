@@ -161,7 +161,8 @@ def _load(name: str) -> Snapshot:
 
 @pytest.mark.parametrize(
     "fixture, prefix",
-    [("select_address", "selector."), ("main_file_menu", "menu.file."), ("prefs_general", "prefs.")],
+    [("select_address", "selector."), ("main_file_menu", "menu.file."), ("prefs_general", "prefs."),
+     ("order_editor", "order.")],
 )
 def test_window_scoped_locators_resolve_in_their_recordings(registry, fixture, prefix):
     snap = _load(fixture)

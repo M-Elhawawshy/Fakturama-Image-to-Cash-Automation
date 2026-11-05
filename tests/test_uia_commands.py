@@ -62,7 +62,7 @@ def test_inspect_without_fakturama(capsys):
 def test_locate_verified_skips_closed_dialogs_and_menus(capsys):
     assert cmd_locate([], finder=finder, snapshotter=snapshotter, window_lister=no_dialogs) == 0
     out = capsys.readouterr().out
-    assert "toolbar.new_order" in out and "12/25 resolved, 0 failed, 13 skipped" in out
+    assert "toolbar.new_order" in out and "12/33 resolved, 0 failed, 21 skipped" in out
     lines = {line.split()[0]: " ".join(line.split()[1:]) for line in out.splitlines() if line.strip()}
     assert lines["menu.file.preferences"] == "SKIPPED menu.file.expanded not open"
     assert lines["menu.file.expanded"] == "SKIPPED not open"
@@ -76,8 +76,9 @@ def test_locate_resolves_in_an_open_dialog(capsys):
 
 
 def test_locate_unresolved_exit_2(capsys):
-    assert cmd_locate(["toolbar.save", "order.cust_ref"], finder=finder, snapshotter=snapshotter,
-                      window_lister=no_dialogs) == 2
-    out = capsys.readouterr().out
-    assert "order.cust_ref  NOT_FOUND" in out
-    assert "1/2 resolved, 1 failed" in out
+    assert cmd_locate(["toolbar.save", "order.cust_ref", "toolbar.new_ordr"], finder=finder,
+                      snapshotter=snapshotter, window_lister=no_dialogs) == 2
+    lines = {line.split()[0]: " ".join(line.split()[1:3]) for line in capsys.readouterr().out.splitlines() if line.strip()}
+    assert lines["order.cust_ref"] == "SKIPPED not"  # transient: no Order editor open
+    assert lines["toolbar.new_ordr"].startswith("UNKNOWN_KEY")
+    assert lines["1/3"] == "resolved, 1"

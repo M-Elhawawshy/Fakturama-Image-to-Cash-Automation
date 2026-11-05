@@ -234,3 +234,53 @@ def cmd_read_table(
         json_out.write_text(json.dumps(read.to_dict(), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         print(f"\nWrote {json_out}")
     return EXIT_OK
+
+
+def print_header_checks(checks) -> None:
+    width = max(len(c.field) for c in checks)
+    for c in checks:
+        mark = "ok  " if c.ok else "FAIL"
+        print(f"[{mark}] {c.field:<{width}}  {c.seen!r}" + ("" if c.ok else f"  (expected {c.expected!r})"))
+
+
+def cmd_order_open(
+    spec_path: Path,
+    *,
+    registry: Registry | None = None,
+    finder: Callable[[], MainWindow] = find_main_window,
+    editor_factory=None,
+) -> int:
+    """Open a New Order and set its header from an OrderSpec. Never saves."""
+    from pydantic import ValidationError
+
+    from fakturama_agent.flow.order_header import HeaderError, HeaderWanted, OrderEditor, compare
+    from fakturama_agent.spec.models import OrderSpec
+    from fakturama_agent.uia.actions import ActionError
+    from fakturama_agent.uia.datefield import DateEntryError
+    from fakturama_agent.uia.inputs import InputError
+
+    try:
+        spec = OrderSpec.model_validate_json(spec_path.read_text(encoding="utf-8"))
+    except (OSError, ValidationError) as e:
+        print(f"Cannot load {spec_path}: {e}", file=sys.stderr)
+        return EXIT_ERROR
+    wanted = HeaderWanted(cust_ref=spec.order.external_reference, order_date=spec.order.order_date)
+    registry = registry or Registry.load()
+    main = _bind(finder)
+    if main is None:
+        return EXIT_ERROR
+    factory = editor_factory or OrderEditor.open_new
+    left_open = "A New Order tab may be open: close it and answer No to 'Save changes?'."
+    try:
+        editor = factory(main, registry)
+        print(f"Opened a New Order (proposed No. {editor.read().number}); setting the header ...")
+        read = editor.set_header(wanted)
+    except (HeaderError, DateEntryError, InputError, ActionError, TimeoutError) as e:
+        print(f"Stopped: {e}\n{left_open}", file=sys.stderr)
+        return EXIT_UNRESOLVED
+    checks = compare(wanted, read)
+    print()
+    print_header_checks(checks)
+    ok = all(c.ok for c in checks)
+    print(f"\nHeader {'set and verified' if ok else 'NOT as wanted'}. Nothing was saved. {left_open}")
+    return EXIT_OK if ok else EXIT_UNRESOLVED
