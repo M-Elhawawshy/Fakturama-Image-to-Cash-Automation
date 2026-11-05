@@ -148,6 +148,14 @@ Per item, after selection: set Qty., U.Price, Discount through the inline editor
 
 **Live check:** an Order PO00000N with two lines 450.00 / 120.00 and totals 570.00 / 108.30 / 678.30 is in Data > Documents, state open.
 
+**Done 2026-11-05** (`create-order SPEC [--no-save] [--allow-duplicate]`, `check-order SPEC`). Saved live: **PO000004**, Jul 14 2026, Northstar Office GmbH / Marta Klein, `WEB-2026-0714-A17`, open, total 678.30; a second `create-order` stops at the duplicate guard (Decision 2, built here already). What the live work showed:
+- Double-click on an item cell opens an inline UIA Edit over the cell (`1.00`, `USD 40`, `0.00 %`); real keys + Enter commit. Enter moves the Qty. editor to the next row (last row wraps to the first); Escape closes it unchanged. Plain numbers work in every column (`2`, `41.50`, `10` = 10 %). Only differing cells are typed.
+- Cells are located from the grid's pixels: column separators in the header; **while the grid has the focus the header turns grid-line grey and its separators vanish**, so the empty rows' vertical lines are used (both sources must agree when both exist).
+- Copy holds model values: Qty. `2.00`, U.Price `USD 250` (the app locale's currency code, not the order's EUR: amounts are compared, the code is not), Discount `-0.1` for 10 %, Price `USD 450`. Footer shows display money (`$570.00`).
+- Overall Discount stayed `0%` and Shipping `Free of shipping costs` `$0.00` after selecting the Debtor; both are verified (not typed).
+- Save: the toolbar Save, once; no dialog appeared (R12 did not occur); the editor tab became `PO000004`. Selecting the Invoice address tab first (R11) was enough; no crash.
+- **After the Save refreshed Documents, UIA Select on the `Orders` filter only focused it**; the reader now falls back to a guarded click. The first live run crashed on that read after a successful Save; the post-Save check now reports instead of raising, and `check-order` re-verifies a saved Order read-only.
+
 ### J. `run`: the state machine end to end
 
 Wire A–I as explicit steps (precondition → one action → read-back) with outcomes ok / create / review, per the design. Plus:

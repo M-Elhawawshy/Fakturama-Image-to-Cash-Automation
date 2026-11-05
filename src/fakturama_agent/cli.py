@@ -110,6 +110,18 @@ def build_parser() -> argparse.ArgumentParser:
     crm.add_argument("spec", type=Path, help="OrderSpec JSON")
     crm.add_argument("--without-email", action="store_true", help=email_help)
 
+    cro = sub.add_parser("create-order", help="build the Order of an OrderSpec (header, Debtor, lines), verify "
+                         "lines, totals and addresses, Save once, verify Documents. PERSISTS an Order: back up first.")
+    cro.add_argument("spec", type=Path, help="OrderSpec JSON")
+    cro.add_argument("--allow-duplicate", action="store_true",
+                     help="create it even if an Order with the same Cust.Ref. exists")
+    cro.add_argument("--no-save", action="store_true",
+                     help="do every step except Save (the verified Order is left open, unsaved)")
+
+    cko = sub.add_parser("check-order", help="is the OrderSpec's Order saved in Data > Documents once, with its "
+                         "Cust.Ref., Date, contact, state open and Total? (read-only)")
+    cko.add_argument("spec", type=Path, help="OrderSpec JSON")
+
     norm = sub.add_parser("normalize", help="RawExtraction JSON (e.g. a corrected raw.json) -> OrderSpec JSON")
     norm.add_argument("raw", type=Path, help="RawExtraction JSON file")
     norm.add_argument("-o", "--output", type=Path, required=True, help="OrderSpec JSON to write")
@@ -220,7 +232,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_ocr(args.image, args.check, args.overlay, args.json)
     if args.command in ("inspect", "locate", "preflight", "read-table", "order-open", "order-select",
                         "check-vat", "check-payment", "check-master",
-                        "create-payment", "create-vat", "create-product", "create-debtor", "create-master"):
+                        "create-payment", "create-vat", "create-product", "create-debtor", "create-master",
+                        "create-order", "check-order"):
         from fakturama_agent.uia import commands
 
         if args.command == "inspect":
@@ -237,6 +250,10 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "create-debtor":
             return commands.cmd_create("debtor", spec_path=args.spec, without_email=args.without_email,
                                        reselect=args.reselect)
+        if args.command == "check-order":
+            return commands.cmd_check_order(args.spec)
+        if args.command == "create-order":
+            return commands.cmd_create_order(args.spec, allow_duplicate=args.allow_duplicate, save=not args.no_save)
         if args.command == "create-master":
             return commands.cmd_create("master", spec_path=args.spec, without_email=args.without_email)
         if args.command == "check-vat":

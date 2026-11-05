@@ -127,6 +127,35 @@ locators:
     transient: true
     status: verified
     note: "upper icon (existing contact); nth 1 is the green + (new Debtor). Behaviour confirmed in part E"
+  order.total_net:
+    named: {control_type: Edit, name: "Total Net"}
+    transient: true
+    status: verified
+    note: "disabled, display money e.g. '$570.00' (tests/fixtures/uia/order_editor_lines.json)"
+  order.vat_total:
+    named: {control_type: Edit, name: "VAT"}
+    transient: true
+    status: verified
+    note: "the header VAT is a ComboBox, so the only Edit named VAT is the total"
+  order.total:
+    named: {control_type: Edit, name: "Total"}
+    transient: true
+    status: verified
+  order.discount:
+    named: {control_type: Edit, name: "Discount"}
+    transient: true
+    status: verified
+    note: "overall discount, '0%'; selecting a Debtor sets it to the contact's discount"
+  order.shipping:
+    named: {control_type: ComboBox, name: "Shipping"}
+    transient: true
+    status: verified
+    note: "'Free of shipping costs' by default"
+  order.shipping_amount:
+    label_sibling: {label: "Shipping", sibling_type: Edit, nth: 0}
+    transient: true
+    status: verified
+    note: "the unnamed Edit after the Shipping ComboBox, '$0.00'"
   order.items.select_icon:
     label_sibling: {label: "Items", sibling_type: Image, nth: 0}
     transient: true

@@ -36,6 +36,7 @@ LINE_COVER = 0.9  # a grid-line row: one mid-grey colour over 90% of the table w
 SELECT_COVER = 0.5  # a selected row: selection blue over half the table width
 MIN_INK_PIXELS = 8  # anti-aliased text of one short value is far above this
 MIN_PITCH, MAX_PITCH = 12, 80
+MAX_COLUMNS = 40
 WHITE = (255, 255, 255)
 
 
@@ -201,3 +202,44 @@ def read_header(image: Image.Image, pixels: GridPixels, ocr: Callable[[bytes], o
     result = ocr(header_strip(image, pixels))
     boxes = sorted(result.boxes, key=lambda b: b.box[0])
     return [b.text for b in boxes]
+
+
+def column_edges(image: Image.Image, pixels: GridPixels) -> list[int]:
+    """Right edges (x of the separator line) of the header cells, left to right.
+
+    Recorded (Order items, 2026-11-05): separators are 1-px columns of the grid-line
+    grey through every header row, e.g. 39 (end of 'Pos.'), 139, 239, ... 939. Text
+    is never that exact grey through the whole header height, so a separator is a
+    column that is GRID_LINE in every header row (rows 1 .. header_bottom - 1)."""
+    rgb = image.convert("RGB")
+    width = min(pixels.columns_width or rgb.width, rgb.width)
+
+    def separators(ys: range) -> list[int] | None:
+        found = [x for x in range(width) if all(rgb.getpixel((x, y))[:3] == GRID_LINE for y in ys)]
+        return found if 2 <= len(found) <= MAX_COLUMNS else None  # a uniformly grey strip is no answer
+
+    ys = range(1, pixels.header_bottom)
+    if len(ys) < 5:
+        raise GridUnreadable(f"header only {len(ys)} px high")
+    # While the grid has the focus the header cells turn the grid-line grey and their
+    # separators vanish (seen live). Empty rows below the lines still draw them.
+    header = separators(ys)
+    body = None
+    if pixels.ink_rows < pixels.bands:
+        top, bottom = pixels.band(pixels.ink_rows)
+        body = separators(range(top, bottom + 1))
+    if header and body and header != body:
+        raise GridUnreadable(f"header separators {header} differ from the empty rows' {body}")
+    if not (header or body):
+        raise GridUnreadable("no column separators visible (header focused and no empty row)")
+    return header or body
+
+
+def cell_point(edges: list[int], column: int, pixels: GridPixels, row: int) -> tuple[int, int]:
+    """Centre of cell (``row``, ``column``), grid-relative; ``column`` counts header cells
+    from 0 (a row-header column such as 'Pos.' is cell 0)."""
+    if not 0 <= column < len(edges):
+        raise GridUnreadable(f"column {column} not among {len(edges)} header cells")
+    left = edges[column - 1] + 1 if column else 0
+    top, bottom = pixels.band(row)
+    return (left + edges[column]) // 2, (top + bottom) // 2

@@ -524,3 +524,90 @@ def cmd_create(
             ok = ok and not problems
         print("The New Order is not saved: close it without saving (Save Parts: untick it, OK).")
     return EXIT_OK if ok else EXIT_UNRESOLVED
+
+
+def cmd_create_order(
+    spec_path: Path,
+    *,
+    allow_duplicate: bool = False,
+    save: bool = True,
+    registry: Registry | None = None,
+    finder: Callable[[], MainWindow] = find_main_window,
+    preflight=None,
+    creator=None,
+    ocr=None,
+) -> int:
+    """create-order: build, verify and SAVE the Order of an OrderSpec (part I). Persists one Order."""
+    from pydantic import ValidationError
+
+    from fakturama_agent.spec.models import OrderSpec
+
+    try:
+        spec = OrderSpec.model_validate_json(spec_path.read_text(encoding="utf-8"))
+    except (OSError, ValidationError) as e:
+        print(f"Cannot load {spec_path}: {e}", file=sys.stderr)
+        return EXIT_ERROR
+    registry = registry or Registry.load()
+    main = _bind(finder)
+    if main is None:
+        return EXIT_ERROR
+    if ocr is None:
+        from fakturama_agent.extract.ocr import run_ocr as ocr
+    if preflight is None:
+        from fakturama_agent.uia.preflight import LiveProbe, run_preflight
+
+        preflight = lambda m, r: run_preflight(m, LiveProbe(r), r)  # noqa: E731
+    report = preflight(main, registry)
+    if not report.ok:
+        print_report(report)
+        print("\nNot creating the Order until preflight is clean.")
+        return EXIT_UNRESOLVED
+    if creator is None:
+        from fakturama_agent.flow.create_order import create_order as creator
+    run = creator(main, registry, spec, report.money, ocr, allow_duplicate=allow_duplicate, save=save)
+    width = max(len(s.name) for s in run.steps)
+    for s in run.steps:
+        print(f"[{'ok  ' if s.ok else 'STOP'}] {s.name:<{width}}  {s.detail}")
+    if run.ok and not save:
+        print("\nEverything verified; nothing was saved (--no-save). Close the New Order without saving "
+              "(Save Parts: untick it, OK).")
+        return EXIT_OK
+    if run.ok:
+        print(f"\nOrder {run.number} saved and verified in Data > Documents.")
+        return EXIT_OK
+    if run.saved and run.number is None:
+        print("\nA Save was dispatched and its outcome is not confirmed: check Data > Documents by hand; "
+              "do not rerun blindly.")
+    elif run.saved:
+        print(f"\nOrder {run.number} was saved, but its verification failed: review it by hand.")
+    elif run.unsaved_left_open:
+        print("\nNothing was saved. The New Order is left open: close it without saving "
+              "(Save Parts: untick it, OK).")
+    else:
+        print("\nNothing was saved.")
+    return EXIT_UNRESOLVED
+
+
+def cmd_check_order(spec_path: Path, *, registry: Registry | None = None,
+                    finder: Callable[[], MainWindow] = find_main_window, verifier=None, ocr=None) -> int:
+    """check-order: is the spec's Order saved in Data > Documents, once and as specified? (read-only)"""
+    from pydantic import ValidationError
+
+    from fakturama_agent.spec.models import OrderSpec
+
+    try:
+        spec = OrderSpec.model_validate_json(spec_path.read_text(encoding="utf-8"))
+    except (OSError, ValidationError) as e:
+        print(f"Cannot load {spec_path}: {e}", file=sys.stderr)
+        return EXIT_ERROR
+    registry = registry or Registry.load()
+    main = _bind(finder)
+    if main is None:
+        return EXIT_ERROR
+    if ocr is None:
+        from fakturama_agent.extract.ocr import run_ocr as ocr
+    if verifier is None:
+        from fakturama_agent.flow.create_order import verify_documents as verifier
+    step = verifier(main, registry, spec, ocr)
+    print(f"[{'ok  ' if step.ok else 'FAIL'}] {step.name}  {step.detail}")
+    return EXIT_OK if step.ok else EXIT_UNRESOLVED

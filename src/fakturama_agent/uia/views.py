@@ -107,14 +107,20 @@ class LiveGrid:
                 raise TableError(f"view {spec.view!r}: {len(items)} filter entries named {spec.filter!r}")
             return items[0]
 
-        item = tree_item(self._snap())
-        if not item.selected:
-            actions.select(item)
-
         def selected() -> UiNode | None:
             snap = self._snap()
             return view_pane(snap, spec.view) if tree_item(snap).selected else None
 
+        item = tree_item(self._snap())
+        if item.selected:
+            return actions.wait_until(selected, timeout=self.timeout, what=f"filter {spec.filter!r} selected")
+        actions.select(item)
+        try:
+            return actions.wait_until(selected, timeout=2.0, what=f"filter {spec.filter!r} selected")
+        except TimeoutError:
+            # Seen after an Order Save refreshed the view: Select only focused the entry
+            # (dotted outline, not selected). A real click on it selects it.
+            actions.guarded_click(tree_item(self._snap()), self.main.hwnd)
         return actions.wait_until(selected, timeout=self.timeout, what=f"filter {spec.filter!r} selected")
 
     # -- capture and copy -------------------------------------------------------
