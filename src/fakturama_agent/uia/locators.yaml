@@ -104,6 +104,17 @@ locators:
     transient: true
     status: verified
     note: "focus target to blur the header fields; never typed into"
+  order.address_tab:
+    named: {control_type: Tab, name: "Invoice address"}
+    transient: true
+    status: verified
+    note: "the Tab is named after its selected tab; never switch to Delivery address (saving then crashes 2.2.0)"
+  order.invoice_address:
+    named: {control_type: Edit, name_regex: ".*"}
+    within: order.address_tab
+    transient: true
+    status: verified
+    note: "multi-line text, e.g. 'Learning Labs / Alice Smith / 10 Test Street / DE-10115 Berlin / Germany'"
   order.addresses.select_icon:
     label_sibling: {label: "Addresses", sibling_type: Image, nth: 0}
     transient: true
@@ -202,3 +213,21 @@ tables:
   payments:
     view: "terms of payment"
     columns: ["Standard", "Name", "Description", "Discount", "Disc. Days", "Net Days"]
+
+  # --- selector dialogs and the Order's item grid (part E). Their grids select one
+  # row at a time (address) or allow Select All (product); both are read by walking
+  # the rows. Copy only ever happens with a highlighted selection (Copy with nothing
+  # selected raises "copiedCells is null" in Fakturama 2.2.0, seen 2026-11-05).
+  select_address:
+    view: "Select the address"
+    row_header: ""
+    columns: ["No.", "First Name", "Name", "Company", "ZIP", "City", "address type",
+              "additional n...", "local consul..."]
+    checked: 6  # up to City: OCR merges the touching headers to its right
+  select_product:
+    view: "Select a product"
+    columns: ["Item No.", "Name", "Description", "Stock", "Price", "VAT"]
+  order_items:
+    view: "New Order"
+    row_header: "Pos."
+    columns: ["Qty.", "Item No.", "Picture", "Name", "Description", "VAT", "U.Price", "Discount", "Price"]

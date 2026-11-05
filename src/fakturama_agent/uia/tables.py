@@ -6,8 +6,10 @@ NatTable exposes no rows to UIA. The reader:
 2. captures the grid until two captures agree (the list stopped changing);
 3. judges emptiness from pixels (Copy on an empty grid crashes Fakturama) and
    checks the header by OCR (the copy has no header row);
-4. focuses the grid via UIA, verifies focus, sends Ctrl+A, Ctrl+C and accepts
-   the clipboard only if its sequence number changed and Fakturama owns it;
+4. focuses the grid via UIA, verifies focus, sends Ctrl+A, checks from the
+   pixels that exactly the used rows are highlighted (Copy without a selection
+   crashes Fakturama), sends Ctrl+C and accepts the clipboard only if its
+   sequence number changed and Fakturama owns it;
 5. copies twice and requires identical text, parses it as TSV with exactly the
    expected number of columns, and cross-checks the row count with the pixels.
 
@@ -27,7 +29,7 @@ from typing import Protocol
 from PIL import Image, ImageChops
 
 from fakturama_agent.uia.clipboard import ClipboardText
-from fakturama_agent.uia.grid import GridPixels, GridUnreadable, analyze, check_header, read_header
+from fakturama_agent.uia.grid import GridPixels, GridUnreadable, analyze, check_header, read_header, selected_bands
 from fakturama_agent.uia.locators import TableSpec
 
 ICON_COLUMN = "icon"
@@ -84,10 +86,12 @@ def parse_tsv(text: str, spec: TableSpec) -> list[dict[str, str | None]]:
 class GridBackend(Protocol):
     def show(self, spec: TableSpec) -> None: ...
     def capture(self) -> Image.Image: ...
-    def copy_all(self) -> ClipboardText: ...
+    def select_all(self) -> None: ...  # focus the grid (verified) and press Ctrl+A
+    def copy(self) -> ClipboardText: ...  # Ctrl+C, wait for a new clipboard sequence number
 
 
-def _stable_capture(backend: GridBackend, timeout: float, interval: float) -> Image.Image:
+def stable_capture(backend, timeout: float = 5.0, interval: float = 0.3) -> Image.Image:
+    """Capture until two consecutive captures are identical."""
     deadline = time.monotonic() + timeout
     previous = backend.capture()
     while True:
@@ -98,6 +102,26 @@ def _stable_capture(backend: GridBackend, timeout: float, interval: float) -> Im
         if time.monotonic() >= deadline:
             raise TableError("the grid kept changing; not reading a list in motion")
         previous = current
+
+
+def require_selection(image: Image.Image, rows: list[int]) -> None:
+    """Copy is only safe with a visible selection: with none, Fakturama 2.2.0 raises
+    "copiedCells is null" (an Internal Error dialog). The highlighted bands must be
+    exactly ``rows``."""
+    try:
+        selected = selected_bands(image, analyze(image))
+    except GridUnreadable as e:
+        raise TableError(f"cannot see the selection: {e}") from e
+    if selected != rows:
+        raise TableError(f"highlighted rows {selected}, expected {rows}; not copying")
+
+
+def accept_copy(clip: ClipboardText, fakturama_pid: int, what: str = "copy") -> str:
+    if clip.owner_pid != fakturama_pid:
+        raise TableError(f"{what}: clipboard owned by pid {clip.owner_pid}, not Fakturama ({fakturama_pid})")
+    if clip.text is None:
+        raise TableError(f"{what}: the clipboard holds no text")
+    return clip.text
 
 
 def read_table(
@@ -111,10 +135,10 @@ def read_table(
     interval: float = 0.3,
 ) -> TableRead:
     backend.show(spec)
-    image = _stable_capture(backend, stable_timeout, interval)
+    image = stable_capture(backend, stable_timeout, interval)
     try:
         pixels = analyze(image)
-        check_header(read_header(image, pixels, ocr), spec.columns)
+        check_header(read_header(image, pixels, ocr), spec.expected_header(), prefix=spec.checked is not None)
     except GridUnreadable as e:
         raise TableError(f"{spec.view}: {e}") from e
     result = TableRead(key, spec.view, spec.filter, column_keys(spec), [], pixels)
@@ -123,12 +147,9 @@ def read_table(
 
     texts = []
     for attempt in (1, 2):
-        clip = backend.copy_all()
-        if clip.owner_pid != fakturama_pid:
-            raise TableError(f"copy {attempt}: clipboard owned by pid {clip.owner_pid}, not Fakturama ({fakturama_pid})")
-        if clip.text is None:
-            raise TableError(f"copy {attempt}: the clipboard holds no text")
-        texts.append(clip.text)
+        backend.select_all()
+        require_selection(stable_capture(backend, stable_timeout, interval), list(range(pixels.ink_rows)))
+        texts.append(accept_copy(backend.copy(), fakturama_pid, f"copy {attempt}"))
     if texts[0] != texts[1]:
         raise TableError("two copies of the grid differ; the list changed while reading")
     rows = parse_tsv(texts[0], spec)

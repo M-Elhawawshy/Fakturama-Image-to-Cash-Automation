@@ -11,11 +11,10 @@ opened by Invoke on Data > <view>.
 from __future__ import annotations
 
 import time
-from collections.abc import Callable
 
 from PIL import Image
 
-from fakturama_agent.uia import actions, clipboard
+from fakturama_agent.uia import actions, clipboard, inputs
 from fakturama_agent.uia.binding import MainWindow, process_windows
 from fakturama_agent.uia.clipboard import ClipboardText
 from fakturama_agent.uia.locators import LocatorError, Registry, TableSpec
@@ -82,6 +81,7 @@ class LiveGrid:
         pane = actions.wait_until(lambda: view_pane(self._snap(), spec.view), timeout=self.timeout, what=f"view {spec.view!r}")
         if spec.filter:
             pane = self._select_filter(spec)
+        actions.park_mouse(self.main.hwnd)
         self.grid = grid_of(pane, self.registry)
 
     def _open_from_data_menu(self, view: str, snap: Snapshot) -> None:
@@ -125,26 +125,41 @@ class LiveGrid:
         assert self.grid is not None, "show() first"
         return ImageGrab.grab(bbox=self.grid.rect, all_screens=True)
 
-    def copy_all(self, keys: Callable[[str], None] | None = None) -> ClipboardText:
+    def select_all(self) -> None:
         assert self.grid is not None, "show() first"
-        from pywinauto.keyboard import send_keys
-        from pywinauto.uia_defines import IUIA
-
-        from fakturama_agent.uia.winapi import foreground_hwnd
-
-        keys = keys or (lambda k: send_keys(k))
-        element = self.grid.element.element
-        element.SetFocus()
+        focus_grid(self.grid, self.main.hwnd)
+        inputs.send("^a")
         time.sleep(0.2)
-        focused = IUIA().iuia.GetFocusedElement().CurrentNativeWindowHandle
-        if focused != element.CurrentNativeWindowHandle or foreground_hwnd() != self.main.hwnd:
-            raise TableError("the grid did not get keyboard focus; not sending Ctrl+A/Ctrl+C")
-        before = clipboard.sequence_number()
-        keys("^a")
-        time.sleep(0.15)
-        keys("^c")
-        actions.wait_until(
-            lambda: True if clipboard.sequence_number() != before else None, timeout=3.0, what="the copy to reach the clipboard"
-        )
-        time.sleep(0.1)
-        return clipboard.read_text()
+
+    def copy(self) -> ClipboardText:
+        assert self.grid is not None, "show() first"
+        return copy_selection(self.grid, self.main.hwnd)
+
+
+def focus_grid(grid: UiNode, owner_hwnd: int) -> None:
+    """UIA SetFocus on a grid Pane; verified by window handle (NatTable has no UIA children)."""
+    from pywinauto.uia_defines import IUIA
+
+    from fakturama_agent.uia.winapi import foreground_hwnd
+
+    if foreground_hwnd() != owner_hwnd and not actions.bring_to_front(owner_hwnd):
+        raise TableError("the window holding the grid could not be brought to the front")
+    element = grid.element.element
+    element.SetFocus()
+    time.sleep(0.2)
+    focused = IUIA().iuia.GetFocusedElement().CurrentNativeWindowHandle
+    if focused != element.CurrentNativeWindowHandle or foreground_hwnd() != owner_hwnd:
+        raise TableError("the grid did not get keyboard focus; not sending keys")
+
+
+def copy_selection(grid: UiNode, owner_hwnd: int) -> ClipboardText:
+    """Ctrl+C on the focused grid; returns once the clipboard sequence number changed.
+    The caller must have checked that a selection is highlighted."""
+    focus_grid(grid, owner_hwnd)
+    before = clipboard.sequence_number()
+    inputs.send("^c")
+    actions.wait_until(
+        lambda: True if clipboard.sequence_number() != before else None, timeout=3.0, what="the copy to reach the clipboard"
+    )
+    time.sleep(0.1)
+    return clipboard.read_text()

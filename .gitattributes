@@ -2,3 +2,4 @@
 *.png binary
 *.pdf binary
 tests/fixtures/tables/*.txt -text
+tests/fixtures/selectors/*.txt -text

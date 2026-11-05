@@ -80,6 +80,39 @@ def guarded_click(node: UiNode, owner_hwnd: int) -> None:
     w.click_input()
 
 
+def guarded_click_at(node: UiNode, dx: int, dy: int, owner_hwnd: int) -> None:
+    """Real left click at (dx, dy) inside ``node``'s UIA rectangle (e.g. a row band of a
+    NatTable grid, whose rows are not UIA elements), with the same guards."""
+    from pywinauto import mouse
+
+    left, top, right, bottom = node.rect
+    x, y = left + dx, top + dy
+    if not (left <= x < right and top <= y < bottom):
+        raise ActionError(f"point {dx},{dy} is outside {node.label()} {node.rect}")
+    if node.element is None:
+        raise ActionError(f"{node.label()} comes from a recorded tree, not the live application")
+    if not bring_to_front(owner_hwnd):
+        raise ActionError("the window could not be brought to the front; refusing to click")
+    if not _same_element(_element_at(x, y), node.element.element):
+        raise ActionError(f"{node.label()} is not the element at {x},{y} (covered or moved); refusing to click")
+    mouse.click(coords=(x, y))
+
+
+def park_mouse(owner_hwnd: int) -> None:
+    """Move the pointer onto the window's title bar, so no hover tooltip or highlight
+    lies over a grid that is about to be captured (seen live: the Items icon's
+    tooltip covered the Order's item grid right after the icon was clicked)."""
+    import ctypes
+    from ctypes import wintypes
+
+    from pywinauto import mouse
+
+    rect = wintypes.RECT()
+    if ctypes.windll.user32.GetWindowRect(owner_hwnd, ctypes.byref(rect)):
+        mouse.move(coords=((rect.left + rect.right) // 2, rect.top + 10))
+        time.sleep(0.4)  # let a tooltip fade
+
+
 def press_escape(owner_hwnd: int) -> None:
     """Escape to Fakturama only (closes an open menu); never sent to another window."""
     from pywinauto.keyboard import send_keys

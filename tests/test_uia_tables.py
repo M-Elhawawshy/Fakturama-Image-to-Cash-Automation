@@ -3,11 +3,12 @@
 from pathlib import Path
 
 import pytest
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from fakturama_agent.extract.ocr import OcrResult
 from fakturama_agent.uia.binding import MainWindow
 from fakturama_agent.uia.clipboard import ClipboardText
+from fakturama_agent.uia.grid import analyze
 from fakturama_agent.uia.commands import cmd_read_table
 from fakturama_agent.uia.locators import Registry, TableSpec
 from fakturama_agent.uia.tables import TableError, parse_tsv, read_table
@@ -74,24 +75,45 @@ def test_trailing_line_break_is_optional():
 # --- reader decisions ------------------------------------------------------------
 
 
+def highlighted(image: Image.Image, rows: int) -> Image.Image:
+    """The grid as Ctrl+A leaves it: used rows filled with the selection blue (as recorded)."""
+    img = image.convert("RGB").copy()
+    px = analyze(img)
+    draw = ImageDraw.Draw(img)
+    for i in range(rows):
+        top, bottom = px.band(i)
+        draw.rectangle([0, top, px.columns_width, bottom], fill=(0, 120, 212))
+    return img
+
+
 class FakeGrid:
-    def __init__(self, name, *, copies=None, owner=PID, images=None):
+    def __init__(self, name, *, copies=None, owner=PID, images=None, select_works=True):
         self.name = name
         self.images = list(images) if images else None
         self.copies = list(copies) if copies is not None else [copied(name)] * 2
         self.owner = owner
         self.copy_calls = 0
         self.shown = None
+        self.all_selected = False
+        self.select_works = select_works
 
     def show(self, spec: TableSpec) -> None:
         self.shown = spec
 
-    def capture(self) -> Image.Image:
+    def _plain(self) -> Image.Image:
         if self.images:
             return self.images.pop(0) if len(self.images) > 1 else self.images[0]
         return Image.open(FIX / f"grid_{self.name}.png")
 
-    def copy_all(self) -> ClipboardText:
+    def capture(self) -> Image.Image:
+        image = self._plain()
+        return highlighted(image, analyze(image).ink_rows) if self.all_selected else image
+
+    def select_all(self) -> None:
+        self.all_selected = self.select_works
+
+    def copy(self) -> ClipboardText:
+        assert self.all_selected, "Copy without a visible selection crashes Fakturama"
         self.copy_calls += 1
         return ClipboardText(sequence=self.copy_calls, owner_pid=self.owner, text=self.copies.pop(0))
 
@@ -142,6 +164,22 @@ def test_row_count_must_match_the_pixels():
     one_row_less = copied("documents").split("\r\n", 1)[1]
     with pytest.raises(TableError, match="grid shows 3"):
         read("documents", FakeGrid("documents", copies=[one_row_less] * 2))
+
+
+def test_no_highlight_after_select_all_means_no_copy():
+    backend = FakeGrid("documents", select_works=False)
+    with pytest.raises(TableError, match="highlighted rows"):
+        read("documents", backend)
+    assert backend.copy_calls == 0
+
+
+def test_recorded_select_all_highlight():
+    from fakturama_agent.uia.grid import selected_bands
+    from fakturama_agent.uia.tables import require_selection
+
+    image = Image.open(FIX.parent / "selectors" / "products_view_select_all.png")
+    require_selection(image, [0, 1, 2, 3, 4, 5])
+    assert selected_bands(image, analyze(image)) == [0, 1, 2, 3, 4, 5]
 
 
 def test_grid_that_keeps_changing_is_refused():

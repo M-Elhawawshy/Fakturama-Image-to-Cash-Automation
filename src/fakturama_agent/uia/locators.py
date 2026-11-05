@@ -64,9 +64,16 @@ class TableSpec(_Strict):
     right ("" for a header-less icon column); the copy has no header row, so the
     header is checked by OCR before rows are trusted."""
 
-    view: str  # TabItem / Data menu item / view pane name
+    view: str  # TabItem / Data menu item / view pane name, or the dialog title
     columns: list[str]
     filter: str | None = None  # TreeItem to select first (Documents category)
+    row_header: str | None = None  # header text of a numbered row-header column (not in the copy)
+    checked: int | None = None  # leading columns whose header OCR must match (None: all);
+    #                             later headers may be truncated by the column width
+
+    def expected_header(self) -> list[str]:
+        cols = self.columns if self.checked is None else self.columns[: self.checked]
+        return ([self.row_header] if self.row_header else []) + cols
 
 
 class LocatorFile(_Strict):

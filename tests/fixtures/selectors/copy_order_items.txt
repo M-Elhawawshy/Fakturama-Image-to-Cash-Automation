@@ -1,0 +1,1 @@
+1.00	SKU-001	null	Blue notebook		VAT taxValue: [0.19] salesEqualizationTax: [null] description: [VAT 19%] name: [VAT 19%] dateAdded: [Tue Nov 03 00:00:00 EET 2026] modifiedBy: [<user>] modified: [Tue Nov 03 00:00:00 EET 2026] id: [2] deleted: [false] validFrom: [Tue Nov 03 00:00:00 EET 2026] validTo: [null]	USD 11.9	0.0	USD 11.9

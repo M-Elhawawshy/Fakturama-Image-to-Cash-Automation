@@ -1,0 +1,85 @@
+{
+  "engine": "rapidocr-onnxruntime 1.4.4 (box_thresh=0.3)",
+  "boxes": [
+    {
+      "text": "No.",
+      "score": 1.0,
+      "box": [
+        231,
+        8,
+        307,
+        55
+      ]
+    },
+    {
+      "text": "First Name",
+      "score": 0.9736,
+      "box": [
+        462,
+        8,
+        677,
+        55
+      ]
+    },
+    {
+      "text": "Name",
+      "score": 0.9981,
+      "box": [
+        811,
+        10,
+        927,
+        55
+      ]
+    },
+    {
+      "text": "Company",
+      "score": 0.9986,
+      "box": [
+        1078,
+        10,
+        1260,
+        57
+      ]
+    },
+    {
+      "text": "ZIP",
+      "score": 0.9979,
+      "box": [
+        1436,
+        12,
+        1504,
+        51
+      ]
+    },
+    {
+      "text": "city",
+      "score": 0.9314,
+      "box": [
+        1724,
+        3,
+        1814,
+        57
+      ]
+    },
+    {
+      "text": "address type",
+      "score": 0.9795,
+      "box": [
+        1940,
+        7,
+        2203,
+        57
+      ]
+    },
+    {
+      "text": "additional n... local consul..",
+      "score": 0.9922,
+      "box": [
+        2227,
+        8,
+        2786,
+        53
+      ]
+    }
+  ]
+}

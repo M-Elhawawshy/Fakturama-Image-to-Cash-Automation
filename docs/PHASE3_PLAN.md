@@ -88,6 +88,14 @@ From the open Order: upper icon beside `Addresses` → `Select the address`, sea
 
 **Live check:** with the sample → "Debtor not found", "CHR-ERG-01 not found", dialogs cancelled. With a hand-written test spec for Learning Labs / Alice Smith and `SKU-001` → the Debtor is selected and its address appears in the Order; one `SKU-001` line is added. Nothing saved.
 
+**Done 2026-11-05** (`order-select SPEC`; test spec `tests/fixtures/specs/existing_debtor.json`). What the live work showed:
+- **Copy with no selected cell raises Fakturama's `Internal Error` ("this.copiedCells is null")**, not only on an empty grid (triggered once while exploring; dismissed with its OK). Rule now everywhere, part C included: copy only when the pixels show exactly the expected rows highlighted (view style blue (0,120,212), dialog style (217,232,251), measured over the header's column extent, not the pane width).
+- After a search no row is selected; Down does not select; a guarded click inside a row band does (hit test: the grid Pane is under the point). The address grid selects one row at a time (Ctrl+A copies one row), so both dialogs are read by walking: click row 1, then Down, each row highlighted and copied. Selecting = the same walk to the row, copy, compare with the row read before, OK.
+- `Select the address` grid is a second visual style (bordered header, numbered rows, alternating shading, lines only as wide as the table, white below the last row); the detector handles both. OCR merges its right-hand headers, so only `No.`…`City` are checked; the copy has 9 cells (two columns are truncated on screen and named as displayed).
+- Search filters as you type (substring, any column, case-insensitive): the decision is made on exact Company, First Name, Name, ZIP, City (debtor) / exact Item No. (product). Same Company with other details = conflict (review).
+- After OK: the Order's invoice address shows e.g. `Learning Labs / Alice Smith / 10 Test Street / DE-10115 Berlin / Germany` and a `Delivery address` tab appears (never selected: R11); a product adds one line, read from the Order's item grid (`Pos.` row header; copy has model values such as `USD 11.9`).
+- A tooltip from the just-clicked Items icon covered the item grid; the detector refused it ("used rows after an empty row"). The mouse is now parked on the title bar before every grid capture.
+
 ### F. Master-data checks: VAT and payment method (read-only)
 
 Data > VATs: exact `VAT 19%` row; open it and read Name, Value and `VAT code (E-Invoice)` = `S (Standard rate)`; close unchanged. Data > terms of payment: exact Name row; open it and read the payment code (`Credit transfer ` etc.). Any conflict → review, per brief 2.10.2 and 3.5.

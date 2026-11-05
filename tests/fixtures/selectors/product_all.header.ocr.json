@@ -1,0 +1,65 @@
+{
+  "engine": "rapidocr-onnxruntime 1.4.4 (box_thresh=0.3)",
+  "boxes": [
+    {
+      "text": "Item No.",
+      "score": 0.9987,
+      "box": [
+        12,
+        7,
+        157,
+        51
+      ]
+    },
+    {
+      "text": "Name",
+      "score": 0.9999,
+      "box": [
+        309,
+        7,
+        417,
+        53
+      ]
+    },
+    {
+      "text": "Description",
+      "score": 0.9983,
+      "box": [
+        610,
+        7,
+        798,
+        55
+      ]
+    },
+    {
+      "text": "Stock",
+      "score": 0.9989,
+      "box": [
+        910,
+        7,
+        1010,
+        51
+      ]
+    },
+    {
+      "text": "Price",
+      "score": 0.9995,
+      "box": [
+        1209,
+        7,
+        1300,
+        53
+      ]
+    },
+    {
+      "text": "VAT",
+      "score": 0.9982,
+      "box": [
+        1510,
+        8,
+        1580,
+        51
+      ]
+    }
+  ]
+}

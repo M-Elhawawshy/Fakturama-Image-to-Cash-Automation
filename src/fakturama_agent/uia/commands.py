@@ -284,3 +284,51 @@ def cmd_order_open(
     ok = all(c.ok for c in checks)
     print(f"\nHeader {'set and verified' if ok else 'NOT as wanted'}. Nothing was saved. {left_open}")
     return EXIT_OK if ok else EXIT_UNRESOLVED
+
+
+def cmd_order_select(
+    spec_path: Path,
+    *,
+    registry: Registry | None = None,
+    finder: Callable[[], MainWindow] = find_main_window,
+    editor_factory=None,
+    checker=None,
+    ocr=None,
+) -> int:
+    """Open a New Order and check the Debtor and every SKU with the selector dialogs. Never saves."""
+    from pydantic import ValidationError
+
+    from fakturama_agent.flow.order_header import HeaderError, OrderEditor
+    from fakturama_agent.spec.models import OrderSpec
+
+    try:
+        spec = OrderSpec.model_validate_json(spec_path.read_text(encoding="utf-8"))
+    except (OSError, ValidationError) as e:
+        print(f"Cannot load {spec_path}: {e}", file=sys.stderr)
+        return EXIT_ERROR
+    registry = registry or Registry.load()
+    main = _bind(finder)
+    if main is None:
+        return EXIT_ERROR
+    if ocr is None:
+        from fakturama_agent.extract.ocr import run_ocr as ocr
+    if checker is None:
+        from fakturama_agent.flow.order_select import check_all as checker
+    left_open = "The New Order tab is left open: close it and answer No to 'Save changes?'."
+    try:
+        editor = (editor_factory or OrderEditor.open_new)(main, registry)
+    except (HeaderError, TimeoutError) as e:
+        print(f"Cannot open a New Order: {e}", file=sys.stderr)
+        return EXIT_UNRESOLVED
+    print(f"Opened a New Order; checking the Debtor and {len(spec.items)} item(s) ...\n")
+    outcomes = checker(editor, spec, ocr)
+    width = max(len(o.what) for o in outcomes)
+    for o in outcomes:
+        print(f"[{'ok  ' if o.ok else 'STOP' if o.error else 'REVW' if o.decision and o.decision.needs_review else 'FAIL'}] "
+              f"{o.what:<{width}}  {o.summary()}")
+    skipped = len(spec.items) + 1 - len(outcomes)
+    if skipped:
+        print(f"       {skipped} later check(s) not run after the stop")
+    ok = all(o.ok for o in outcomes) and not skipped
+    print(f"\n{'All checks decided.' if ok else 'Manual review needed.'} Nothing was saved. {left_open}")
+    return EXIT_OK if ok else EXIT_UNRESOLVED

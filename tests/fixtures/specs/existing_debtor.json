@@ -1,0 +1,90 @@
+{
+  "schema_version": "1",
+  "order": {
+    "external_reference": "WEB-2026-0714-A17",
+    "order_date": "2026-07-14",
+    "customer_id": "CUST-1007",
+    "currency": "EUR"
+  },
+  "debtor": {
+    "company": "Learning Labs",
+    "alias": "LEARNING-LABS",
+    "contact_first_name": "Alice",
+    "contact_last_name": "Smith",
+    "email": "marta.klein@example.test",
+    "phone": "+49 30 5550 1420"
+  },
+  "billing_address": {
+    "name": "Learning Labs",
+    "street": "10 Test Street",
+    "zip": "10115",
+    "city": "Berlin",
+    "country": "Germany",
+    "country_code": "DE"
+  },
+  "delivery_address": null,
+  "payment": {
+    "method": "Bank Transfer",
+    "paid_status": "PAID",
+    "payment_date": "2026-07-18"
+  },
+  "items": [
+    {
+      "line_no": 1,
+      "sku": "SKU-001",
+      "description": "Ergonomic Desk Chair",
+      "quantity": "2",
+      "unit": "pcs",
+      "unit_net_price": "250.00",
+      "discount_percent": "10",
+      "vat_percent": "19",
+      "line_net": "450.00"
+    },
+    {
+      "line_no": 2,
+      "sku": "MAT-DESK-02",
+      "description": "Anti-Fatigue Desk Mat",
+      "quantity": "3",
+      "unit": "pcs",
+      "unit_net_price": "40.00",
+      "discount_percent": "0",
+      "vat_percent": "19",
+      "line_net": "120.00"
+    }
+  ],
+  "totals": {
+    "net": "570.00",
+    "vat": "108.30",
+    "gross": "678.30"
+  },
+  "derived": {
+    "payment_code": "Credit transfer",
+    "billing_equals_delivery": true,
+    "items": [
+      {
+        "line_no": 1,
+        "vat_name": "VAT 19%",
+        "product_gross_price": "297.50",
+        "expected_line_net": "450.00"
+      },
+      {
+        "line_no": 2,
+        "vat_name": "VAT 19%",
+        "product_gross_price": "47.60",
+        "expected_line_net": "120.00"
+      }
+    ],
+    "totals": {
+      "net": "570.00",
+      "vat": "108.30",
+      "gross": "678.30",
+      "matches_printed": true
+    }
+  },
+  "provenance": {
+    "image_sha256": null,
+    "model_id": null,
+    "ocr_engine": null,
+    "field_checks": []
+  }
+}
