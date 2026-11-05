@@ -60,7 +60,7 @@ Every control is found through the UIA tree, scoped to a bound parent, with no f
 | --- | --- | --- |
 | 1. Named control | Control has a usable Name + ControlType | e.g. Edit `Cust.Ref.`, Button `Save the current contents`, TabItem `New Order`, ComboBox `VAT` |
 | 2. Label-anchored structure | Edit or icon is unnamed | Find Text label, then its sibling by position in the parent: Date next to `Date`; first Image after Text `Addresses` = address selector; first Image after Text `Items` = product selector |
-| 3. Visual fallback inside a UIA rectangle | Content not exposed (NatTable rows, CDateTime segments) | Screenshot only that control's current UIA rectangle, OCR it, act at a point computed from that rectangle |
+| 3. Fallback inside a UIA rectangle | Content not exposed (NatTable rows, CDateTime segments) | Tables: Select All + Copy and read the clipboard; OCR only inside that control's current UIA rectangle to locate a row or date segment, acting at a point computed from that rectangle |
 
 **Scoping.** Bind the main window (title `^Fakturama`, class `SWT_Window0`, exactly one) and then the specific editor tab instance. Every lookup is relative to that editor pane, never global indexes. Dialogs (`Select the address`, `Select a product`) may be nested under the main window, so the search covers both top-level and descendant windows of the process.
 
@@ -74,7 +74,7 @@ Every control is found through the UIA tree, scoped to a bound parent, with no f
 - Images and tabs that reject patterns: click the centre of their current UIA rectangle after checking structure, then read the selected state back.
 - Dates: segmented CDateTime; fill month, day and year segments and verify the displayed value after blur.
 
-**Tables.** Selector and Documents tables expose only a pane. The table reader screenshots that pane, detects the ruled grid, OCRs the required columns and returns rows only if the list is complete: unscrolled, a blank terminal row visible, every cell legible. Otherwise the result is "unreadable" (manual review), never "zero matches". Matching is exact and case-sensitive.
+**Tables.** Selector and Documents tables expose only a pane. The table reader focuses that grid, sends Select All + Copy and reads the tab-separated clipboard text, accepting it only when the clipboard was freshly written by the Fakturama process; it reads twice and requires identical results. Because Copy on an empty grid crashes Fakturama, emptiness is first decided from the grid's pixels. Anything unreadable is "unreadable" (manual review), never "zero matches". OCR is used only to locate the exact row to click; the selection is then verified by copying it. Matching is exact and case-sensitive. *(Changed 2026-11-05 from screenshot OCR; see docs/PHASE3_PLAN.md.)*
 
 **Waits.** No fixed sleeps. Each action waits on a condition (dialog present, tab title gains `*`, list stable across two reads) with a timeout.
 
@@ -118,7 +118,7 @@ Fakturama has no transaction across editors: a Debtor or Product saved before a 
 | Ambiguity | Stop for manual review | Best-guess match | A wrong Debtor or Product on an invoice is costly to undo |
 | Language | Python + pywinauto (UIA backend) | Go + raw UIA COM | Exploration already proved this stack |
 
-**Risks.** The app must stay visible and in the foreground. Table reading depends on OCR of a rendered grid and on the currency locale. Labels are tied to English 2.2.0. Invoice, paid state and payment date were not explored yet; Phase 4 starts with a fresh UIA tree inspection.
+**Risks.** The app must stay visible and in the foreground. Table reading uses the clipboard (overwriting its contents) and depends on the currency locale. Labels are tied to English 2.2.0. Invoice, paid state and payment date were not explored yet; Phase 4 starts with a fresh UIA tree inspection.
 
 ## Decisions (resolved open questions)
 
