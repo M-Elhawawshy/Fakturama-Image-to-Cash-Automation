@@ -79,7 +79,11 @@ More detail: [docs/DESIGN.md](docs/DESIGN.md), and the phase plans with everythi
 
 ## Evidence
 
-Annotated screenshots from the runner's own evidence, with personal paths blurred (`tools/annotate_screenshots.py`):
+**Video:** [a full `automate` run, image to paid Invoice](https://www.youtube.com/watch?v=I7JOPBT1x00) (YouTube).
+
+[![Watch the full run on YouTube](https://img.youtube.com/vi/I7JOPBT1x00/hqdefault.jpg)](https://www.youtube.com/watch?v=I7JOPBT1x00)
+
+**Screenshots:** annotated from the runner's own evidence, with personal paths blurred (`tools/annotate_screenshots.py`):
 
 1. [Product created](docs/screenshots/1-product-created.png): CHR-ERG-01, gross 297,50 € = 250.00 × 1.19, VAT 19%.
 2. [Debtor created](docs/screenshots/2-debtor-created.png): Northstar Office GmbH / Marta Klein.

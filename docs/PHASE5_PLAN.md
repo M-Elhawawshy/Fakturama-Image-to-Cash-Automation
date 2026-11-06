@@ -6,21 +6,20 @@ The brief's deliverables and where each one is:
 |---|---|---|
 | Source code with a clear structure in a Git repo | `src/fakturama_agent/` (`extract/`, `spec/`, `uia/`, `flow/`, `cli.py`), `tests/` | done |
 | Setup instructions: dependencies and how to run against Fakturama | `README.md` › Setup, Run it | done |
-| Annotated screenshots or a short recording | `docs/screenshots/` (3 images from the clean run's evidence, made by `tools/annotate_screenshots.py`) | done; a recording is optional |
+| Annotated screenshots or a short recording | `docs/screenshots/` (3 images from the euro run's evidence, made by `tools/annotate_screenshots.py`) and a [recording](https://www.youtube.com/watch?v=I7JOPBT1x00), both linked in README › Evidence | done |
 | README | `README.md` | done |
 | Written question: "If you had 3 more hours, what would you do?" | `README.md` › Written questions | done |
 | Skipped items noted | `README.md` › Deviations and limits | done |
 
 ## Recorded while preparing (2026-11-06)
 
-- The clean end-to-end test took three runs (out/runs/…T135134, …T135305, …T135747): the first two were stopped by the table reader refusing a grid whose bottom rows were covered. The evidence screenshot shows a desktop notification ("friend is playing …") over the lower right of the screen. The reader now waits up to 10 s for such an overlay and saves a full-screen picture of it to `out/overlays/`.
+- The clean end-to-end test in the US-dollar workspace took three runs: the first two were stopped by the table reader refusing a grid whose bottom rows were covered. The evidence screenshot shows a desktop notification ("friend is playing …") over the lower right of the screen. The reader now waits up to 10 s for such an overlay and saves a full-screen picture of it to `out/overlays/`.
 - Currency check added to `run`: Fakturama has one currency per workspace, which the user sets (the tool never changes it). The order's currency must match it, else review; `--accept-currency` enters the amounts under the workspace currency. The sample's earlier live runs (US-dollar workspace, EUR order) predate the check.
 - First run with the workspace on Germany stopped before saving product CHR-ERG-01: '297.50' typed into the gross price became 29.750,00 €. Checked live in unsaved editors: money fields take the locale's decimal mark ('297,50'; paid Value '12.34' -> 1.234,00 €), NatTable line cells and the VAT Value always take a dot ('1,5' Qty. -> 15, '7,5' -> 75%). Money fields now use `MoneyFormat.typed`.
-- Euro runs: out/runs/…T150128 (PO000008, INV000005) and …T154423 (PO000009, INV000006) both finished first time with the workspace on Germany; `check-invoice` confirms INV000006. The screenshots in the repo are now from …T154423.
+- Two full euro runs (workspace on Germany) finished first time: PO000008 / INV000005, then, after cleaning up, PO000009 / INV000006, confirmed again with `check-invoice`. The screenshots in the repo come from the second.
 - `automate IMAGE`: extract, then run, in one command; Fakturama is touched only if extraction passed (shares the `run` flags).
 - Screenshots in the repo blur the window title and the start page URL (both show the workspace path) and crop the notification corner.
 
-## Optional before submitting
+## Submitted
 
-- A short screen recording of `run` on a cleaned workspace (turn off desktop notifications first; delete INV/PO/Debtor/products/term as in the Phase 4 test, keep VAT 19%).
-- Read the README once as a reviewer would; check the commit history reads well (`git log --oneline`).
+- Repository pushed to GitHub; the recording is on YouTube and linked from the README.
