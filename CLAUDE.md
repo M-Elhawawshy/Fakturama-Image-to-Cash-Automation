@@ -5,7 +5,8 @@ Turn one order image into a saved, verified Order + linked Invoice in Fakturama 
 ## Read first
 
 - `docs/DESIGN.md` — approved design (architecture, OrderSpec contract, extraction strategy, UIA grounding, workflow, decisions).
-- `docs/PHASE4_PLAN.md` — the current phase's plan: parts A–E, brief steps 4.6–5.7, recordings, decisions.
+- `docs/PHASE5_PLAN.md` — the current phase: deliverables and where each one is.
+- `docs/PHASE4_PLAN.md` — the finished Invoice phase: parts A–E, brief steps 4.6–5.7, recordings, decisions.
 - `docs/PHASE3_PLAN.md` — the finished Order phase: parts A–J, decisions, known Fakturama behaviours.
 - `docs/PHASE2_PLAN.md` — the finished extraction phase (golden test data).
 - `agent findings/fakturama-uia-findings.md` — observed UIA behavior of Fakturama from an earlier exploration. Its rules are binding.
@@ -15,8 +16,8 @@ Turn one order image into a saved, verified Order + linked Invoice in Fakturama 
 1. Design — done.
 2. Extraction — done. Image → validated `OrderSpec` JSON.
 3. Order flow via UIA — done (`run`, see `docs/PHASE3_PLAN.md`).
-4. **Linked Invoice + payment status — current.** Built in parts A–E (see `docs/PHASE4_PLAN.md`).
-5. README, screenshots/recording, written answers.
+4. Linked Invoice + payment status — done (`run` ends with it, see `docs/PHASE4_PLAN.md`).
+5. **README, screenshots/recording, written answers — current** (see `docs/PHASE5_PLAN.md`).
 
 Work only on the current phase unless asked.
 
