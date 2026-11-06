@@ -143,3 +143,44 @@ def test_cli_extract_unreadable_image(tmp_path):
     bad = tmp_path / "order.png"
     bad.write_bytes(b"nope")
     assert cmd_extract(bad, tmp_path / "order.json", FakeExtractor(), recorded_ocr) == 1
+
+
+# --- automate: extract, then run -------------------------------------------------------------------
+
+
+def test_automate_extracts_then_runs_on_the_simulator(tmp_path, raw_fixture, capsys):
+    from fakturama_agent.cli import cmd_automate
+    from fakturama_agent.flow.simulator import FakeFakturama
+    from fakturama_agent.uia.commands import cmd_run
+
+    fak = FakeFakturama()
+    out = tmp_path / "order_001" / "order.json"
+    run = lambda spec: cmd_run(spec, without_email=True, runs_root=tmp_path / "runs",  # noqa: E731
+                               adapter_factory=lambda d: fak)
+    assert cmd_automate(SAMPLE, out, FakeExtractor(raw=raw_fixture), run, recorded_ocr) == 0
+    stdout = capsys.readouterr().out
+    assert stdout.index("== 1/2 extract") < stdout.index("== 2/2 run") < stdout.index("Done: the Order")
+    assert fak.orders == [("PO000001", "WEB-2026-0714-A17")] and fak.invoices[0][3] is True
+
+
+def test_automate_never_runs_after_a_failed_extraction(tmp_path, raw_fixture, capsys):
+    from fakturama_agent.cli import cmd_automate
+
+    calls = []
+    out = tmp_path / "order.json"
+    assert cmd_automate(SAMPLE, out, FakeExtractor(raw=_mangled(raw_fixture)), calls.append, recorded_ocr) == 2
+    assert calls == [] and not out.exists() and (tmp_path / "review.md").exists()
+    assert "Fakturama was not touched" in capsys.readouterr().err
+    error = FakeExtractor(error=ExtractionError("API down"))
+    assert cmd_automate(SAMPLE, out, error, calls.append, recorded_ocr) == 1 and calls == []
+
+
+def test_automate_arguments():
+    from fakturama_agent.cli import _run_options, build_parser, default_spec_path
+
+    args = build_parser().parse_args(["automate", "samples/order_001.png", "--without-email", "--accept-currency"])
+    assert args.output is None and default_spec_path(args.image) == Path("out") / "order_001" / "order.json"
+    assert _run_options(args) == {"without_email": True, "allow_duplicate": False, "checked": False,
+                                  "accept_currency": True}
+    run = build_parser().parse_args(["run", "x.json", "--checked"])
+    assert _run_options(run)["checked"] is True

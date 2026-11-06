@@ -15,6 +15,7 @@ The brief's deliverables and where each one is:
 
 - The clean end-to-end test took three runs (out/runs/…T135134, …T135305, …T135747): the first two were stopped by the table reader refusing a grid whose bottom rows were covered. The evidence screenshot shows a desktop notification ("friend is playing …") over the lower right of the screen. The reader now waits up to 10 s for such an overlay and saves a full-screen picture of it to `out/overlays/`.
 - Currency check added to `run`: Fakturama has one currency per workspace, which the user sets (the tool never changes it). The order's currency must match it, else review; `--accept-currency` enters the amounts under the workspace currency. The sample's earlier live runs (US-dollar workspace, EUR order) predate the check.
+- `automate IMAGE`: extract, then run, in one command; Fakturama is touched only if extraction passed (shares the `run` flags).
 - Screenshots in the repo blur the window title and the start page URL (both show the workspace path) and crop the notification corner.
 
 ## Optional before submitting

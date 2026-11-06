@@ -3,34 +3,48 @@
 One order image in, a saved and verified **Order** plus its **linked, paid Invoice** out, in Fakturama 2.2.0 on Windows. The image is read by a vision LLM with an OCR cross-check; Fakturama is driven through **Microsoft UI Automation** (pywinauto), with no hardcoded coordinates. Every write is read back, every Save happens once, and anything ambiguous stops the run for manual review instead of guessing.
 
 ```
-samples/order_001.png ──extract──▶ out/order.json (validated OrderSpec) ──run──▶ Fakturama: master data, Order, Invoice
+samples/order_001.png ──extract──▶ out/order_001/order.json (validated OrderSpec) ──run──▶ Fakturama: master data, Order, Invoice
+
+automate IMAGE = extract, then run (run is skipped if extraction needs review)
 ```
 
-**Status:** the whole brief is implemented and has run end to end on the sample: payment term, products and Debtor created when missing, Order PO000007 saved (lines 450.00 / 120.00, totals 570.00 / 108.30 / 678.30), linked Invoice INV000004 saved as paid on 2026-07-18 with Value 678.30, all verified in Data > Documents. That run was made before the currency check existed, in a workspace set to US dollars, so Fakturama shows these EUR amounts with a $ sign (see [Currency](#currency-set-by-you-not-by-the-tool)). 748 offline tests. What differs from the brief and what is not covered is listed under [Deviations and limits](#deviations-and-limits).
+**Status:** the whole brief is implemented and has run end to end on the sample: payment term, products and Debtor created when missing, Order PO000007 saved (lines 450.00 / 120.00, totals 570.00 / 108.30 / 678.30), linked Invoice INV000004 saved as paid on 2026-07-18 with Value 678.30, all verified in Data > Documents. That run was made before the currency check existed, in a workspace set to US dollars, so Fakturama shows these EUR amounts with a $ sign (see [Currency](#currency-set-by-you-not-by-the-tool)). 751 offline tests. What differs from the brief and what is not covered is listed under [Deviations and limits](#deviations-and-limits).
 
 ## Setup
 
 **Fakturama**
 - Fakturama **2.2.0**, **English** UI, Windows, display scaling 100%. Start it yourself and open the workspace; the tool never launches it.
 - File > Preferences > Documents: *immediately take over a clearly found item number* must be **off** (preflight checks it).
-- **Currency: set it yourself.** Fakturama 2.2.0 has one currency per workspace (File > Preferences > General > *Currency locale*); documents have no currency of their own. The tool only reads this setting and never changes it. For the sample, which is in EUR, choose a euro country (e.g. *Germany*) before `run`, or pass `--accept-currency` (see below).
+- **Currency: set it yourself.** Fakturama 2.2.0 has one currency per workspace (File > Preferences > General > *Currency locale*); documents have no currency of their own. The tool only reads this setting and never changes it. For the sample, which is in EUR, choose a euro country (e.g. *Germany*) before `automate`/`run`, or pass `--accept-currency` (see below).
 - Back up the workspace folder before a run that creates records (copy it; restore by copying back).
 
 **Python**
 - Python 3.12 and [uv](https://docs.astral.sh/uv/).
 - `uv sync` installs the dependencies (pywinauto 0.6.9, google-genai, RapidOCR, pydantic, PyYAML).
-- Copy `.env.example` to `.env` and set `GEMINI_API_KEY` (only needed for `extract`; responses are cached in `.cache/`).
+- Copy `.env.example` to `.env` and set `GEMINI_API_KEY` (only needed for `extract`/`automate`; responses are cached in `.cache/`, so the sample does not call the API again).
 
 **While a run is in progress:** Fakturama maximized and in front, hands off mouse and keyboard, no other editor tabs with unsaved changes. Desktop notifications that pop up over Fakturama (seen: a game launcher's "friend is playing" toast) make the table reader wait until they are gone.
 
 ## Run it
+
+One command does the whole task, image to paid Invoice:
+
+```
+uv run python -m fakturama_agent automate samples/order_001.png --without-email
+```
+
+`automate` runs the two stages below in a row. Fakturama is only touched if extraction passed every check; otherwise it stops after writing `review.md` (exit 2). The OrderSpec goes to `out/<image name>/order.json` (`-o` to change it).
+
+The stages can also be run separately, e.g. to look at or correct the OrderSpec in between:
 
 ```
 uv run python -m fakturama_agent extract samples/order_001.png -o out/order.json
 uv run python -m fakturama_agent run out/order.json --without-email
 ```
 
-`extract` writes the `OrderSpec`, or a `review.md` and exit code 2 when a check fails. `run` prints one line per step and writes `out/runs/<time>/` with `report.md`, `journal.jsonl`, before/after screenshots of every step and a UIA dump of the window when it stops. Exit codes: 0 done, 2 stopped for review, 1 usage error.
+`extract` writes the `OrderSpec`, or a `review.md` and exit code 2 when a check fails. `run` prints one line per step and writes `out/runs/<time>/` with `report.md`, `journal.jsonl`, before/after screenshots of every step and a UIA dump of the window when it stops. Exit codes (`run` and `automate`): 0 done, 2 stopped for review, 1 usage or operational error.
+
+The flags below apply to `automate` and `run` alike.
 
 `--without-email`: Fakturama rejects the sample's `marta.klein@example.test` (*Please enter a valid e-mail address*). Without the flag the run stops for review before saving the Debtor; with it the Debtor is saved with an empty E-Mail and the report says so.
 
@@ -105,7 +119,7 @@ In this order:
 1. **Follow the brief's Order-first sequence literally** as an option of `run`: open the Order, try its selectors, and branch into creation from there before returning to the same Order. All building blocks exist (selector checks, create steps, binding by window handle); what is missing is keeping the Order bound while other editors save, and tests for that path in the simulator.
 2. **More real inputs.** Run extraction on a set of varied order images (other layouts, photos, an unpaid one, Credit Card and SEPA, two VAT rates, more lines) and turn the results into golden tests; then run each live, including saving an unpaid Invoice to record its Documents state.
 3. **Robustness of the desktop session.** Detect focus thieves and notifications up front (preflight), support scrolling in the item grid for long orders, and run in a dedicated Windows session or VM so nothing can cover Fakturama.
-4. **Packaging.** One `process IMAGE` command (extract, then run), a short screen recording of a clean run, and a summary page that links each run's evidence.
+4. **Packaging.** Batch mode for `automate` (a folder of images, one report), a short screen recording of a clean run, and a summary page that links each run's evidence.
 
 ## Notes
 

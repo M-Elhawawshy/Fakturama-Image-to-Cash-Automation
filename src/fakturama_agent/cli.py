@@ -1,13 +1,15 @@
 """Command-line entry point.
 
-Exit codes: 0 = OrderSpec written, 1 = operational error (no API key, API
-down, unreadable file; just retry), 2 = manual review needed.
+Exit codes: 0 = OrderSpec written (or, for ``run``/``automate``, the Order and
+Invoice saved and verified), 1 = operational error (no API key, API down,
+unreadable file; just retry), 2 = manual review needed.
 """
 
 from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 from fakturama_agent.extract.crosscheck import crosscheck
@@ -37,6 +39,15 @@ def build_parser() -> argparse.ArgumentParser:
     ext.add_argument("image", type=Path, help="order image (PNG, JPEG, WebP; other formats are converted)")
     ext.add_argument("-o", "--output", type=Path, required=True, help="OrderSpec JSON to write")
     ext.add_argument("--no-cache", action="store_true", help="ignore the cached LLM response and call the API")
+
+    auto = sub.add_parser("automate", help="the whole task for one image: extract the OrderSpec, then `run` it "
+                          "(master data, Order, linked Invoice). Fakturama is only touched if extraction passed "
+                          "every check. PERSISTS records: back up first.")
+    auto.add_argument("image", type=Path, help="order image (PNG, JPEG, WebP; other formats are converted)")
+    auto.add_argument("-o", "--output", type=Path,
+                      help="OrderSpec JSON to write (default: out/<image name>/order.json; review.md goes next to it)")
+    auto.add_argument("--no-cache", action="store_true", help="ignore the cached LLM response and call the API")
+    _run_flags(auto)
 
     ocr = sub.add_parser("ocr", help="run only the OCR on an image (no LLM) and show what it read")
     ocr.add_argument("image", type=Path, help="order image")
@@ -122,15 +133,7 @@ def build_parser() -> argparse.ArgumentParser:
                         "VAT, products, Debtor, the Order and its linked Invoice (each saved once, verified), with a journal and evidence "
                         "in out/runs/<time>/. PERSISTS records: back up first.")
     rn.add_argument("spec", type=Path, help="OrderSpec JSON")
-    rn.add_argument("--without-email", action="store_true",
-                    help="if Fakturama rejects the Debtor's e-mail, save it with an EMPTY E-Mail instead of stopping")
-    rn.add_argument("--allow-duplicate", action="store_true",
-                    help="create the Order even if one with the same Cust.Ref. exists")
-    rn.add_argument("--checked", action="store_true",
-                    help="you checked Fakturama after an earlier run left a Save of unknown outcome")
-    rn.add_argument("--accept-currency", action="store_true",
-                    help="enter the amounts although the order's currency is not the workspace's (Fakturama "
-                         "then shows them in the workspace currency); the tool never changes the currency")
+    _run_flags(rn)
 
     inv = sub.add_parser("invoice-open", help="open the saved Order's linked Invoice (follow-up) and confirm what "
                          "it copied: header, addresses, lines, totals. Never saves.")
@@ -155,6 +158,40 @@ def build_parser() -> argparse.ArgumentParser:
     norm.add_argument("raw", type=Path, help="RawExtraction JSON file")
     norm.add_argument("-o", "--output", type=Path, required=True, help="OrderSpec JSON to write")
     return parser
+
+
+def _run_flags(p: argparse.ArgumentParser) -> None:
+    """The flags shared by ``run`` and ``automate``."""
+    p.add_argument("--without-email", action="store_true",
+                   help="if Fakturama rejects the Debtor's e-mail, save it with an EMPTY E-Mail instead of stopping")
+    p.add_argument("--allow-duplicate", action="store_true",
+                   help="create the Order even if one with the same Cust.Ref. exists")
+    p.add_argument("--checked", action="store_true",
+                   help="you checked Fakturama after an earlier run left a Save of unknown outcome")
+    p.add_argument("--accept-currency", action="store_true",
+                   help="enter the amounts although the order's currency is not the workspace's (Fakturama "
+                        "then shows them in the workspace currency); the tool never changes the currency")
+
+
+def _run_options(args: argparse.Namespace) -> dict:
+    return {"without_email": args.without_email, "allow_duplicate": args.allow_duplicate,
+            "checked": args.checked, "accept_currency": args.accept_currency}
+
+
+def default_spec_path(image: Path) -> Path:
+    return Path("out") / image.stem / "order.json"
+
+
+def cmd_automate(image: Path, out_path: Path, extractor: VisionExtractor, run: Callable[[Path], int],
+                 ocr: OcrFn = run_ocr) -> int:
+    """extract, then run: Fakturama is touched only if the image gave a fully checked OrderSpec."""
+    print(f"== 1/2 extract {image}\n")
+    code = cmd_extract(image, out_path, extractor, ocr)
+    if code != EXIT_OK:
+        print("\nStopped after extraction: Fakturama was not touched.", file=sys.stderr)
+        return code
+    print(f"\n== 2/2 run {out_path}\n")
+    return run(out_path)
 
 
 def _write_text(path: Path, text: str) -> None:
@@ -250,13 +287,19 @@ def cmd_normalize(raw_path: Path, out_path: Path) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    if args.command == "extract":
+    if args.command in ("extract", "automate"):
         from dotenv import load_dotenv
 
         load_dotenv(Path(".env"))
         overrides = {"cache_dir": None} if args.no_cache else {}
         extractor = GeminiExtractor(config=GeminiConfig.from_env(**overrides))
-        return cmd_extract(args.image, args.output, extractor)
+        if args.command == "extract":
+            return cmd_extract(args.image, args.output, extractor)
+        from fakturama_agent.uia import commands
+
+        options = _run_options(args)
+        return cmd_automate(args.image, args.output or default_spec_path(args.image), extractor,
+                            lambda spec: commands.cmd_run(spec, **options))
     if args.command == "ocr":
         return cmd_ocr(args.image, args.check, args.overlay, args.json)
     if args.command in ("inspect", "locate", "preflight", "read-table", "order-open", "order-select",
@@ -287,9 +330,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "invoice-open":
             return commands.cmd_invoice_open(args.spec)
         if args.command == "run":
-            return commands.cmd_run(args.spec, without_email=args.without_email,
-                                    allow_duplicate=args.allow_duplicate, checked=args.checked,
-                                    accept_currency=args.accept_currency)
+            return commands.cmd_run(args.spec, **_run_options(args))
         if args.command == "check-order":
             return commands.cmd_check_order(args.spec)
         if args.command == "create-order":
