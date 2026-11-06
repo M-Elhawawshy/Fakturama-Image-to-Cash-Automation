@@ -212,3 +212,25 @@ def test_check_invoice_exit_code(capsys):
     bad = cmd_check_invoice(GOLDEN, registry=REG, finder=lambda: MAIN, preflight=lambda m, r: Report(),
                             verifier=lambda *a: [Step("source Order", False, "not open")], ocr=object())
     assert (ok, bad) == (0, 2)
+
+
+def test_verify_never_compares_with_an_empty_term_description(monkeypatch):
+    """Seen live: the term lookup after Save came back empty and the check compared
+    'Bank Transfer' with ''. The description read before Save is now passed through;
+    a failed lookup is reported as such."""
+    import fakturama_agent.flow.invoice as inv
+    from fakturama_agent.flow.master_data import MasterCheck
+
+    class Read:
+        rows = INVOICES
+
+    monkeypatch.setattr(inv, "read_view", lambda *a: (object(), Read()))
+    monkeypatch.setattr(inv, "verify_documents", lambda *a, **k: Step("Documents", True, "PO000006: ok"))
+    monkeypatch.setattr(inv, "check_payment", lambda *a: MasterCheck("Payment Bank Transfer", error="view busy"))
+    monkeypatch.setattr(inv, "read_saved_invoice", lambda *a: {
+        "invoice.payment": "Bank Transfer", "invoice.paid": "on", "invoice.paid_date": "Jul 18, 2026",
+        "invoice.paid_value": "$678.30", "order.total": "$678.30"})
+    steps = inv.verify_invoice(MAIN, REG, SPEC, Report.money, None, number="INV000001")
+    assert steps[-1].name == "saved Invoice reopened" and "cannot read the payment term" in steps[-1].detail
+    steps = inv.verify_invoice(MAIN, REG, SPEC, Report.money, None, number="INV000001", description="Bank Transfer")
+    assert all(s.ok for s in steps)

@@ -147,8 +147,10 @@ def java_date(text: str | None) -> date | None:
     return datetime.strptime(f"{m[1]} {m[2]} {m[3]}", "%b %d %Y").date()
 
 
-def documents_problems(rows: list[dict], number: str, spec: OrderSpec, contact: str) -> list[str]:
-    """Pure: Data > Documents (Orders) must hold exactly one row for the saved Order."""
+def documents_problems(rows: list[dict], number: str, spec: OrderSpec, contact: str, *,
+                       unique: bool = True) -> list[str]:
+    """Pure: Data > Documents (Orders) must hold exactly one row for the saved Order; with
+    ``unique`` (unless a duplicate was explicitly allowed) also only one with its Cust.Ref."""
     mine = [r for r in rows if r.get("Document") == number]
     if len(mine) != 1:
         return [f"{len(mine)} Documents rows are {number!r}"]
@@ -156,7 +158,7 @@ def documents_problems(rows: list[dict], number: str, spec: OrderSpec, contact: 
     ref = spec.order.external_reference
     if r.get("Cust.Ref.") != ref:
         p.append(f"Cust.Ref. is {r.get('Cust.Ref.')!r}")
-    if sum(1 for x in rows if x.get("Cust.Ref.") == ref) != 1:
+    if unique and sum(1 for x in rows if x.get("Cust.Ref.") == ref) != 1:
         p.append(f"{sum(1 for x in rows if x.get('Cust.Ref.') == ref)} orders carry Cust.Ref. {ref!r}")
     if java_date(r.get("Date")) != spec.order.order_date:
         p.append(f"Date is {r.get('Date')!r}, expected {spec.order.order_date}")

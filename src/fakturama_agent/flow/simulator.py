@@ -29,6 +29,7 @@ class FakeFakturama:
     products: dict[str, tuple[str, Decimal, str]] = field(default_factory=dict)  # sku -> (name, gross, vat)
     debtors: list[dict] = field(default_factory=list)  # Company, First Name, Name, ZIP, City
     orders: list[tuple[str, str]] = field(default_factory=list)  # (number, cust_ref)
+    invoices: list[tuple[str, str, str, bool]] = field(default_factory=list)  # (number, order, cust_ref, paid)
     log: str = ""
     preflight_ok: bool = True
     documents_readable: bool = True
@@ -49,6 +50,11 @@ class FakeFakturama:
         if not self.documents_readable:
             return None
         return [n for n, ref in self.orders if ref == cust_ref]
+
+    def invoices_with_ref(self, cust_ref: str) -> list[str] | None:
+        if not self.documents_readable:
+            return None
+        return [n for n, _o, ref, _p in self.invoices if ref == cust_ref]
 
     def evidence(self, step: str, moment: str) -> None:
         self.evidence_taken.append(f"{step}:{moment}")
@@ -138,4 +144,22 @@ class FakeFakturama:
         if missing or not any(d["Company"] == spec.debtor.company for d in self.debtors):
             return StepResult("review", f"not found in the Order's dialogs: {missing or 'Debtor'}")
         number = f"PO{len(self.orders) + 1:06d}"
-        return self._created("order", lambda: self.orders.append((number, ref)), f"{number} saved and verified")
+        result = self._created("order", lambda: self.orders.append((number, ref)), f"{number} saved and verified")
+        result.ref = number
+        return result
+
+    def create_invoice(self, spec: OrderSpec, allow_duplicate: bool, order_number: str) -> StepResult:
+        self.calls.append(f"invoice of {order_number}")
+        ref = spec.order.external_reference
+        if self.invoices_with_ref(ref) and not allow_duplicate:
+            return StepResult("review", "invoice guard")
+        if (order_number, ref) not in self.orders:
+            return StepResult("stop", f"the saved Order {order_number} is not verified")
+        if spec.payment.method.value not in self.payments:
+            return StepResult("review", f"{spec.payment.method.value} is not available")
+        number = f"INV{len(self.invoices) + 1:06d}"
+        paid = spec.payment.paid_status.value == "PAID"
+        result = self._created("invoice", lambda: self.invoices.append((number, order_number, ref, paid)),
+                               f"{number} of {order_number} saved, {'paid' if paid else 'not paid'}, verified")
+        result.ref = number
+        return result

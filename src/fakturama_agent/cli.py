@@ -119,7 +119,7 @@ def build_parser() -> argparse.ArgumentParser:
                      help="do every step except Save (the verified Order is left open, unsaved)")
 
     rn = sub.add_parser("run", help="the whole flow for one OrderSpec: preflight, duplicate guard, payment term, "
-                        "VAT, products, Debtor, then the Order (Save once, verified), with a journal and evidence "
+                        "VAT, products, Debtor, the Order and its linked Invoice (each saved once, verified), with a journal and evidence "
                         "in out/runs/<time>/. PERSISTS records: back up first.")
     rn.add_argument("spec", type=Path, help="OrderSpec JSON")
     rn.add_argument("--without-email", action="store_true",

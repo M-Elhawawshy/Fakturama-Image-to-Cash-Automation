@@ -147,12 +147,12 @@ def create_order(main: MainWindow, registry: Registry, spec: OrderSpec, money: M
     run.number = number
     run.add("save", [] if number and number in title else [f"editor shows {title!r} for No. {number!r}"],
             f"saved once: editor {title!r}")
-    run.steps.append(verify_documents(main, registry, spec, ocr, number))
+    run.steps.append(verify_documents(main, registry, spec, ocr, number, unique=not allow_duplicate))
     return run
 
 
 def verify_documents(main: MainWindow, registry: Registry, spec: OrderSpec, ocr: Callable,
-                     number: str | None = None) -> Step:
+                     number: str | None = None, *, unique: bool = True) -> Step:
     """Read-only: Documents (Orders) holds the saved Order exactly once and it matches the spec.
     Without ``number`` the Order is found by its Cust.Ref. (``check-order``)."""
     ref = spec.order.external_reference
@@ -166,6 +166,6 @@ def verify_documents(main: MainWindow, registry: Registry, spec: OrderSpec, ocr:
             return Step("Documents", False, f"{len(found)} Orders carry Cust.Ref. {ref!r}: {found}")
         number = found[0]
     contact = saved_title(debtor_plan(spec, ""))
-    problems = documents_problems(docs.rows, number, spec, contact)
+    problems = documents_problems(docs.rows, number, spec, contact, unique=unique)
     return Step("Documents", not problems, "; ".join(problems) if problems else
                 f"{number}: {ref}, {spec.order.order_date}, {contact}, open, total {spec.derived.totals.gross}")

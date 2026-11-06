@@ -98,9 +98,11 @@ def _panes(main: MainWindow, name: str) -> list[int]:
             if n.control_type == "Pane" and n.name == name and n.automation_id]
 
 
-def open_saved_order(main: MainWindow, registry: Registry, spec: OrderSpec, ocr: Callable) -> tuple[OrderEditor, str]:
-    """The saved Order of this Cust.Ref. in an editor (opened, or its open tab bound)."""
-    step = verify_documents(main, registry, spec, ocr)
+def open_saved_order(main: MainWindow, registry: Registry, spec: OrderSpec, ocr: Callable,
+                     number: str | None = None, *, unique: bool = True) -> tuple[OrderEditor, str]:
+    """The saved Order in an editor (opened, or its open tab bound): ``number`` (the run's own
+    Order), else the one Order carrying the Cust.Ref."""
+    step = verify_documents(main, registry, spec, ocr, number, unique=unique)
     if not step.ok:
         raise InvoiceError(f"the saved Order is not verified: {step.detail}")
     number = step.detail.split(":", 1)[0]
@@ -280,6 +282,7 @@ class InvoiceRun:
     invoice: OrderEditor | None = None  # the bound, still unsaved Invoice editor
     saved: bool = False  # a Save was dispatched
     number: str | None = None  # the saved Invoice's number
+    description: str | None = None  # the payment term's description, read before the Invoice was opened
 
     @property
     def ok(self) -> bool:
@@ -287,19 +290,20 @@ class InvoiceRun:
 
 
 def open_invoice(main: MainWindow, registry: Registry, spec: OrderSpec, money: MoneyFormat,
-                 ocr: Callable) -> InvoiceRun:
+                 ocr: Callable, *, order_number: str | None = None, unique: bool = True) -> InvoiceRun:
     """Parts B and C: open the linked Invoice, confirm the copy, set payment; never saves."""
     run = InvoiceRun([])
     try:
         term = check_payment(main, registry, spec.payment.method, ocr)  # before the Invoice exists
         description = term.seen.get("Description", "")
+        run.description = description or None
         if term.kind != "reusable" or term.error or not description:
             run.steps.append(Step("payment term", False, f"needed for 5.2, review: {term.summary()}"))
             return run
         run.steps.append(Step("payment term", True, f"{term.reason}; listed as {description!r}"))
-        order, number = open_saved_order(main, registry, spec, ocr)
+        order, number = open_saved_order(main, registry, spec, ocr, order_number, unique=unique)
         run.order_number = number
-        run.steps.append(Step("source Order", True, f"{number} found once by {spec.order.external_reference!r}"))
+        run.steps.append(Step("source Order", True, f"{number} verified ({spec.order.external_reference!r})"))
         run.invoice = open_linked_invoice(order)
         run.steps.append(Step("linked Invoice", True, f"follow-up Invoice of {number} opened (unsaved)"))
         run.steps += check_copy(run.invoice, spec, money, ocr)
@@ -336,7 +340,8 @@ def save_invoice(main: MainWindow, registry: Registry, invoice: OrderEditor) -> 
 PAID_STATE = "COMMAND_CHECKED"  # Documents shows 'paid' with a tick (recorded 2026-11-06, INV000001)
 
 
-def invoice_row_problems(rows: list[dict], number: str, spec: OrderSpec, contact: str) -> list[str]:
+def invoice_row_problems(rows: list[dict], number: str, spec: OrderSpec, contact: str, *,
+                         unique: bool = True) -> list[str]:
     """Pure: Documents > Invoices holds the saved Invoice once, as specified (5.5). The row's Date
     is the Invoice Date (proposed, today), so it is not compared with the order date."""
     mine = [r for r in rows if r.get("Document") == number]
@@ -347,7 +352,7 @@ def invoice_row_problems(rows: list[dict], number: str, spec: OrderSpec, contact
     if r.get("Cust.Ref.") != ref:
         p.append(f"Cust.Ref. is {r.get('Cust.Ref.')!r}")
     same_ref = [x.get("Document") for x in rows if x.get("Cust.Ref.") == ref]
-    if len(same_ref) != 1:
+    if unique and len(same_ref) != 1:
         p.append(f"{len(same_ref)} Invoices carry Cust.Ref. {ref!r}: {same_ref}")
     if r.get("Name") != contact:
         p.append(f"Name is {r.get('Name')!r}, expected {contact!r}")
@@ -398,7 +403,8 @@ def read_saved_invoice(main: MainWindow, registry: Registry, ocr: Callable, numb
 
 
 def verify_invoice(main: MainWindow, registry: Registry, spec: OrderSpec, money: MoneyFormat, ocr: Callable,
-                   number: str | None = None, description: str | None = None) -> list[Step]:
+                   number: str | None = None, description: str | None = None, *,
+                   order_number: str | None = None, unique: bool = True) -> list[Step]:
     """Read-only: the Invoices row, the still-open source Order, the reopened Invoice."""
     from fakturama_agent.flow.create_debtor import debtor_plan, saved_title
 
@@ -414,15 +420,18 @@ def verify_invoice(main: MainWindow, registry: Registry, spec: OrderSpec, money:
         if len(found) != 1:
             return [Step("Invoice in Documents", False, f"{len(found)} Invoices carry Cust.Ref. {ref!r}: {found}")]
         number = found[0]
-    problems = invoice_row_problems(table.rows, number, spec, contact)
+    problems = invoice_row_problems(table.rows, number, spec, contact, unique=unique)
     state = "paid" if spec.payment.paid_status == PaidStatus.PAID else "not paid"
     steps.append(Step("Invoice in Documents", not problems, "; ".join(problems) or
                       f"{number}: {ref}, {contact}, {state}, total {spec.derived.totals.gross}"))
-    order = verify_documents(main, registry, spec, ocr)
+    order = verify_documents(main, registry, spec, ocr, order_number, unique=unique)
     steps.append(Step("source Order", order.ok, order.detail + (" (still open)" if order.ok else "")))
     if description is None:
         term = check_payment(main, registry, spec.payment.method, ocr)
         description = term.seen.get("Description", "")
+        if term.kind != "reusable" or term.error or not description:
+            steps.append(Step("saved Invoice reopened", False, f"cannot read the payment term: {term.summary()}"))
+            return steps
     try:
         seen = read_saved_invoice(main, registry, ocr, number)
     except (InvoiceError, EditorError, TableError, actions.ActionError, inputs.InputError, TimeoutError) as e:
@@ -439,7 +448,7 @@ def verify_invoice(main: MainWindow, registry: Registry, spec: OrderSpec, money:
 
 
 def create_invoice(main: MainWindow, registry: Registry, spec: OrderSpec, money: MoneyFormat, ocr: Callable, *,
-                   allow_duplicate: bool = False, save: bool = True) -> InvoiceRun:
+                   allow_duplicate: bool = False, save: bool = True, order_number: str | None = None) -> InvoiceRun:
     """Parts B-D: duplicate guard, open + confirm + payment, Save once, verify."""
     ref = spec.order.external_reference
     existing = invoices_with_ref(main, registry, ocr, ref)
@@ -450,7 +459,8 @@ def create_invoice(main: MainWindow, registry: Registry, spec: OrderSpec, money:
                                                         "not creating another (--allow-duplicate overrides)")])
     guard = Step("invoice guard", True, f"no Invoice carries {ref!r}" if not existing else
                  f"overridden: {existing} exist")
-    run = open_invoice(main, registry, spec, money, ocr)
+    unique = not allow_duplicate
+    run = open_invoice(main, registry, spec, money, ocr, order_number=order_number, unique=unique)
     run.steps.insert(0, guard)
     if not run.ok or run.invoice is None:
         return run
@@ -463,5 +473,6 @@ def create_invoice(main: MainWindow, registry: Registry, spec: OrderSpec, money:
     if not step.ok:
         return run
     run.number, run.invoice = title, None
-    run.steps += verify_invoice(main, registry, spec, money, ocr, number=title)
+    run.steps += verify_invoice(main, registry, spec, money, ocr, number=title, description=run.description,
+                                order_number=run.order_number, unique=unique)
     return run

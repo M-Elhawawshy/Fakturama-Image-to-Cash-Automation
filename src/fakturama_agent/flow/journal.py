@@ -5,7 +5,9 @@ Before any step that may Save, the runner writes ``attempting``; afterwards
 ``attempting`` and no ``done`` (crash, killed process), or with a stopped step
 whose Save was dispatched, left a Save of unknown outcome behind. The next run for
 the same Cust.Ref. refuses to start until a person has checked Fakturama
-(``--checked``): a Save is never repeated blindly.
+(``--checked``): a Save is never repeated blindly. A refused run records the
+inherited unknown Saves (``blocked``), so rerunning without ``--checked`` never
+clears them.
 """
 
 from __future__ import annotations
@@ -40,6 +42,8 @@ def unresolved(events: Iterable[dict]) -> list[str]:
     for e in events:
         if e["event"] == "attempting":
             open_steps[e["step"]] = e
+        elif e["event"] == "blocked":  # inherited from an earlier run, not settled by this one
+            unknown += [u for u in e.get("unknown", []) if u not in unknown]
         elif e["event"] == "done":
             open_steps.pop(e["step"], None)
             if e.get("outcome") == "stop" and e.get("saved"):

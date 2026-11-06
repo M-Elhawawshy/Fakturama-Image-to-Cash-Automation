@@ -46,9 +46,10 @@ def test_all_missing_creates_everything(tmp_path):
     fak = FakeFakturama()
     result, events = go(fak, tmp_path, without_email=True)
     assert result.ok
-    assert [o for _, o in outcomes(result)][4:] == ["create", "ok", "create", "create", "create", "create", "ok"]
-    assert fak.orders == [("PO000001", REF)]
-    assert sum(e["event"] == "attempting" for e in events) == sum(e["event"] == "done" for e in events) == 6
+    assert [o for _, o in outcomes(result)][4:] == ["create", "ok", "create", "create", "create", "create", "create",
+                                                    "ok"]
+    assert fak.orders == [("PO000001", REF)] and fak.invoices == [("INV000001", "PO000001", REF, True)]
+    assert sum(e["event"] == "attempting" for e in events) == sum(e["event"] == "done" for e in events) == 7
     assert "Order WEB-2026-0714-A17:after" in fak.evidence_taken and fak.dumps == []
 
 
@@ -57,7 +58,8 @@ def test_all_exist_creates_only_the_order(tmp_path):
     result, _ = go(fak, tmp_path)
     assert result.ok
     assert [o for s, o in outcomes(result) if s.startswith(("Payment", "VAT", "Product", "Debtor"))] == ["ok"] * 5
-    assert outcomes(result)[-2] == ("Order WEB-2026-0714-A17", "create")
+    assert outcomes(result)[-3:] == [("Order WEB-2026-0714-A17", "create"), ("Invoice WEB-2026-0714-A17", "create"),
+                                     ("Error.log", "ok")]
 
 
 def test_second_run_stops_at_the_duplicate_guard(tmp_path):
@@ -117,7 +119,9 @@ def test_crash_after_the_order_save_leaves_attempting_open(tmp_path):
     blocked, _ = go(fak, tmp_path, n=2)
     assert blocked.final.step == "journal" and len(fak.orders) == 1
     checked, _ = go(fak, tmp_path, n=3, checked=True)
-    assert checked.final.step == "duplicate guard" and len(fak.orders) == 1  # the saved Order is found, not repeated
+    assert checked.ok and len(fak.orders) == 1  # the saved Order is found, not repeated: resume with its Invoice
+    assert ("duplicate guard", "ok") in outcomes(checked) and "resuming" in checked.records[3].detail
+    assert fak.invoices == [("INV000001", "PO000001", REF, True)]
 
 
 def test_stop_before_save_does_not_block_the_next_run(tmp_path):
@@ -192,7 +196,7 @@ def test_run_command_writes_journal_and_report(tmp_path, capsys):
     fak = FakeFakturama()
     code = cmd_run(GOLDEN, without_email=True, runs_root=tmp_path / "runs", adapter_factory=lambda d: fak)
     out = capsys.readouterr().out
-    assert code == 0 and "Done: the Order is saved and verified." in out and "[NEW ] Order" in out
+    assert code == 0 and "Done: the Order and its linked Invoice are saved and verified." in out and "[NEW ] Order" in out
     run_dir = next((tmp_path / "runs").iterdir())
     assert {p.name for p in run_dir.iterdir()} >= {"journal.jsonl", "report.md", "result.json"}
     code = cmd_run(GOLDEN, runs_root=tmp_path / "runs", adapter_factory=lambda d: fak)
@@ -241,3 +245,101 @@ def test_live_error_log_reading(tmp_path):
     assert fak.error_log() == ""
     log.write_text("!ENTRY boom\n", encoding="utf-8")
     assert fak.error_log() == "!ENTRY boom\n"
+
+
+
+# --- Phase 4: the Invoice step ---------------------------------------------------------------------------
+
+
+def test_second_run_after_the_invoice_is_done(tmp_path):
+    fak = complete()
+    go(fak, tmp_path, n=1)
+    result, _ = go(fak, tmp_path, n=2)
+    assert outcomes(result)[-1] == ("duplicate guard", "review") and "this order is done" in result.final.detail
+    assert len(fak.orders) == len(fak.invoices) == 1
+
+
+def test_resume_invoices_an_existing_order_without_master_steps(tmp_path):
+    fak = complete()
+    fak.orders = [("PO000006", REF)]
+    result, _ = go(fak, tmp_path)
+    assert result.ok and fak.calls == ["invoice of PO000006"]
+    assert fak.invoices == [("INV000001", "PO000006", REF, True)]
+
+
+def test_two_orders_without_invoice_is_review(tmp_path):
+    fak = complete()
+    fak.orders = [("PO000005", REF), ("PO000006", REF)]
+    result, _ = go(fak, tmp_path)
+    assert result.final.step == "duplicate guard" and result.final.outcome == "review" and fak.calls == []
+
+
+def test_override_invoices_the_new_order(tmp_path):
+    fak = complete()
+    go(fak, tmp_path, n=1)
+    result, _ = go(fak, tmp_path, n=2, allow_duplicate=True)
+    assert result.ok and fak.invoices[-1][:2] == ("INV000002", "PO000002")
+
+
+def test_unpaid_order_gets_an_unpaid_invoice(tmp_path):
+    from fakturama_agent.spec.models import PaidStatus
+
+    unpaid = SPEC.model_copy(update={"payment": SPEC.payment.model_copy(
+        update={"paid_status": PaidStatus.UNPAID, "payment_date": None})})
+    fak = complete()
+    runs = tmp_path / "runs"
+    result = run_order(unpaid, fak, Journal(runs / "a" / "journal.jsonl"), runs)
+    assert result.ok and fak.invoices[0][3] is False and "not paid" in result.records[-2].detail
+
+
+def test_failure_after_the_invoice_save_blocks_then_is_found(tmp_path):
+    fak = complete()
+    fak.fail = {"invoice": "stop_after_save"}
+    result, events = go(fak, tmp_path)
+    assert result.final.step.startswith("Invoice") and result.final.saved and len(fak.invoices) == 1
+    assert unresolved(events)
+    fak.fail = {}
+    assert go(fak, tmp_path, n=2)[0].final.step == "journal"
+    checked, _ = go(fak, tmp_path, n=3, checked=True)
+    assert checked.final.step == "duplicate guard" and len(fak.invoices) == 1  # never a second Invoice
+
+
+def test_invoice_review_leaves_the_saved_order(tmp_path):
+    fak = complete()
+    fak.fail = {"invoice": "review"}
+    result, _ = go(fak, tmp_path)
+    assert result.final.outcome == "review" and len(fak.orders) == 1 and fak.invoices == []
+    fak.fail = {}
+    resumed, _ = go(fak, tmp_path, n=2)
+    assert resumed.ok and len(fak.orders) == 1 and len(fak.invoices) == 1
+
+
+def test_invoice_run_mapping():
+    from fakturama_agent.flow.create_order import Step
+    from fakturama_agent.flow.invoice import InvoiceRun
+    from fakturama_agent.flow.live import from_invoice_run
+
+    done = InvoiceRun([Step("saved Invoice reopened", True, "Bank Transfer, paid on")], "PO000006", saved=True,
+                      number="INV000001")
+    r = from_invoice_run(done)
+    assert (r.outcome, r.saved, r.ref) == ("create", True, "INV000001") and "paid on" in r.detail
+    guard = InvoiceRun([Step("invoice guard", False, "exists")])
+    assert from_invoice_run(guard).outcome == "review"
+    mismatch = InvoiceRun([Step("Invoice lines", False, "line 1 differs")], invoice=object())
+    assert from_invoice_run(mismatch).outcome == "review" and "left open" in from_invoice_run(mismatch).detail
+    error = InvoiceRun([Step("linked Invoice", False, "TimeoutError")])
+    assert from_invoice_run(error).outcome == "stop"
+    unclear = InvoiceRun([Step("save Invoice", False, "unclear")], saved=True)
+    assert from_invoice_run(unclear).outcome == "stop" and from_invoice_run(unclear).saved
+
+
+def test_rerunning_without_checked_never_clears_the_block(tmp_path):
+    fak = complete()
+    fak.fail = {"order": "crash"}
+    go(fak, tmp_path, n=1)
+    fak.fail = {}
+    for n in (2, 3, 4):
+        blocked, _ = go(fak, tmp_path, n=n)
+        assert blocked.final.step == "journal" and blocked.final.outcome == "review"
+    assert go(fak, tmp_path, n=5, checked=True)[0].ok
+    assert go(fak, tmp_path, n=6)[0].final.step == "duplicate guard"  # settled: the order is done

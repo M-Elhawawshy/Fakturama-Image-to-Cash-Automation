@@ -32,7 +32,8 @@ def from_order_run(run) -> StepResult:
     text = "; ".join(f"{s.name}: {s.detail}" for s in run.steps if not s.ok) or \
         "; ".join(f"{s.name}: {s.detail}" for s in run.steps)
     if run.ok:
-        return StepResult("create", f"{run.number} saved and verified ({run.steps[-1].detail})", saved=True)
+        return StepResult("create", f"{run.number} saved and verified ({run.steps[-1].detail})", saved=True,
+                          ref=run.number)
     if run.saved:
         return StepResult("stop", text, saved=True)
     failed = next(s for s in run.steps if not s.ok)
@@ -77,6 +78,11 @@ class LiveFakturama:
         except Exception:  # noqa: BLE001 - unreadable is a stop, never "no orders"
             return None
         return duplicates(docs.rows, cust_ref)
+
+    def invoices_with_ref(self, cust_ref: str) -> list[str] | None:
+        from fakturama_agent.flow.invoice import invoices_with_ref
+
+        return invoices_with_ref(self.main, self.registry, self.ocr, cust_ref)
 
     def evidence(self, step: str, moment: str) -> None:
         from PIL import ImageGrab
@@ -130,3 +136,24 @@ class LiveFakturama:
 
         return from_order_run(create_order(self.main, self.registry, spec, self.money, self.ocr,
                                            allow_duplicate=allow_duplicate))
+
+    def create_invoice(self, spec: OrderSpec, allow_duplicate: bool, order_number: str | None) -> StepResult:
+        from fakturama_agent.flow.invoice import create_invoice
+
+        return from_invoice_run(create_invoice(self.main, self.registry, spec, self.money, self.ocr,
+                                               allow_duplicate=allow_duplicate, order_number=order_number))
+
+
+def from_invoice_run(run) -> StepResult:
+    """Pure: an ``InvoiceRun`` of create_invoice as one step result."""
+    failed = [s for s in run.steps if not s.ok]
+    text = "; ".join(f"{s.name}: {s.detail}" for s in failed) or "; ".join(f"{s.name}: {s.detail}" for s in run.steps)
+    if run.ok:
+        paid = next((s.detail for s in run.steps if s.name == "saved Invoice reopened"), "")
+        return StepResult("create", f"{run.number} of {run.order_number} saved and verified ({paid})", saved=True,
+                          ref=run.number)
+    if run.saved:
+        return StepResult("stop", text, saved=True, ref=run.number)
+    left = " The unsaved New Invoice is left open." if run.invoice is not None else ""
+    hard = failed and failed[0].name in ("linked Invoice", "save Invoice")  # an error, not a mismatch
+    return StepResult("stop" if hard else "review", text + left)

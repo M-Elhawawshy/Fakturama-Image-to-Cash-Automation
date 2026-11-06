@@ -663,7 +663,7 @@ def cmd_run(
         print(f"[{marks[r.outcome]}] {r.step:<{width}}  {r.detail}")
     print(f"\nReport: {run_dir / 'report.md'}")
     if result.ok:
-        print("Done: the Order is saved and verified.")
+        print("Done: the Order and its linked Invoice are saved and verified.")
         return EXIT_OK
     final = result.final
     if final and final.saved:

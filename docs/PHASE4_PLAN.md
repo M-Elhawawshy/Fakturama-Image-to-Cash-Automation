@@ -86,6 +86,10 @@ A step `invoice` after the Order (journal, evidence, Error.log watch), the simul
 
 **Live check:** on a clean workspace `run out/order.json --without-email` ends with the Order and its paid Invoice; a second run stops at the duplicate guard.
 
+**Built (E) 2026-11-06.** `run` ends with an `Invoice` step (journal, evidence, Error.log watch) that invoices the run's own Order (its number is passed on, so `--allow-duplicate` invoices the new Order). Guard: an Invoice with the Cust.Ref. → review ("this order is done"); exactly one Order without Invoice → resume with the Invoice only (decision 4); several Orders → review. With `--allow-duplicate` the "only one with this Cust.Ref." rules are relaxed in the Order and Invoice checks. Simulator tests: all missing (7 saving steps), all existing, resume, two Orders, override, unpaid, stop after the Invoice Save (blocks; `--checked` then finds the Invoice, never a second), review at the Invoice (Order kept; a rerun resumes). Live 2026-11-06 on PO000006 without an Invoice (INV000001 deleted by hand): the run resumed and saved **INV000003** (verified afterwards by `check-invoice`: paid, Jul 18 2026, $678.30, PO000006 open); a rerun stops at the guard. Two defects found and fixed:
+- the check after the Invoice Save looked the payment term up again, got nothing and compared `Bank Transfer` with `''` (stop after a Save). The description read before the Invoice was opened is now carried through; a failed lookup reports itself.
+- a run refused by the journal gate did not record the inherited unknown Save, so a second plain rerun passed the gate. A refused run now writes `blocked` with the unknown Saves; only `--checked` clears them.
+
 ## Decisions (confirmed 2026-11-06)
 
 1. **Value = the Invoice's own Total**, which must also equal the spec's gross; any difference is review (never typed to force a match).
