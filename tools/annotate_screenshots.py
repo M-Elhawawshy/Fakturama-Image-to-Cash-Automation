@@ -39,12 +39,12 @@ class Shot:
 MASTERS = [
     Shot("03-product-chr-erg-01-after.png", "1-product-created.png",
          "Master data: product CHR-ERG-01 created (only because no exact Item No. existed)",
-         [((426, 856, 1030, 878), "New row CHR-ERG-01: gross 297.50 = 250.00 net x 1.19, VAT 19% "
-                                  "(selected before the price; read back in the editor before Save)"),
+         [((426, 856, 1030, 878), "New row CHR-ERG-01: gross 297,50 EUR = 250.00 net x 1.19, VAT 19% (chosen before the price; "
+                                  "typed in the workspace format, read back in the editor before Save)"),
           ((426, 712, 1030, 734), "The Products list is read by Select All + Copy, not OCR; header checked by OCR")],
          crop=(0, 0, 1936, 1040), blur=(TITLE_BAR, START_URL)),
     Shot("05-debtor-northstar-office-gmbh-after.png", "2-debtor-created.png",
-         "Master data: Debtor Northstar Office GmbH / Marta Klein created with billing + delivery address",
+         "Master data: Debtor Northstar Office GmbH / Marta Klein (CUST000009) created with billing + delivery address",
          [((426, 796, 1030, 818), "New contact (Customer ID proposed by Fakturama, kept). The list shows the "
                                   "DELIVERY ZIP 10553; the billing address is 10117"),
           ((426, 712, 1030, 734), "Identity check: exact Company, First Name, Name, ZIP, City")],
@@ -52,13 +52,13 @@ MASTERS = [
 ]
 ORDER = [
     Shot("07-invoice-web-2026-0714-a17-after.png", "3-order-and-invoice.png",
-         "Saved Order PO000007 and its linked, paid Invoice INV000004",
+         "Saved Order PO000009 and its linked, paid Invoice INV000006 (workspace currency: EUR, locale Germany)",
          [((396, 160, 1460, 250), "Header: proposed No. kept, Date Jul 14 2026 (from the image), Net, "
                                   "Cust.Ref. WEB-2026-0714-A17"),
-          ((396, 340, 1380, 410), "Lines: 2 x 250.00 -10% = 450.00 and 3 x 40.00 = 120.00, read back twice"),
-          ((1470, 480, 1920, 610), "Totals 570.00 / 108.30 / 678.30 equal the image; discount 0%, free shipping"),
+          ((396, 340, 1380, 410), "Lines: 2 x 250,00 EUR -10% = 450,00 EUR and 3 x 40,00 EUR = 120,00 EUR, read back twice"),
+          ((1470, 480, 1920, 610), "Totals 570,00 / 108,30 / 678,30 EUR equal the image; discount 0%, free shipping"),
           ((1456, 250, 1710, 320), "Follow-up Invoice (keeps the Order link), not the toolbar's Invoice"),
-          ((576, 728, 1920, 756), "Documents > Invoices: INV000004, paid, 678.30; the Order stays open")],
+          ((576, 728, 1920, 756), "Documents > Invoices: INV000006, paid, 678,30 EUR; the Order stays open")],
          crop=(0, 0, 1936, 1040)),
 ]
 

@@ -7,7 +7,7 @@ order image ──extract──▶ OrderSpec JSON (validated) ──run──▶
             └─────────────────────────── automate = extract, then run ────────────────────────────┘
 ```
 
-**Status:** the whole brief is implemented and has run end to end on the sample. The payment term, products and Debtor were created because they were missing. Order PO000007 was saved (lines 450.00 / 120.00, totals 570.00 / 108.30 / 678.30), and its Invoice INV000004 was saved as paid on 2026-07-18 with Value 678.30. Everything was verified in Data > Documents. 753 offline tests. Differences from the brief and gaps are under [Deviations and limits](#deviations-and-limits).
+**Status:** the whole brief is implemented and has run end to end on the sample with one `automate` command, in a workspace set to EUR. The payment term, products and Debtor were created because they were missing. Order PO000009 was saved (lines 450,00 / 120,00 €, totals 570,00 / 108,30 / 678,30 €), and its Invoice INV000006 was saved as paid on 2026-07-18 with Value 678,30 €. Everything was verified in Data > Documents, then checked again with `check-invoice`. 753 offline tests. Differences from the brief and gaps are under [Deviations and limits](#deviations-and-limits).
 
 ## Setup
 
@@ -81,20 +81,20 @@ More detail: [docs/DESIGN.md](docs/DESIGN.md), and the phase plans with everythi
 
 Annotated screenshots from the runner's own evidence, with personal paths blurred (`tools/annotate_screenshots.py`):
 
-1. [Product created](docs/screenshots/1-product-created.png): CHR-ERG-01, gross 297.50 = 250.00 × 1.19, VAT 19%.
+1. [Product created](docs/screenshots/1-product-created.png): CHR-ERG-01, gross 297,50 € = 250.00 × 1.19, VAT 19%.
 2. [Debtor created](docs/screenshots/2-debtor-created.png): Northstar Office GmbH / Marta Klein.
-3. [Order and paid Invoice](docs/screenshots/3-order-and-invoice.png): PO000007 with both lines and totals; INV000004 paid, 678.30.
+3. [Order and paid Invoice](docs/screenshots/3-order-and-invoice.png): PO000009 with both lines and totals; INV000006 paid, 678,30 €.
 
 ![Order and its paid Invoice](docs/screenshots/3-order-and-invoice.png)
 
-These come from a workspace set to US dollars, before the currency check existed, so the EUR amounts appear with `$`. On the cleaned workspace the result took three runs. The first two stopped because a desktop notification covered part of a Data view. The third reused the records the second had created. The reader now waits up to 10 s for such an overlay and keeps a screenshot of it.
+All three come from one clean `automate` run in a euro workspace (run 20261106T154423), which finished on the first attempt. Earlier history: the first full run used a US-dollar workspace, so its EUR amounts showed `$`, which led to the currency check. Its clean test needed three runs, because a desktop notification twice covered part of a Data view; the reader now waits up to 10 s for such an overlay and keeps a screenshot of it. The first euro run stopped before saving a product because the price was typed with a dot, which led to typing money in the workspace's format.
 
 ## Deviations and limits
 
 - **Order of operations.** The brief creates missing master data from inside the open New Order. `run` settles master data first, then builds the Order and selects everything through the Order's own selectors, which remain the final existence check. Every editor then sees fresh lists (the Debtor editor reads the payment list only once), and no Order sits half-built while other editors save.
 - **E-mail.** Fakturama rejects the `.test` domain; see `--without-email`.
-- <a id="currency"></a>**Currency is set by the user, not by the tool.** Fakturama 2.2.0 has one currency per workspace; a document cannot be "in EUR" on its own. The tool never changes the setting. It reads the currency format in preflight, parses every amount in it, and types money fields in it (`297,50` in Germany; NatTable cells and the VAT value always take a dot). `run` works out the workspace currency from the locale and its symbol and stops for review if it differs from the order's, unless `--accept-currency`. In a German workspace every field was checked live in unsaved editors; a full euro run is not recorded yet.
-- **Tested environment.** English Fakturama 2.2.0, 100% scaling, maximized window, one sample image; full runs with the US currency format. Preflight refuses other UI languages and currency formats it cannot pin down; a date display other than `MMM d, yyyy` stops the run.
+- <a id="currency"></a>**Currency is set by the user, not by the tool.** Fakturama 2.2.0 has one currency per workspace; a document cannot be "in EUR" on its own. The tool never changes the setting. It reads the currency format in preflight, parses every amount in it, and types money fields in it (`297,50` in Germany; NatTable cells and the VAT value always take a dot). `run` works out the workspace currency from the locale and its symbol and stops for review if it differs from the order's, unless `--accept-currency`. Full runs passed in both a US-dollar and a euro (Germany) workspace.
+- **Tested environment.** English Fakturama 2.2.0, 100% scaling, maximized window, one sample image; full runs with the US and German currency formats. Preflight refuses other UI languages and currency formats it cannot pin down; a date display other than `MMM d, yyyy` stops the run.
 - **Not exercised live:** saving an UNPAID Invoice (that branch ran unsaved), Credit Card and SEPA terms, VAT rates other than 19% (0% needs an exemption code and is refused), and more lines than the item grid shows without scrolling (the run stops).
 - **Keyboard layout.** Ctrl shortcuts are sent as virtual keys and were verified with an Arabic layout active; full runs used the English layout.
 
@@ -110,7 +110,7 @@ In this order:
    - **Safe redelivery.** The idempotency key is the image hash plus Cust.Ref. The existing duplicate guard, resume and journal already make a redelivered message harmless: it resumes or reports "already done", and a Save of unknown outcome is held for a person instead of retried.
    - **Status per message.** Each message's outcome and run folder are written back, for a dashboard or alerting.
 2. **The brief's Order-first sequence** as an option of `run`: open the Order, try its selectors, create what is missing from there, and return to the same Order. The building blocks exist; what is missing is keeping the Order bound while other editors save, plus simulator tests for that path.
-3. **More real inputs.** Varied images (other layouts, photos, unpaid, Credit Card and SEPA, two VAT rates, more lines) turned into golden tests, then run live, including a saved unpaid Invoice and a full run in a euro workspace.
+3. **More real inputs.** Varied images (other layouts, photos, unpaid, Credit Card and SEPA, two VAT rates, more lines) turned into golden tests, then run live, including a saved unpaid Invoice.
 4. **A sturdier desktop session.** Detect notifications and focus thieves in preflight, scroll the item grid for long orders, and run in a dedicated Windows session or VM where nothing can cover Fakturama.
 
 ## Notes
