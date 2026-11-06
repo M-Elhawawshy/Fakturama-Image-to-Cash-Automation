@@ -17,6 +17,7 @@ order image ──extract──▶ OrderSpec JSON (validated) ──run──▶
 - Fakturama **2.2.0**, **English** UI, Windows, display scaling 100%. Start it and open the workspace yourself; the tool never launches it.
 - File > Preferences > Documents: *immediately take over a clearly found item number* must be **off** (preflight checks it).
 - **Set the currency yourself** (File > Preferences > General > *Currency locale*). Fakturama has one currency per workspace and the tool never changes it. The sample is in EUR, so choose a euro country such as *Germany* (see [Currency](#currency)).
+- **A new workspace with no documents:** on one PC the run could not select rows in Data > Documents until the list held at least one document. If that happens, save any document by hand (a dummy one is fine) and run again.
 - Back up the workspace folder before a run that creates records.
 
 **Python**
