@@ -6,7 +6,9 @@ review or stop (both end the run; Fakturama is left exactly as it is):
 0. spec gate: every critical extracted field must be OCR-confirmed;
 1. journal gate: the previous run for this Cust.Ref. must not have left a Save of
    unknown outcome (``--checked`` after a person looked);
-2. preflight, Error.log baseline, duplicate guard (no Order with the Cust.Ref.);
+2. preflight, currency gate (the order's currency must be the workspace's; setting
+   the workspace currency is the user's job, ``--accept-currency`` waives it),
+   Error.log baseline, duplicate guard (no Order with the Cust.Ref.);
 3. master data, check-first and create-if-missing, in the safe order: term of
    payment, VAT rates, products, Debtor (the Debtor editor reads the payment list
    once, a product needs its VAT);
@@ -54,6 +56,7 @@ class StepResult:
 
 class Fakturama(Protocol):
     def preflight(self) -> StepResult: ...
+    def workspace_currency(self) -> tuple[str | None, str]: ...  # (ISO code or None, how / why not)
     def error_log(self) -> str: ...  # Fakturama's Error.log content ("" if none)
     def orders_with_ref(self, cust_ref: str) -> list[str] | None: ...  # None: unreadable
     def invoices_with_ref(self, cust_ref: str) -> list[str] | None: ...  # None: unreadable
@@ -72,6 +75,7 @@ class RunOptions:
     without_email: bool = False
     allow_duplicate: bool = False
     checked: bool = False  # a person checked Fakturama after an unknown Save of an earlier run
+    accept_currency: bool = False  # enter the amounts although the workspace currency differs
 
 
 @dataclass
@@ -102,6 +106,23 @@ def spec_gate(spec: OrderSpec) -> list[str]:
     """Pure: critical extracted values that OCR did not confirm (manual review)."""
     return [f"{c.field} = {c.value!r} is {c.status.value}" for c in spec.provenance.field_checks
             if c.critical and c.status != CheckStatus.CONFIRMED]
+
+
+def currency_gate(order: str, workspace: str | None, how: str, accept: bool) -> tuple[Outcome, str]:
+    """Pure: the order's currency against the workspace's (Fakturama has one per workspace).
+
+    The automation never changes the workspace currency; a mismatch is review unless
+    the user accepts it (``--accept-currency``): the amounts are then entered as plain
+    numbers and Fakturama shows them with the workspace's currency.
+    """
+    if workspace == order:
+        return "ok", f"order and workspace are both {order} ({how})"
+    seen = f"order is {order}, workspace is {workspace or 'unknown'} ({how})"
+    if accept:
+        return "ok", (f"accepted with --accept-currency: {seen}; the amounts are entered as numbers and "
+                      f"shown in the workspace currency")
+    return "review", (f"{seen}. Set Preferences > General > Currency locale yourself (the tool never changes "
+                      f"it), or rerun with --accept-currency to enter the amounts under the workspace currency")
 
 
 def plan(spec: OrderSpec) -> list[tuple[str, str, object]]:
@@ -148,6 +169,10 @@ def run_order(spec: OrderSpec, fak: Fakturama, journal: Journal, runs_root: Path
 
     pre = fak.preflight()
     if not record("preflight", pre.outcome, pre.detail):
+        return _end(journal, result)
+    workspace, how = fak.workspace_currency()
+    outcome, detail = currency_gate(spec.order.currency, workspace, how, options.accept_currency)
+    if not record("currency", outcome, detail):
         return _end(journal, result)
     baseline = fak.error_log()
 

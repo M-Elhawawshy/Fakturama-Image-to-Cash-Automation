@@ -46,7 +46,7 @@ def test_all_missing_creates_everything(tmp_path):
     fak = FakeFakturama()
     result, events = go(fak, tmp_path, without_email=True)
     assert result.ok
-    assert [o for _, o in outcomes(result)][4:] == ["create", "ok", "create", "create", "create", "create", "create",
+    assert [o for _, o in outcomes(result)][5:] == ["create", "ok", "create", "create", "create", "create", "create",
                                                     "ok"]
     assert fak.orders == [("PO000001", REF)] and fak.invoices == [("INV000001", "PO000001", REF, True)]
     assert sum(e["event"] == "attempting" for e in events) == sum(e["event"] == "done" for e in events) == 7
@@ -120,7 +120,7 @@ def test_crash_after_the_order_save_leaves_attempting_open(tmp_path):
     assert blocked.final.step == "journal" and len(fak.orders) == 1
     checked, _ = go(fak, tmp_path, n=3, checked=True)
     assert checked.ok and len(fak.orders) == 1  # the saved Order is found, not repeated: resume with its Invoice
-    assert ("duplicate guard", "ok") in outcomes(checked) and "resuming" in checked.records[3].detail
+    assert ("duplicate guard", "ok") in outcomes(checked) and "resuming" in checked.records[4].detail
     assert fak.invoices == [("INV000001", "PO000001", REF, True)]
 
 
@@ -343,3 +343,42 @@ def test_rerunning_without_checked_never_clears_the_block(tmp_path):
         assert blocked.final.step == "journal" and blocked.final.outcome == "review"
     assert go(fak, tmp_path, n=5, checked=True)[0].ok
     assert go(fak, tmp_path, n=6)[0].final.step == "duplicate guard"  # settled: the order is done
+
+
+# --- currency: Fakturama has one currency per workspace; the user sets it --------------------------
+
+
+def test_currency_mismatch_is_review_before_any_step(tmp_path):
+    fak = complete()
+    fak.currency = "USD"
+    result, events = go(fak, tmp_path)
+    assert outcomes(result)[-1] == ("currency", "review") and fak.calls == []
+    assert "order is EUR, workspace is USD" in result.final.detail and "--accept-currency" in result.final.detail
+    assert not any(e["event"] == "attempting" for e in events)
+    fak.currency = None  # not determinable: also review, never a guess
+    result, _ = go(fak, tmp_path, n=2)
+    assert outcomes(result)[-1] == ("currency", "review") and "workspace is unknown" in result.final.detail
+
+
+def test_accept_currency_runs_and_says_so(tmp_path):
+    fak = complete()
+    fak.currency = "USD"
+    result, events = go(fak, tmp_path, accept_currency=True)
+    assert result.ok and ("currency", "ok") in outcomes(result)
+    assert "accepted with --accept-currency" in next(r.detail for r in result.records if r.step == "currency")
+    assert events[0]["options"]["accept_currency"] is True
+
+
+def test_matching_currency_is_ok(tmp_path):
+    result, _ = go(complete(), tmp_path)
+    assert next(r for r in result.records if r.step == "currency").detail.startswith("order and workspace are both EUR")
+
+
+def test_run_command_currency_flag(tmp_path, capsys):
+    from fakturama_agent.uia.commands import cmd_run
+
+    fak = complete()
+    fak.currency = "USD"
+    assert cmd_run(GOLDEN, runs_root=tmp_path / "runs", adapter_factory=lambda d: fak) == 2
+    assert "[REVW] currency" in capsys.readouterr().out
+    assert cmd_run(GOLDEN, accept_currency=True, runs_root=tmp_path / "runs", adapter_factory=lambda d: fak) == 0

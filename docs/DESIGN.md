@@ -125,7 +125,7 @@ Fakturama has no transaction across editors: a Debtor or Product saved before a 
 - Language: **Python** (confirmed).
 - Billing ≠ delivery address: create a **second address with the Delivery role**.
 - Paid status: anything other than PAID is treated as **UNPAID** (paid left clear, no date or value).
-- Currency: a **locale-aware money parser** set by preflight; the app's locale setting is left unchanged.
+- Currency: a **locale-aware money parser** set by preflight; the app's locale setting is left unchanged. Fakturama has one currency per workspace: setting it is the user's job; `run` stops for review if it differs from the order's currency (`--accept-currency` waives that).
 - LLM: **Gemini Flash** (free tier for testing), behind a small provider interface so the model can be swapped.
 
 ## Phased delivery plan

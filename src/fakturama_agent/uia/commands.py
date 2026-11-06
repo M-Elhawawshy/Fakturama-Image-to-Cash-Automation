@@ -619,6 +619,7 @@ def cmd_run(
     without_email: bool = False,
     allow_duplicate: bool = False,
     checked: bool = False,
+    accept_currency: bool = False,
     runs_root: Path = Path("out/runs"),
     registry: Registry | None = None,
     finder: Callable[[], MainWindow] = find_main_window,
@@ -655,7 +656,8 @@ def cmd_run(
         fak = adapter_factory(run_dir)
     print(f"Run {run_dir.name}: {spec.order.external_reference} (evidence in {run_dir})\n")
     result = run_order(spec, fak, Journal(run_dir / "journal.jsonl"), runs_root,
-                       RunOptions(without_email=without_email, allow_duplicate=allow_duplicate, checked=checked))
+                       RunOptions(without_email=without_email, allow_duplicate=allow_duplicate, checked=checked,
+                                  accept_currency=accept_currency))
     write_report(result, spec, run_dir / "report.md")
     width = max(len(r.step) for r in result.records)
     marks = {"ok": "ok  ", "create": "NEW ", "review": "REVW", "stop": "STOP"}

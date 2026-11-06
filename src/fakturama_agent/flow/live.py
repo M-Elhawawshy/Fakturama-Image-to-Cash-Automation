@@ -48,6 +48,7 @@ class LiveFakturama:
         self.dir = evidence_dir
         self.error_log_path = error_log
         self.money = None
+        self.currency_locale = None
         self._n = 0
 
     # --- read-only ------------------------------------------------------------------------
@@ -57,11 +58,17 @@ class LiveFakturama:
 
         report = run_preflight(self.main, LiveProbe(self.registry), self.registry)
         self.money = report.money
+        self.currency_locale = report.currency_locale
         failed = [f"{c.name}: {c.seen}" for c in report.checks if c.status == "failed"]
         if not report.ok:
             return StepResult("stop", "; ".join(failed) or "not ready")
         return StepResult("ok", f"{sum(c.status == 'ok' for c in report.checks)}/{len(report.checks)} checks ok; "
                                 f"money like {report.money.describe()}")
+
+    def workspace_currency(self) -> tuple[str | None, str]:
+        from fakturama_agent.uia.money import workspace_currency
+
+        return workspace_currency(self.currency_locale, self.money)
 
     def error_log(self) -> str:
         try:

@@ -32,6 +32,7 @@ class FakeFakturama:
     invoices: list[tuple[str, str, str, bool]] = field(default_factory=list)  # (number, order, cust_ref, paid)
     log: str = ""
     preflight_ok: bool = True
+    currency: str | None = "EUR"  # the workspace currency (None: not determinable)
     documents_readable: bool = True
     fail: dict[str, str] = field(default_factory=dict)  # step kind -> failure mode
     calls: list[str] = field(default_factory=list)
@@ -42,6 +43,9 @@ class FakeFakturama:
 
     def preflight(self) -> StepResult:
         return StepResult("ok", "8/8 checks ok") if self.preflight_ok else StepResult("stop", "unsaved editors open")
+
+    def workspace_currency(self) -> tuple[str | None, str]:
+        return self.currency, "simulated"
 
     def error_log(self) -> str:
         return self.log

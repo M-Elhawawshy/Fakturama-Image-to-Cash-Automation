@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import pytest
 
-from fakturama_agent.uia.money import MoneyFormat, MoneyFormatError
+from fakturama_agent.uia.money import MoneyFormat, MoneyFormatError, workspace_currency
 
 US = MoneyFormat.from_example("$-1,234.57", 2)
 
@@ -67,3 +67,36 @@ def test_other_locales(example, decimals, fmt, text, value):
 def test_unsupported_examples(example, decimals):
     with pytest.raises(MoneyFormatError):
         MoneyFormat.from_example(example, decimals)
+
+
+# --- the workspace currency ------------------------------------------------------------------------
+
+
+
+
+@pytest.mark.parametrize("locale, example, expected", [
+    ("United States", "$-1,234.57", "USD"),
+    ("Germany", "-1.234,57 €", "EUR"),
+    ("Austria", "€ -1.234,57", "EUR"),
+    ("Germany", "-1.234,57 EUR", "EUR"),  # ISO code shown instead of the symbol
+    ("Switzerland", "CHF-1'234.57", "CHF"),
+    ("United Kingdom", "-£1,234.57", "GBP"),
+    ("Germany", "-1.234,57", "EUR"),  # no symbol: the locale decides
+])
+def test_workspace_currency(locale, example, expected):
+    code, how = workspace_currency(locale, MoneyFormat.from_example(example, 2))
+    assert code == expected and repr(locale) in how
+
+
+@pytest.mark.parametrize("locale, example, why", [
+    ("Germany", "$-1,234.57", "does not fit EUR"),  # symbol and locale contradict
+    ("Germany", "-1.234,57 USD", "disagree"),
+    ("Atlantis", "¤-1,234.57", "not known"),
+])
+def test_workspace_currency_unknown(locale, example, why):
+    code, how = workspace_currency(locale, MoneyFormat.from_example(example, 2))
+    assert code is None and why in how
+
+
+def test_workspace_currency_without_format():
+    assert workspace_currency("Germany", None) == (None, "the currency format was not read")

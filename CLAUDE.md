@@ -29,7 +29,7 @@ Work only on the current phase unless asked.
 - Paid status: anything other than PAID → UNPAID.
 - Payment method enum is closed (Bank Transfer, Credit Card, SEPA Direct Debit); unknown → manual review.
 - Billing ≠ delivery → second address with the Delivery role (Phase 3).
-- Currency: locale-aware money parser set by preflight; never change the app's locale (Phase 3).
+- Currency: locale-aware money parser set by preflight; never change the app's locale (Phase 3). The user sets the workspace currency; `run` stops for review on a mismatch unless `--accept-currency`.
 - When unsure, stop for manual review; never guess or fuzzy-match identifiers.
 
 ## Conventions

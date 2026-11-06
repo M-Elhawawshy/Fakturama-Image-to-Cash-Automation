@@ -6,14 +6,14 @@ One order image in, a saved and verified **Order** plus its **linked, paid Invoi
 samples/order_001.png ──extract──▶ out/order.json (validated OrderSpec) ──run──▶ Fakturama: master data, Order, Invoice
 ```
 
-**Status:** the whole brief is implemented and has run end to end on the sample: payment term, products and Debtor created when missing, Order PO000007 saved (lines 450.00 / 120.00, totals 570.00 / 108.30 / 678.30), linked Invoice INV000004 saved as paid on 2026-07-18 with Value 678.30, all verified in Data > Documents. 733 offline tests. What differs from the brief and what is not covered is listed under [Deviations and limits](#deviations-and-limits).
+**Status:** the whole brief is implemented and has run end to end on the sample: payment term, products and Debtor created when missing, Order PO000007 saved (lines 450.00 / 120.00, totals 570.00 / 108.30 / 678.30), linked Invoice INV000004 saved as paid on 2026-07-18 with Value 678.30, all verified in Data > Documents. That run was made before the currency check existed, in a workspace set to US dollars, so Fakturama shows these EUR amounts with a $ sign (see [Currency](#currency-set-by-you-not-by-the-tool)). 748 offline tests. What differs from the brief and what is not covered is listed under [Deviations and limits](#deviations-and-limits).
 
 ## Setup
 
 **Fakturama**
 - Fakturama **2.2.0**, **English** UI, Windows, display scaling 100%. Start it yourself and open the workspace; the tool never launches it.
 - File > Preferences > Documents: *immediately take over a clearly found item number* must be **off** (preflight checks it).
-- The currency format is read from Preferences (General) and never changed; the sample was run with the default *United States* locale.
+- **Currency: set it yourself.** Fakturama 2.2.0 has one currency per workspace (File > Preferences > General > *Currency locale*); documents have no currency of their own. The tool only reads this setting and never changes it. For the sample, which is in EUR, choose a euro country (e.g. *Germany*) before `run`, or pass `--accept-currency` (see below).
 - Back up the workspace folder before a run that creates records (copy it; restore by copying back).
 
 **Python**
@@ -33,6 +33,8 @@ uv run python -m fakturama_agent run out/order.json --without-email
 `extract` writes the `OrderSpec`, or a `review.md` and exit code 2 when a check fails. `run` prints one line per step and writes `out/runs/<time>/` with `report.md`, `journal.jsonl`, before/after screenshots of every step and a UIA dump of the window when it stops. Exit codes: 0 done, 2 stopped for review, 1 usage error.
 
 `--without-email`: Fakturama rejects the sample's `marta.klein@example.test` (*Please enter a valid e-mail address*). Without the flag the run stops for review before saving the Debtor; with it the Debtor is saved with an empty E-Mail and the report says so.
+
+`--accept-currency`: `run` compares the order's currency (EUR in the sample) with the workspace currency and stops for review when they differ. With the flag it goes on and enters the amounts as plain numbers; Fakturama then shows them in the workspace currency (e.g. `$678.30` for an EUR order). The report records that the mismatch was accepted.
 
 Other flags: `--allow-duplicate` (create another Order and Invoice although one carries the Cust.Ref.), `--checked` (you inspected Fakturama after an earlier run stopped right after a Save).
 
@@ -60,7 +62,7 @@ Other flags: `--allow-duplicate` (create another Order and Invoice although one 
 **Tables** (NatTable exposes no rows to UIA). The grid's pixels decide whether it is empty and which rows are highlighted; the header is checked by OCR; the rows are copied with Select All + Copy and accepted only if the clipboard was freshly written by Fakturama and two copies agree. Copy is only sent when exactly the expected rows are highlighted, because Copy without a selection crashes Fakturama 2.2.0. Line cells are edited through NatTable's inline editors, located from the header separators.
 
 **The run** (`flow/`). Explicit steps with outcomes ok / create / review / stop:
-1. gates: spec checks, journal, preflight, Error.log baseline, duplicate guard on Cust.Ref.;
+1. gates: spec checks, journal, preflight, currency (order vs workspace), Error.log baseline, duplicate guard on Cust.Ref.;
 2. master data, check first and create only when missing, in a safe order: payment term (the Debtor editor reads the list once), VAT, products (VAT chosen before the gross price, which it recalculates), Debtor (billing address with the Invoice role, delivery address with the Delivery role, alias, Net, payment);
 3. the Order: header, Debtor and products picked in the Order's own selector dialogs (exact match on Company/First Name/Name/ZIP/City and Item No.), lines, totals, addresses, Save once, Documents row;
 4. the linked Invoice from the Order's follow-up area: copied fields confirmed, payment method, paid + payment date + Value = Total (unpaid: nothing touched), Save once, Invoice row, Order still open, Invoice reopened and read back.
@@ -85,8 +87,13 @@ On the cleaned workspace the full result took three runs: the first two stopped 
 
 - **Order of operations.** The brief keeps the New Order open and creates missing master data from there, returning to the same Order. `run` settles master data first (checking the Data views), then opens the Order and selects everything through the Order's own selector dialogs, which still serve as the final existence check. Reason: every editor then sees fresh lists (the Debtor editor reads the payment list only once), and an Order is never left half-built while other editors save. The existence checks, exact-match rules and create branches are the brief's; only the moment differs.
 - **E-mail.** Fakturama rejects the `.test` domain; the Debtor is saved without E-Mail only with `--without-email`, otherwise the run stops for review.
-- **Currency.** The workspace's locale is US dollars; the order is in EUR. Amounts are compared as numbers; the currency label is not changed (the locale is never touched).
-- **Tested environment.** English Fakturama 2.2.0, US currency format, 100% display scaling, a maximized window, one sample image. Other UI languages and currency formats are refused by preflight; a date display other than `MMM d, yyyy` stops the run; other display scaling is untested.
+- <a id="currency-set-by-you-not-by-the-tool"></a>**Currency: set by you, not by the tool.** Fakturama 2.2.0 keeps one currency for the whole workspace, so an Order cannot be "in EUR" on its own. The automation never changes that setting: choosing the workspace currency is the user's job. What the automation does:
+  - preflight reads the currency format, and every amount read back from Fakturama is parsed in that format (`$-1,234.57`, `-1.234,57 €`, ...);
+  - `run` works out the workspace currency from the locale and its symbol, and stops for review if it differs from the order's currency or cannot be determined;
+  - with `--accept-currency` it enters the amounts as plain numbers anyway, and Fakturama labels them with the workspace currency.
+
+  The sample's live runs used a US-dollar workspace (before this check existed), so the EUR amounts appear with `$`. With the workspace set to *Germany*, the check reads EUR live (read-only preflight); a full `run` in a euro workspace has not been recorded yet.
+- **Tested environment.** English Fakturama 2.2.0, US currency format, 100% display scaling, a maximized window, one sample image. Other UI languages, and currency formats the money reader cannot pin down, are refused by preflight; a date display other than `MMM d, yyyy` stops the run; other display scaling is untested.
 - **Not exercised live:** an UNPAID invoice saved (the unpaid branch was run unsaved; its Documents state is only required to not be *paid*), Credit Card and SEPA terms, VAT rates other than 19% in an order (0% needs an exemption code and is refused), more item lines than the editor shows without scrolling (the line editor then stops).
 - **Keyboard layout.** Ctrl shortcuts are sent as virtual keys and were verified with an Arabic layout active; digits map to the same keys in that layout, but full runs were done with the English layout.
 

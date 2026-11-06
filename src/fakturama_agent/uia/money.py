@@ -91,3 +91,50 @@ class MoneyFormat:
     def describe(self) -> str:
         sample = f"1{self.group}234{self.decimal}{'5' * self.decimals}"
         return f"{self.symbol}{sample}" if self.symbol_first else f"{sample} {self.symbol}".rstrip()
+
+
+# --------------------------------------------------------------------------
+# which currency the workspace is in
+# --------------------------------------------------------------------------
+
+# Fakturama 2.2.0 has ONE currency for the whole workspace (Preferences > General >
+# Currency locale, a country name); documents have no currency of their own. The
+# run only reads it, to compare it with the order's currency; changing it is the
+# user's job, never the automation's.
+_EURO = ("Austria", "Belgium", "Croatia", "Cyprus", "Estonia", "Finland", "France", "Germany", "Greece",
+         "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta", "Netherlands", "Portugal",
+         "Slovakia", "Slovenia", "Spain")
+COUNTRY_CURRENCY: dict[str, str] = {
+    **{country: "EUR" for country in _EURO},
+    "United States": "USD", "United Kingdom": "GBP", "Switzerland": "CHF", "Liechtenstein": "CHF",
+    "Canada": "CAD", "Australia": "AUD", "New Zealand": "NZD", "Japan": "JPY", "China": "CNY",
+    "Sweden": "SEK", "Norway": "NOK", "Denmark": "DKK", "Poland": "PLN", "Czech Republic": "CZK",
+    "Czechia": "CZK", "Hungary": "HUF",
+}
+SYMBOL_CURRENCIES: dict[str, set[str]] = {
+    "$": {"USD", "CAD", "AUD", "NZD"}, "€": {"EUR"}, "£": {"GBP"}, "¥": {"JPY", "CNY"},
+    "kr": {"SEK", "NOK", "DKK"}, "zł": {"PLN"}, "Kč": {"CZK"}, "Ft": {"HUF"},
+}
+_ISO = re.compile(r"^[A-Z]{3}$")
+
+
+def workspace_currency(locale: str | None, money: MoneyFormat | None) -> tuple[str | None, str]:
+    """Pure: (ISO code, how it was found) of the workspace currency, or (None, why not).
+
+    From the Currency locale (a country) and the symbol in Preferences' example; both
+    must agree. Unknown or contradicting settings give None (the run stops for review).
+    """
+    if money is None:
+        return None, "the currency format was not read"
+    by_locale = COUNTRY_CURRENCY.get((locale or "").strip())
+    symbol = money.symbol.strip()
+    seen = f"locale {locale!r}, symbol {symbol!r}"
+    if _ISO.match(symbol):
+        if by_locale and by_locale != symbol:
+            return None, f"{seen} disagree ({by_locale} vs {symbol})"
+        return symbol, seen
+    if by_locale is None:
+        return None, f"{seen}: the locale's currency is not known to the tool"
+    if symbol and by_locale not in SYMBOL_CURRENCIES.get(symbol, set()):
+        return None, f"{seen}: the symbol does not fit {by_locale}"
+    return by_locale, seen

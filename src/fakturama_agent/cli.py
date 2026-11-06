@@ -128,6 +128,9 @@ def build_parser() -> argparse.ArgumentParser:
                     help="create the Order even if one with the same Cust.Ref. exists")
     rn.add_argument("--checked", action="store_true",
                     help="you checked Fakturama after an earlier run left a Save of unknown outcome")
+    rn.add_argument("--accept-currency", action="store_true",
+                    help="enter the amounts although the order's currency is not the workspace's (Fakturama "
+                         "then shows them in the workspace currency); the tool never changes the currency")
 
     inv = sub.add_parser("invoice-open", help="open the saved Order's linked Invoice (follow-up) and confirm what "
                          "it copied: header, addresses, lines, totals. Never saves.")
@@ -285,7 +288,8 @@ def main(argv: list[str] | None = None) -> int:
             return commands.cmd_invoice_open(args.spec)
         if args.command == "run":
             return commands.cmd_run(args.spec, without_email=args.without_email,
-                                    allow_duplicate=args.allow_duplicate, checked=args.checked)
+                                    allow_duplicate=args.allow_duplicate, checked=args.checked,
+                                    accept_currency=args.accept_currency)
         if args.command == "check-order":
             return commands.cmd_check_order(args.spec)
         if args.command == "create-order":
