@@ -100,3 +100,37 @@ def test_invoice_open_all_ok_leaves_the_invoice_unsaved(capsys):
 def test_invoice_open_failure_before_the_invoice_exists(capsys):
     code, out = run_cmd(capsys, InvoiceRun([Step("linked Invoice", False, "the saved Order is not verified")]))
     assert code == 2 and "[FAIL] linked Invoice" in out and "left open" not in out
+
+
+# --- part C: paid status rules -------------------------------------------------------------------------
+
+from decimal import Decimal  # noqa: E402
+
+from fakturama_agent.flow.invoice import paid_problems  # noqa: E402
+from fakturama_agent.spec.models import PaidStatus  # noqa: E402
+
+TOTAL = Decimal("678.30")
+UNPAID = SPEC.model_copy(update={"payment": SPEC.payment.model_copy(
+    update={"paid_status": PaidStatus.UNPAID, "payment_date": None})})
+
+
+def test_paid_as_recorded_live():
+    assert paid_problems("on", "Jul 18, 2026", TOTAL, TOTAL, SPEC) == []  # read back 2026-11-06
+
+
+@pytest.mark.parametrize(
+    "paid, shown, value, total, needle",
+    [("off", "Jul 18, 2026", TOTAL, TOTAL, "paid is 'off'"),
+     ("on", "Nov 6, 2026", TOTAL, TOTAL, "paid date"),
+     ("on", "Jul 18, 2026", Decimal("600.00"), TOTAL, "Value"),
+     ("on", "Jul 18, 2026", None, TOTAL, "Value"),
+     ("on", "Jul 18, 2026", Decimal("620.00"), Decimal("620.00"), "Invoice Total")],
+)
+def test_paid_differences(paid, shown, value, total, needle):
+    problems = paid_problems(paid, shown, value, total, SPEC)
+    assert len(problems) == 1 and needle in problems[0]
+
+
+def test_unpaid_leaves_paid_clear():
+    assert paid_problems("off", "", None, None, UNPAID) == []
+    assert "UNPAID" in paid_problems("on", "", None, None, UNPAID)[0]

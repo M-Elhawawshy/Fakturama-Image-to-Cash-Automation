@@ -66,6 +66,8 @@ Find the saved Order by Cust.Ref. in Documents (exactly one, verified as in `che
 
 **Live check:** `invoice-open` on the sample shows paid ticked, at `Jul 18, 2026`, Value `$678.30`, Bank Transfer; with a test spec whose status is UNPAID, paid stays clear.
 
+**Done (C) 2026-11-06** (`invoice-open` now ends with the payment steps; `paid_problems`). Live: the term is checked first (Bank Transfer, code `Credit transfer`, description `Bank Transfer`), before the Invoice is opened. Sample: method already `Bank Transfer` (untouched), paid ticked via Toggle, `at` entered as Jul 18, 2026 with the segmented-date routine, Value already `$678.30` = Total (not typed); Invoice Date and Service date still Nov 6. UNPAID test spec (`tests/fixtures/specs/order_unpaid.json`): method confirmed, paid clear, Due Days `0` / Pay Until untouched. Both Invoices discarded unsaved.
+
 ### D. Save once and verify (persists the Invoice)
 
 Select the Invoice address tab; journal `attempting invoice`; toolbar Save once (any dialog stops, never retried); the editor is renamed to its number. Then Documents: find the Invoice row (category to be recorded on the first Save; `This transaction` may show Order and Invoice together), check number, Cust.Ref., Total and state; check the source Order row is still `open` with the same Cust.Ref. and Total. Reopen the Invoice (5.6) and read method, paid, at, Value. Commands `create-invoice SPEC [--no-save]` and read-only `check-invoice SPEC`.

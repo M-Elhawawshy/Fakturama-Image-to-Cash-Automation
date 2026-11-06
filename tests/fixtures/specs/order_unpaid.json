@@ -1,0 +1,392 @@
+{
+  "schema_version": "1",
+  "order": {
+    "external_reference": "WEB-2026-0714-A17",
+    "order_date": "2026-07-14",
+    "customer_id": "CUST-1007",
+    "currency": "EUR"
+  },
+  "debtor": {
+    "company": "Northstar Office GmbH",
+    "alias": "NORTHSTAR-BERLIN",
+    "contact_first_name": "Marta",
+    "contact_last_name": "Klein",
+    "email": "marta.klein@example.test",
+    "phone": "+49 30 5550 1420"
+  },
+  "billing_address": {
+    "name": "Northstar Office GmbH",
+    "street": "Friedrichstrasse 88",
+    "zip": "10117",
+    "city": "Berlin",
+    "country": "Germany",
+    "country_code": "DE"
+  },
+  "delivery_address": {
+    "name": "Northstar Office Warehouse",
+    "street": "Beusselstrasse 44",
+    "zip": "10553",
+    "city": "Berlin",
+    "country": "Germany",
+    "country_code": "DE"
+  },
+  "payment": {
+    "method": "Bank Transfer",
+    "paid_status": "UNPAID",
+    "payment_date": null
+  },
+  "items": [
+    {
+      "line_no": 1,
+      "sku": "CHR-ERG-01",
+      "description": "Ergonomic Desk Chair",
+      "quantity": "2",
+      "unit": "pcs",
+      "unit_net_price": "250.00",
+      "discount_percent": "10",
+      "vat_percent": "19",
+      "line_net": "450.00"
+    },
+    {
+      "line_no": 2,
+      "sku": "MAT-DESK-02",
+      "description": "Anti-Fatigue Desk Mat",
+      "quantity": "3",
+      "unit": "pcs",
+      "unit_net_price": "40.00",
+      "discount_percent": "0",
+      "vat_percent": "19",
+      "line_net": "120.00"
+    }
+  ],
+  "totals": {
+    "net": "570.00",
+    "vat": "108.30",
+    "gross": "678.30"
+  },
+  "derived": {
+    "payment_code": "Credit transfer",
+    "billing_equals_delivery": false,
+    "items": [
+      {
+        "line_no": 1,
+        "vat_name": "VAT 19%",
+        "product_gross_price": "297.50",
+        "expected_line_net": "450.00"
+      },
+      {
+        "line_no": 2,
+        "vat_name": "VAT 19%",
+        "product_gross_price": "47.60",
+        "expected_line_net": "120.00"
+      }
+    ],
+    "totals": {
+      "net": "570.00",
+      "vat": "108.30",
+      "gross": "678.30",
+      "matches_printed": true
+    }
+  },
+  "provenance": {
+    "image_sha256": "24ca3ced6f46673ce72f50466adaa552a227f58b651bb29939f42c04316c1ace",
+    "model_id": "gemini-3.5-flash-lite",
+    "ocr_engine": "rapidocr-onnxruntime 1.4.4",
+    "field_checks": [
+      {
+        "field": "order.external_reference",
+        "value": "WEB-2026-0714-A17",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "order.order_date",
+        "value": "2026-07-14",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "order.customer_id",
+        "value": "CUST-1007",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "order.currency",
+        "value": "EUR",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "order.status_badge",
+        "value": "PAID",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "debtor.company",
+        "value": "Northstar Office GmbH",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "debtor.alias",
+        "value": "NORTHSTAR-BERLIN",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "debtor.contact_name",
+        "value": "Marta Klein",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "debtor.email",
+        "value": "marta.klein@example.test",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "debtor.phone",
+        "value": "+49 30 5550 1420",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "payment.method",
+        "value": "Bank Transfer",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "payment.paid_status",
+        "value": "PAID",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "payment.payment_date",
+        "value": "2026-07-18",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "totals.net",
+        "value": "EUR 570.00",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "totals.vat",
+        "value": "EUR 108.30",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "totals.gross",
+        "value": "EUR 678.30",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "billing_address.name",
+        "value": "Northstar Office GmbH",
+        "status": "confirmed",
+        "critical": false,
+        "ocr_text": null
+      },
+      {
+        "field": "billing_address.street",
+        "value": "Friedrichstrasse 88",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "billing_address.zip",
+        "value": "10117",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "billing_address.city",
+        "value": "Berlin",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "billing_address.country",
+        "value": "Germany",
+        "status": "confirmed",
+        "critical": false,
+        "ocr_text": null
+      },
+      {
+        "field": "delivery_address.name",
+        "value": "Northstar Office Warehouse",
+        "status": "confirmed",
+        "critical": false,
+        "ocr_text": null
+      },
+      {
+        "field": "delivery_address.street",
+        "value": "Beusselstrasse 44",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "delivery_address.zip",
+        "value": "10553",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "delivery_address.city",
+        "value": "Berlin",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "delivery_address.country",
+        "value": "Germany",
+        "status": "confirmed",
+        "critical": false,
+        "ocr_text": null
+      },
+      {
+        "field": "items[0].sku",
+        "value": "CHR-ERG-01",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "items[0].description",
+        "value": "Ergonomic Desk Chair",
+        "status": "confirmed",
+        "critical": false,
+        "ocr_text": null
+      },
+      {
+        "field": "items[0].quantity",
+        "value": "2",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "items[0].unit",
+        "value": "pcs",
+        "status": "confirmed",
+        "critical": false,
+        "ocr_text": null
+      },
+      {
+        "field": "items[0].unit_net_price",
+        "value": "250.00",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "items[0].discount",
+        "value": "10%",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "items[0].vat_rate",
+        "value": "19%",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "items[0].line_net",
+        "value": "450.00",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "items[1].sku",
+        "value": "MAT-DESK-02",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "items[1].description",
+        "value": "Anti-Fatigue Desk Mat",
+        "status": "confirmed",
+        "critical": false,
+        "ocr_text": null
+      },
+      {
+        "field": "items[1].quantity",
+        "value": "3",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "items[1].unit",
+        "value": "pcs",
+        "status": "confirmed",
+        "critical": false,
+        "ocr_text": null
+      },
+      {
+        "field": "items[1].unit_net_price",
+        "value": "40.00",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "items[1].discount",
+        "value": "0%",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "items[1].vat_rate",
+        "value": "19%",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      },
+      {
+        "field": "items[1].line_net",
+        "value": "120.00",
+        "status": "confirmed",
+        "critical": true,
+        "ocr_text": null
+      }
+    ]
+  }
+}

@@ -1,12 +1,18 @@
 """Phase 4: the linked Invoice of the saved Order (brief 4.6-5.7).
 
-Part B (this module so far): find the saved Order by its Cust.Ref. in Data >
+Part B: find the saved Order by its Cust.Ref. in Data >
 Documents (exactly one, verified as ``check-order`` does), open its editor or
 bind its already open tab, invoke the follow-up ``Invoice`` (never the toolbar's:
 only the follow-up keeps the Order relationship), bind the new ``New Invoice``
 editor by its window handle, and confirm what it copied from the Order (5.1).
 The proposed No., Invoice Date and Service date are read, never typed. Nothing is
 saved here.
+
+Part C: payment method and paid status (5.2/5.3), still unsaved: the method is
+picked by the verified term's *description* (the dropdown lists descriptions);
+PAID ticks ``paid``, enters the payment date in the ``at`` field and requires
+``Value`` to equal the Invoice Total (typed only if it differs); anything else
+leaves ``paid`` clear and touches no date or value.
 
 The Invoice editor has the Order's layout (recorded 2026-11-06), so ``OrderEditor``
 binds it and the Order's line, footer and address checks apply unchanged.
@@ -15,19 +21,22 @@ binds it and the Order's line, footer and address checks apply unchanged.
 from __future__ import annotations
 
 import re
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
+from decimal import Decimal
 
 from fakturama_agent.flow.create_order import Step, verify_documents
-from fakturama_agent.flow.order_header import OrderEditor
+from fakturama_agent.flow.master_data import check_payment
+from fakturama_agent.flow.order_header import HeaderError, OrderEditor, _LiveDate
 from fakturama_agent.flow.order_lines import footer_problems, invoice_tab_problems, lines_problems, read_footer
 from fakturama_agent.flow.order_select import check_delivery, debtor_key, read_items
-from fakturama_agent.spec.models import OrderSpec
-from fakturama_agent.uia import actions
+from fakturama_agent.spec.models import OrderSpec, PaidStatus
+from fakturama_agent.uia import actions, inputs
 from fakturama_agent.uia.binding import MainWindow, process_windows
-from fakturama_agent.uia.datefield import DateEntryError, display, parse_display, shows
+from fakturama_agent.uia.datefield import DateEntryError, display, enter_date, parse_display, shows
 from fakturama_agent.uia.locators import Registry
-from fakturama_agent.uia.money import MoneyFormat
+from fakturama_agent.uia.money import MoneyFormat, MoneyFormatError
 from fakturama_agent.uia.record_editor import EditorError, RecordEditor, read_view
 from fakturama_agent.uia.tables import TableError
 from fakturama_agent.uia.tree import snapshot_hwnd
@@ -171,6 +180,93 @@ def check_copy(invoice: OrderEditor, spec: OrderSpec, money: MoneyFormat, ocr: C
     return steps
 
 
+# --- part C: payment ------------------------------------------------------------------------------
+
+
+def paid_problems(paid: str, shown_date: str, value: Decimal | None, total: Decimal | None,
+                  spec: OrderSpec) -> list[str]:
+    """Pure: the payment area read back against the spec (5.3)."""
+    if spec.payment.paid_status != PaidStatus.PAID:
+        return [] if paid == "off" else [f"paid is {paid!r}, but the status is {spec.payment.paid_status.value}"]
+    p = []
+    if paid != "on":
+        p.append(f"paid is {paid!r}, expected ticked")
+    if not shows(shown_date, spec.payment.payment_date):
+        p.append(f"paid date shows {shown_date!r}, expected {display(spec.payment.payment_date)}")
+    if total != spec.derived.totals.gross:
+        p.append(f"Invoice Total is {total}, expected {spec.derived.totals.gross}")
+    if value != total:
+        p.append(f"Value is {value}, expected the full Invoice Total {total}")
+    return p
+
+
+def _money(money: MoneyFormat, text: str) -> Decimal | None:
+    try:
+        return money.parse(text)
+    except MoneyFormatError:
+        return None
+
+
+def _blur(invoice: OrderEditor) -> None:
+    inputs.focus(invoice.node("order.consultant"), invoice.main.hwnd)
+    time.sleep(0.3)
+
+
+def _enter_paid_date(invoice: OrderEditor, target) -> None:
+    field = invoice.node("invoice.paid_date")
+    inputs.focus(field, invoice.main.hwnd)
+    element = field.element.element
+    enter_date(_LiveDate(lambda: element.GetCurrentPropertyValue(30045) or ""), target)
+    _blur(invoice)
+
+
+def set_payment(invoice: OrderEditor, spec: OrderSpec, description: str, money: MoneyFormat) -> list[Step]:
+    """5.2 and 5.3 in the unsaved Invoice; every value read back."""
+    from pywinauto.controls.uiawrapper import UIAWrapper
+
+    steps = []
+    try:
+        inputs.choose(invoice.node("invoice.payment"), description, invoice.main.hwnd,
+                      refresh=lambda: invoice.node("invoice.payment"))
+        shown = invoice.node("invoice.payment").value or ""
+        method_problems = [] if shown == description else [f"payment shows {shown!r}, expected {description!r}"]
+    except inputs.InputError as e:
+        method_problems = [f"{spec.payment.method.value} ({description!r}) is not available: {e}"]
+    steps.append(Step("Invoice payment method", not method_problems, "; ".join(method_problems) or
+                      f"{description!r} ({spec.payment.method.value})"))
+    if method_problems:
+        return steps
+
+    if spec.payment.paid_status == PaidStatus.PAID:
+        paid = invoice.node("invoice.paid")
+        if paid.toggle != "on":
+            UIAWrapper(paid.element).toggle()
+            actions.wait_until(lambda: True if invoice.node("invoice.paid").toggle == "on" else None,
+                               timeout=5.0, what="paid ticked")
+            actions.wait_until(lambda: invoice.node("invoice.paid_date"), timeout=5.0, what="the paid date field")
+        if not shows(invoice.node("invoice.paid_date").value or "", spec.payment.payment_date):
+            _enter_paid_date(invoice, spec.payment.payment_date)
+        total = _money(money, invoice.node("order.total").value or "")
+        if total is not None and _money(money, invoice.node("invoice.paid_value").value or "") != total:
+            inputs.type_text(invoice.node("invoice.paid_value"), f"{total:.2f}", invoice.main.hwnd)
+            _blur(invoice)
+        snap = invoice.snapshot()
+
+        def v(key: str) -> str:
+            node = invoice.registry.resolve(snap, key)
+            return (node.toggle if key == "invoice.paid" else node.value) or ""
+
+        problems = paid_problems(v("invoice.paid"), v("invoice.paid_date"), _money(money, v("invoice.paid_value")),
+                                 _money(money, v("order.total")), spec)
+        detail = f"paid, at {v('invoice.paid_date')}, Value {v('invoice.paid_value')}"
+    else:
+        state = invoice.node("invoice.paid").toggle or ""
+        problems = paid_problems(state, "", None, None, spec)
+        detail = f"{spec.payment.paid_status.value}: paid left clear, no date or value"
+    steps.append(Step("Invoice paid status", not problems, "; ".join(problems) or detail))
+    return steps
+
+
 @dataclass
 class InvoiceRun:
     steps: list[Step]
@@ -184,15 +280,24 @@ class InvoiceRun:
 
 def open_invoice(main: MainWindow, registry: Registry, spec: OrderSpec, money: MoneyFormat,
                  ocr: Callable) -> InvoiceRun:
-    """Parts B (and later C): open the linked Invoice and confirm it; never saves."""
+    """Parts B and C: open the linked Invoice, confirm the copy, set payment; never saves."""
     run = InvoiceRun([])
     try:
+        term = check_payment(main, registry, spec.payment.method, ocr)  # before the Invoice exists
+        description = term.seen.get("Description", "")
+        if term.kind != "reusable" or term.error or not description:
+            run.steps.append(Step("payment term", False, f"needed for 5.2, review: {term.summary()}"))
+            return run
+        run.steps.append(Step("payment term", True, f"{term.reason}; listed as {description!r}"))
         order, number = open_saved_order(main, registry, spec, ocr)
         run.order_number = number
         run.steps.append(Step("source Order", True, f"{number} found once by {spec.order.external_reference!r}"))
         run.invoice = open_linked_invoice(order)
         run.steps.append(Step("linked Invoice", True, f"follow-up Invoice of {number} opened (unsaved)"))
         run.steps += check_copy(run.invoice, spec, money, ocr)
-    except (InvoiceError, EditorError, TableError, actions.ActionError, TimeoutError) as e:
+        if run.ok:
+            run.steps += set_payment(run.invoice, spec, description, money)
+    except (InvoiceError, EditorError, TableError, actions.ActionError, inputs.InputError, DateEntryError,
+            HeaderError, TimeoutError) as e:
         run.steps.append(Step("linked Invoice", False, str(e)))
     return run
