@@ -170,6 +170,15 @@ Wire A–I as explicit steps (precondition → one action → read-back) with ou
 - **Duplicate guard**: preflight refuses to start if Documents already holds an Order with the same Cust.Ref. *(Decision 2)*.
 - **Simulator**: a `FakeFakturama` implementing the same step interface, so the whole decision tree (all exist / all missing / ambiguous debtor / failure after a master Save / failure after the Order Save) is tested offline.
 
+**Built 2026-11-06** (`run SPEC [--without-email] [--allow-duplicate] [--checked]`; `flow/run.py`, `flow/journal.py`, `flow/live.py`, `flow/simulator.py`).
+- Steps: spec gate (critical extracted values OCR-confirmed) → journal gate → preflight → Error.log baseline → duplicate guard → payment → VAT rates → products → Debtor → Order; outcomes ok / create / review / stop; the first review or stop ends the run and leaves Fakturama as it is.
+- Master data is settled *before* the Order is opened (DESIGN.md had it branching from inside the Order): every editor then sees fresh lists, and the Order's selections prove the records exist.
+- Journal `out/runs/<time>/journal.jsonl`: `attempting` / `done` (outcome, saved) per step that may Save. A run that left `attempting` open (crash) or stopped after a Save blocks the next run for that Cust.Ref. until `--checked`; reruns are idempotent because every step checks first.
+- Evidence per run folder: Fakturama window screenshot before/after each step, UIA dump of the main window on review/stop (workspace path redacted), `report.md`, `result.json`.
+- Error.log (`~/.fakturama2/Logs/Error.log`) is read at the start and after every step; anything appended stops the run for review.
+- `FakeFakturama` implements the same interface over an in-memory workspace with injected failures; `tests/test_run.py` covers all missing, all existing, duplicate guard and override, ambiguous/conflicting Debtor, rejected e-mail, conflicting payment term, stop after a master Save (blocks, then `--checked` resumes without duplicates), crash after the Order Save, stop before Save (no block), new Error.log entry, unreadable Documents, spec gate.
+- Live 2026-11-06: on the workspace holding PO000005 (saved by `create-order`), `run` passed spec, journal and preflight gates and stopped at the duplicate guard, with report and UIA dump written.
+
 **Live check:** on a backed-up workspace, `run out/order.json` ends with a saved, verified Order. A second run on the same spec stops at the duplicate guard. With the guard overridden, it takes the select-existing branches for Debtor and Products.
 
 ## Tests per part

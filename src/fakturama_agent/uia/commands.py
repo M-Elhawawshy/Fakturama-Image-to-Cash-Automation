@@ -611,3 +611,64 @@ def cmd_check_order(spec_path: Path, *, registry: Registry | None = None,
     step = verifier(main, registry, spec, ocr)
     print(f"[{'ok  ' if step.ok else 'FAIL'}] {step.name}  {step.detail}")
     return EXIT_OK if step.ok else EXIT_UNRESOLVED
+
+
+def cmd_run(
+    spec_path: Path,
+    *,
+    without_email: bool = False,
+    allow_duplicate: bool = False,
+    checked: bool = False,
+    runs_root: Path = Path("out/runs"),
+    registry: Registry | None = None,
+    finder: Callable[[], MainWindow] = find_main_window,
+    adapter_factory=None,
+    ocr=None,
+) -> int:
+    """run: OrderSpec -> master data -> saved, verified Order, with journal and evidence (part J)."""
+    from datetime import datetime
+
+    from pydantic import ValidationError
+
+    from fakturama_agent.flow.journal import Journal
+    from fakturama_agent.flow.run import RunOptions, run_order, write_report
+    from fakturama_agent.spec.models import OrderSpec
+
+    try:
+        spec = OrderSpec.model_validate_json(spec_path.read_text(encoding="utf-8"))
+    except (OSError, ValidationError) as e:
+        print(f"Cannot load {spec_path}: {e}", file=sys.stderr)
+        return EXIT_ERROR
+    run_dir = runs_root / datetime.now().strftime("%Y%m%dT%H%M%S")
+    run_dir.mkdir(parents=True, exist_ok=True)
+    if adapter_factory is None:
+        registry = registry or Registry.load()
+        main = _bind(finder)
+        if main is None:
+            return EXIT_ERROR
+        if ocr is None:
+            from fakturama_agent.extract.ocr import run_ocr as ocr
+        from fakturama_agent.flow.live import LiveFakturama
+
+        fak = LiveFakturama(main, registry, ocr, run_dir)
+    else:
+        fak = adapter_factory(run_dir)
+    print(f"Run {run_dir.name}: {spec.order.external_reference} (evidence in {run_dir})\n")
+    result = run_order(spec, fak, Journal(run_dir / "journal.jsonl"), runs_root,
+                       RunOptions(without_email=without_email, allow_duplicate=allow_duplicate, checked=checked))
+    write_report(result, spec, run_dir / "report.md")
+    width = max(len(r.step) for r in result.records)
+    marks = {"ok": "ok  ", "create": "NEW ", "review": "REVW", "stop": "STOP"}
+    for r in result.records:
+        print(f"[{marks[r.outcome]}] {r.step:<{width}}  {r.detail}")
+    print(f"\nReport: {run_dir / 'report.md'}")
+    if result.ok:
+        print("Done: the Order is saved and verified.")
+        return EXIT_OK
+    final = result.final
+    if final and final.saved:
+        print("A Save happened in the last step and its outcome is not confirmed: check Fakturama's Data views; "
+              "the next run needs --checked.")
+    else:
+        print("Stopped for manual review; Fakturama is left as it is.")
+    return EXIT_UNRESOLVED

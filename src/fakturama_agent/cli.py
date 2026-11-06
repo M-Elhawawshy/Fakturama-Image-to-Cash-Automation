@@ -118,6 +118,17 @@ def build_parser() -> argparse.ArgumentParser:
     cro.add_argument("--no-save", action="store_true",
                      help="do every step except Save (the verified Order is left open, unsaved)")
 
+    rn = sub.add_parser("run", help="the whole flow for one OrderSpec: preflight, duplicate guard, payment term, "
+                        "VAT, products, Debtor, then the Order (Save once, verified), with a journal and evidence "
+                        "in out/runs/<time>/. PERSISTS records: back up first.")
+    rn.add_argument("spec", type=Path, help="OrderSpec JSON")
+    rn.add_argument("--without-email", action="store_true",
+                    help="if Fakturama rejects the Debtor's e-mail, save it with an EMPTY E-Mail instead of stopping")
+    rn.add_argument("--allow-duplicate", action="store_true",
+                    help="create the Order even if one with the same Cust.Ref. exists")
+    rn.add_argument("--checked", action="store_true",
+                    help="you checked Fakturama after an earlier run left a Save of unknown outcome")
+
     cko = sub.add_parser("check-order", help="is the OrderSpec's Order saved in Data > Documents once, with its "
                          "Cust.Ref., Date, contact, state open and Total? (read-only)")
     cko.add_argument("spec", type=Path, help="OrderSpec JSON")
@@ -233,7 +244,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command in ("inspect", "locate", "preflight", "read-table", "order-open", "order-select",
                         "check-vat", "check-payment", "check-master",
                         "create-payment", "create-vat", "create-product", "create-debtor", "create-master",
-                        "create-order", "check-order"):
+                        "create-order", "check-order", "run"):
         from fakturama_agent.uia import commands
 
         if args.command == "inspect":
@@ -250,6 +261,9 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "create-debtor":
             return commands.cmd_create("debtor", spec_path=args.spec, without_email=args.without_email,
                                        reselect=args.reselect)
+        if args.command == "run":
+            return commands.cmd_run(args.spec, without_email=args.without_email,
+                                    allow_duplicate=args.allow_duplicate, checked=args.checked)
         if args.command == "check-order":
             return commands.cmd_check_order(args.spec)
         if args.command == "create-order":

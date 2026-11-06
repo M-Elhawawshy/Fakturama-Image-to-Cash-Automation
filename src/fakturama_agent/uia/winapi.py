@@ -109,3 +109,13 @@ def enum_windows() -> list[WindowInfo]:
 
 def foreground_hwnd() -> int:
     return int(_user32().GetForegroundWindow() or 0)
+
+
+def window_rect(hwnd: int) -> tuple[int, int, int, int]:
+    """Screen rectangle (left, top, right, bottom) of a top-level window."""
+    from ctypes import byref, wintypes
+
+    rect = wintypes.RECT()
+    if not _user32().GetWindowRect(hwnd, byref(rect)):
+        raise OSError(f"GetWindowRect failed for {hwnd}")
+    return rect.left, rect.top, rect.right, rect.bottom
