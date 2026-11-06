@@ -87,7 +87,7 @@ Annotated screenshots from the runner's own evidence, with personal paths blurre
 
 ![Order and its paid Invoice](docs/screenshots/3-order-and-invoice.png)
 
-All three come from one clean `automate` run in a euro workspace (run 20261106T154423), which finished on the first attempt. Earlier history: the first full run used a US-dollar workspace, so its EUR amounts showed `$`, which led to the currency check. Its clean test needed three runs, because a desktop notification twice covered part of a Data view; the reader now waits up to 10 s for such an overlay and keeps a screenshot of it. The first euro run stopped before saving a product because the price was typed with a dot, which led to typing money in the workspace's format.
+All three come from one clean `automate` run in a euro workspace, which finished on the first attempt. Earlier history: the first full run used a US-dollar workspace, so its EUR amounts showed `$`, which led to the currency check. Its clean test needed three runs, because a desktop notification twice covered part of a Data view; the reader now waits up to 10 s for such an overlay and keeps a screenshot of it. The first euro run stopped before saving a product because the price was typed with a dot, which led to typing money in the workspace's format.
 
 ## Deviations and limits
 
