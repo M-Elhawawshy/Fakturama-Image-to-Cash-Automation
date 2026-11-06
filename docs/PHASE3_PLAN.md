@@ -8,7 +8,7 @@ Binding inputs: `docs/DESIGN.md`, `agent findings/fakturama-uia-findings.md`, th
 
 ## Starting state (read-only look at the workspace, 2026-11-05)
 
-Workspace: `C:\Users\ma774\OneDrive\Desktop\work\fakturama data TJM Labs` (HSQLDB, inside OneDrive).
+Workspace: `<workspace>` (HSQLDB, inside OneDrive).
 
 | Record | Present | Branch a sample run takes |
 |---|---|---|
