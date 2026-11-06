@@ -169,7 +169,7 @@ def create_vat(main: MainWindow, registry: Registry, rate: Decimal, ocr: Callabl
         editor = RecordEditor.open_new(main, registry, "view.vats.create", "New TAX Rate")
         _type(editor, "vat.name", name, "vat.description")
         _type(editor, "vat.description", name, "vat.name")
-        _type(editor, "vat.value", f"{rate.normalize():f}", "vat.name")  # Value commits on blur
+        _type(editor, "vat.value", f"{rate.normalize():f}", "vat.name")  # dot in any locale; commits on blur
         _choose(editor, "vat.code", "S (Standard rate)")
         problems = verify_fields(read_vat_editor(editor), vat_fields(rate))
     except (EditorError, inputs.InputError, TimeoutError, ArithmeticError) as e:
@@ -248,7 +248,7 @@ def create_product(main: MainWindow, registry: Registry, item: Item, gross: Deci
         _type(editor, "product.name", item.description, "product.item_no")
         _type(editor, "product.description", item.description, "product.item_no")
         _choose(editor, "product.vat", vat)  # before the gross price: changing VAT recalculates gross
-        _type(editor, "product.gross_price", f"{gross:.2f}", "product.item_no")
+        _type(editor, "product.gross_price", money.typed(gross), "product.item_no")
         problems = verify_fields(read_product_editor(editor), product_fields(item, gross, vat, money))
     except (EditorError, inputs.InputError, TimeoutError) as e:
         return Created(what, "stopped", f"{e}; nothing saved (close the new editor by hand without saving)")

@@ -100,3 +100,11 @@ def test_workspace_currency_unknown(locale, example, why):
 
 def test_workspace_currency_without_format():
     assert workspace_currency("Germany", None) == (None, "the currency format was not read")
+
+
+def test_typed_uses_the_workspace_decimal_mark():
+    germany = MoneyFormat.from_example("-1.234,57 €", 2)
+    assert germany.typed(Decimal("297.5")) == "297,50"  # '297.50' would be 29.750,00 €
+    assert germany.typed(Decimal("678.30")) == "678,30" and germany.typed(Decimal("1234.5")) == "1234,50"
+    assert US.typed(Decimal("297.5")) == "297.50" and US.typed(Decimal("0")) == "0.00"
+    assert germany.parse(f"{germany.typed(Decimal('678.3'))} €") == Decimal("678.30")

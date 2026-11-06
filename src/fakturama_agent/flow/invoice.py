@@ -256,7 +256,7 @@ def set_payment(invoice: OrderEditor, spec: OrderSpec, description: str, money: 
             _enter_paid_date(invoice, spec.payment.payment_date)
         total = _money(money, invoice.node("order.total").value or "")
         if total is not None and _money(money, invoice.node("invoice.paid_value").value or "") != total:
-            inputs.type_text(invoice.node("invoice.paid_value"), f"{total:.2f}", invoice.main.hwnd)
+            inputs.type_text(invoice.node("invoice.paid_value"), money.typed(total), invoice.main.hwnd)
             _blur(invoice)
         snap = invoice.snapshot()
 

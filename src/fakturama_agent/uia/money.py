@@ -88,6 +88,15 @@ class MoneyFormat:
         value = Decimal(body)
         return -value if neg else value
 
+    def typed(self, value: Decimal) -> str:
+        """What to type into a money field (a product's gross price, an Invoice's paid Value):
+        the workspace's decimal mark, no grouping, no symbol. Recorded live (2026-11-06,
+        Germany): '297,50' is 297,50 EUR, while '297.50' is read as 29.750,00 EUR and
+        '12.34' as 1.234,00 EUR. Not for NatTable line cells or the VAT Value, which always
+        take a dot ('1,5' -> 15, '7,5' -> 75 %)."""
+        text = f"{value.quantize(Decimal(1).scaleb(-self.decimals)):f}"
+        return text.replace(".", self.decimal) if self.decimal else text
+
     def describe(self) -> str:
         sample = f"1{self.group}234{self.decimal}{'5' * self.decimals}"
         return f"{self.symbol}{sample}" if self.symbol_first else f"{sample} {self.symbol}".rstrip()

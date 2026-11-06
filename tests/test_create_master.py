@@ -276,3 +276,20 @@ def test_single_product_and_unknown_sku(capsys):
 def test_create_debtor_passes_the_email_choice(capsys):
     code, calls, _ = run(capsys, "debtor", spec_path=GOLDEN, without_email=True)
     assert code == 0 and calls == [("debtor", "Northstar Office GmbH", {"without_email": True})]
+
+
+def test_product_gross_price_is_typed_in_the_german_format(fake, monkeypatch):
+    """Live 2026-11-06 (locale Germany): '297.50' was read as 29.750,00 €, so the run stopped before Save."""
+    germany = MoneyFormat.from_example("-1.234,57 €", 2)
+    rows = {"before": [], "after": [{"Item No.": "CHR-ERG-01", "Name": "Ergonomic Desk Chair",
+                                      "Price": "297.5", "VAT": "VAT taxValue: [0.19] name: [VAT 19%]"}]}
+    calls = iter(["before", "after"])
+    monkeypatch.setattr(cm, "product_rows", lambda *a: rows[next(calls)])
+    fake["checks"] = [MasterCheck("VAT 19%", "reusable", "ok")]
+    FakeEditor.fields = {"product.item_no": "CHR-ERG-01", "product.name": "Ergonomic Desk Chair",
+                         "product.description": "Ergonomic Desk Chair", "product.vat": "VAT 19%",
+                         "product.gross_price": "297,50\xa0€", "product.cost_price": "0,00\xa0€",
+                         "product.stock": "0.00", "saved_as": "Ergonomic Desk Chair"}
+    result = cm.create_product(MAIN, REG, CHAIR, Decimal("297.50"), germany, ocr=None)
+    assert result.status == "created", result.detail
+    assert ("type", "product.gross_price", "297,50") in FakeEditor.log

@@ -5,7 +5,8 @@ Recorded live (2026-11-05, unsaved Order with the sample's Debtor and products):
   (Qty. shows '1.00', U.Price 'USD 40', Discount '0.00 %'); real keys replace the
   text, Enter commits. After Enter the Qty. editor moves on to the next row (from
   the last row back to the first); Escape closes that one unchanged. A plain
-  number is accepted for every column ('2', '41.50', '10' for 10 %);
+  number is accepted for every column ('2', '41.50', '10' for 10 %); the cells take a
+  dot whatever the currency locale (Germany: '1,5' in Qty. is 15, '12.5' is 12.5 %);
 - the copy then holds model values: Qty. '2.00', U.Price 'USD 250' (currency of
   the app's locale, not the order's), Discount '-0.1' for 10 %, Price 'USD 450';
 - the totals are display money ('$570.00', the preflight's MoneyFormat).
