@@ -714,3 +714,88 @@ def cmd_invoice_open(spec_path: Path, *, registry: Registry | None = None,
     else:
         print("\nNothing was saved.")
     return EXIT_OK if run.ok else EXIT_UNRESOLVED
+
+
+def _invoice_cmd(spec_path: Path, action, *, registry, finder, preflight, ocr, label: str) -> int:
+    from pydantic import ValidationError
+
+    from fakturama_agent.spec.models import OrderSpec
+
+    try:
+        spec = OrderSpec.model_validate_json(spec_path.read_text(encoding="utf-8"))
+    except (OSError, ValidationError) as e:
+        print(f"Cannot load {spec_path}: {e}", file=sys.stderr)
+        return EXIT_ERROR
+    registry = registry or Registry.load()
+    main = _bind(finder)
+    if main is None:
+        return EXIT_ERROR
+    if ocr is None:
+        from fakturama_agent.extract.ocr import run_ocr as ocr
+    if preflight is None:
+        from fakturama_agent.uia.preflight import LiveProbe, run_preflight
+
+        preflight = lambda m, r: run_preflight(m, LiveProbe(r), r)  # noqa: E731
+    report = preflight(main, registry)
+    if not report.ok:
+        print_report(report)
+        print(f"\nNot {label} until preflight is clean.")
+        return EXIT_UNRESOLVED
+    return action(main, registry, spec, report.money, ocr)
+
+
+def _print_steps(steps) -> None:
+    width = max(len(s.name) for s in steps)
+    for s in steps:
+        print(f"[{'ok  ' if s.ok else 'FAIL'}] {s.name:<{width}}  {s.detail}")
+
+
+def cmd_create_invoice(spec_path: Path, *, allow_duplicate: bool = False, save: bool = True,
+                       registry: Registry | None = None, finder: Callable[[], MainWindow] = find_main_window,
+                       preflight=None, creator=None, ocr=None) -> int:
+    """create-invoice: the linked Invoice, payment, Save once, verify (Phase 4). Persists one Invoice."""
+
+    def action(main, registry, spec, money, ocr):
+        nonlocal creator
+        if creator is None:
+            from fakturama_agent.flow.invoice import create_invoice as creator
+        run = creator(main, registry, spec, money, ocr, allow_duplicate=allow_duplicate, save=save)
+        _print_steps(run.steps)
+        if run.ok and not save:
+            print("\nEverything verified; nothing was saved (--no-save). Close the New Invoice without saving "
+                  "(Save Parts: untick it, OK).")
+            return EXIT_OK
+        if run.ok:
+            print(f"\nInvoice {run.number} saved and verified; its Order is still open.")
+            return EXIT_OK
+        if run.saved and run.number is None:
+            print("\nA Save was dispatched and its outcome is not confirmed: check Data > Documents > Invoices "
+                  "by hand; do not rerun blindly.")
+        elif run.saved:
+            print(f"\nInvoice {run.number} was saved, but its verification failed: review it by hand.")
+        elif run.invoice is not None:
+            print("\nNothing was saved. The New Invoice is left open: close it without saving "
+                  "(Save Parts: untick it, OK).")
+        else:
+            print("\nNothing was saved.")
+        return EXIT_UNRESOLVED
+
+    return _invoice_cmd(spec_path, action, registry=registry, finder=finder, preflight=preflight, ocr=ocr,
+                        label="creating the Invoice")
+
+
+def cmd_check_invoice(spec_path: Path, *, registry: Registry | None = None,
+                      finder: Callable[[], MainWindow] = find_main_window, preflight=None, verifier=None,
+                      ocr=None) -> int:
+    """check-invoice: the saved Invoice, its open source Order, the reopened Invoice (read-only)."""
+
+    def action(main, registry, spec, money, ocr):
+        nonlocal verifier
+        if verifier is None:
+            from fakturama_agent.flow.invoice import verify_invoice as verifier
+        steps = verifier(main, registry, spec, money, ocr)
+        _print_steps(steps)
+        return EXIT_OK if all(s.ok for s in steps) else EXIT_UNRESOLVED
+
+    return _invoice_cmd(spec_path, action, registry=registry, finder=finder, preflight=preflight, ocr=ocr,
+                        label="checking the Invoice")

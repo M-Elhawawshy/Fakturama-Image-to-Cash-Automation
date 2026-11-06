@@ -29,7 +29,13 @@ from decimal import Decimal
 from fakturama_agent.flow.create_order import Step, verify_documents
 from fakturama_agent.flow.master_data import check_payment
 from fakturama_agent.flow.order_header import HeaderError, OrderEditor, _LiveDate
-from fakturama_agent.flow.order_lines import footer_problems, invoice_tab_problems, lines_problems, read_footer
+from fakturama_agent.flow.order_lines import (
+    footer_problems,
+    invoice_tab_problems,
+    lines_problems,
+    model_amount,
+    read_footer,
+)
 from fakturama_agent.flow.order_select import check_delivery, debtor_key, read_items
 from fakturama_agent.spec.models import OrderSpec, PaidStatus
 from fakturama_agent.uia import actions, inputs
@@ -272,6 +278,8 @@ class InvoiceRun:
     steps: list[Step]
     order_number: str | None = None
     invoice: OrderEditor | None = None  # the bound, still unsaved Invoice editor
+    saved: bool = False  # a Save was dispatched
+    number: str | None = None  # the saved Invoice's number
 
     @property
     def ok(self) -> bool:
@@ -300,4 +308,160 @@ def open_invoice(main: MainWindow, registry: Registry, spec: OrderSpec, money: M
     except (InvoiceError, EditorError, TableError, actions.ActionError, inputs.InputError, DateEntryError,
             HeaderError, TimeoutError) as e:
         run.steps.append(Step("linked Invoice", False, str(e)))
+    return run
+
+
+# --- part D: Save once ---------------------------------------------------------------------------------
+
+
+def save_invoice(main: MainWindow, registry: Registry, invoice: OrderEditor) -> tuple[Step, str | None]:
+    """5.4: the Invoice address tab selected (as for the Order: saving with Delivery selected
+    crashed 2.2.0), then the toolbar Save ONCE. Returns the saved title (e.g. 'INV000001')."""
+    selected = [n.name for n in invoice.snapshot().root.walk()
+                if n.control_type == "TabItem" and n.selected and n.name in ("Invoice address", "Delivery address")]
+    if selected != ["Invoice address"]:
+        return Step("save Invoice", False, f"selected address tab is {selected}; not saving"), None
+    number = invoice.node("order.no").value or ""
+    try:
+        title = RecordEditor(main, registry, invoice.hwnd, NEW_INVOICE).save()
+    except EditorError as e:
+        return Step("save Invoice", False, f"{e} (do NOT rerun before checking Documents by hand)"), None
+    if title != number:
+        return Step("save Invoice", False, f"saved, but the editor is titled {title!r}, not {number!r}"), title
+    return Step("save Invoice", True, f"saved once: {title}"), title
+
+
+# --- part D: verification after Save (5.5, 5.6) ---------------------------------------------------------
+
+PAID_STATE = "COMMAND_CHECKED"  # Documents shows 'paid' with a tick (recorded 2026-11-06, INV000001)
+
+
+def invoice_row_problems(rows: list[dict], number: str, spec: OrderSpec, contact: str) -> list[str]:
+    """Pure: Documents > Invoices holds the saved Invoice once, as specified (5.5). The row's Date
+    is the Invoice Date (proposed, today), so it is not compared with the order date."""
+    mine = [r for r in rows if r.get("Document") == number]
+    if len(mine) != 1:
+        return [f"{len(mine)} Invoices rows are {number!r}"]
+    r, p = mine[0], []
+    ref = spec.order.external_reference
+    if r.get("Cust.Ref.") != ref:
+        p.append(f"Cust.Ref. is {r.get('Cust.Ref.')!r}")
+    same_ref = [x.get("Document") for x in rows if x.get("Cust.Ref.") == ref]
+    if len(same_ref) != 1:
+        p.append(f"{len(same_ref)} Invoices carry Cust.Ref. {ref!r}: {same_ref}")
+    if r.get("Name") != contact:
+        p.append(f"Name is {r.get('Name')!r}, expected {contact!r}")
+    if model_amount(r.get("Total")) != spec.derived.totals.gross:
+        p.append(f"Total is {r.get('Total')!r}, expected {spec.derived.totals.gross}")
+    paid = spec.payment.paid_status == PaidStatus.PAID
+    if paid and r.get("State") != PAID_STATE:
+        p.append(f"State is {r.get('State')!r}, expected paid ({PAID_STATE})")
+    if not paid and r.get("State") == PAID_STATE:
+        p.append(f"State is paid ({PAID_STATE}), but the status is {spec.payment.paid_status.value}")
+    return [f"Invoices {number}: {x}" for x in p]
+
+
+def invoices_with_ref(main: MainWindow, registry: Registry, ocr: Callable, ref: str) -> list[str] | None:
+    """Invoice numbers carrying ``ref``; [] when the workspace has no Invoice yet (Documents then
+    has no 'Invoices' category); None when the list is unreadable."""
+    try:
+        _grid, table = read_view(main, registry, "invoices", ocr)
+    except EditorError as e:
+        return [] if "0 filter entries named 'Invoices'" in str(e) else None
+    except (TimeoutError, actions.ActionError):
+        return None
+    return [r.get("Document") or "?" for r in table.rows if r.get("Cust.Ref.") == ref]
+
+
+def read_saved_invoice(main: MainWindow, registry: Registry, ocr: Callable, number: str) -> dict[str, str]:
+    """5.6: reopen the saved Invoice from Documents (an open tab of it is closed first, unchanged)
+    and read the persisted payment fields; the editor is closed unchanged afterwards."""
+    for hwnd in _panes(main, number):
+        RecordEditor(main, registry, hwnd, number).close_unchanged("order.cust_ref")
+    grid, table = read_view(main, registry, "invoices", ocr)
+    rows = [i for i, r in enumerate(table.rows) if r.get("Document") == number]
+    if len(rows) != 1:
+        raise InvoiceError(f"{len(rows)} Invoices rows are {number!r}")
+    editor = RecordEditor.open_row(main, registry, grid, table, rows[0], editor_name=number)
+    try:
+        snap = editor.snapshot()
+        seen = {}
+        for key in ("invoice.payment", "invoice.paid", "invoice.paid_date", "invoice.paid_value", "order.total"):
+            try:
+                node = registry.resolve(snap, key)
+                seen[key] = (node.toggle if key == "invoice.paid" else node.value) or ""
+            except Exception:  # noqa: BLE001 - the paid fields exist only when paid is ticked
+                seen[key] = ""
+    finally:
+        editor.close_unchanged("order.cust_ref")
+    return seen
+
+
+def verify_invoice(main: MainWindow, registry: Registry, spec: OrderSpec, money: MoneyFormat, ocr: Callable,
+                   number: str | None = None, description: str | None = None) -> list[Step]:
+    """Read-only: the Invoices row, the still-open source Order, the reopened Invoice."""
+    from fakturama_agent.flow.create_debtor import debtor_plan, saved_title
+
+    ref = spec.order.external_reference
+    contact = saved_title(debtor_plan(spec, ""))
+    steps = []
+    try:
+        _grid, table = read_view(main, registry, "invoices", ocr)
+    except (EditorError, TimeoutError, actions.ActionError) as e:
+        return [Step("Invoice in Documents", False, f"cannot read Documents > Invoices: {e}")]
+    if number is None:
+        found = [r.get("Document") for r in table.rows if r.get("Cust.Ref.") == ref]
+        if len(found) != 1:
+            return [Step("Invoice in Documents", False, f"{len(found)} Invoices carry Cust.Ref. {ref!r}: {found}")]
+        number = found[0]
+    problems = invoice_row_problems(table.rows, number, spec, contact)
+    state = "paid" if spec.payment.paid_status == PaidStatus.PAID else "not paid"
+    steps.append(Step("Invoice in Documents", not problems, "; ".join(problems) or
+                      f"{number}: {ref}, {contact}, {state}, total {spec.derived.totals.gross}"))
+    order = verify_documents(main, registry, spec, ocr)
+    steps.append(Step("source Order", order.ok, order.detail + (" (still open)" if order.ok else "")))
+    if description is None:
+        term = check_payment(main, registry, spec.payment.method, ocr)
+        description = term.seen.get("Description", "")
+    try:
+        seen = read_saved_invoice(main, registry, ocr, number)
+    except (InvoiceError, EditorError, TableError, actions.ActionError, inputs.InputError, TimeoutError) as e:
+        steps.append(Step("saved Invoice reopened", False, str(e)))
+        return steps
+    problems = [] if seen["invoice.payment"] == description else [
+        f"payment is {seen['invoice.payment']!r}, expected {description!r}"]
+    problems += paid_problems(seen["invoice.paid"], seen["invoice.paid_date"],
+                              _money(money, seen["invoice.paid_value"]), _money(money, seen["order.total"]), spec)
+    detail = (f"{seen['invoice.payment']}, paid {seen['invoice.paid']}, at {seen['invoice.paid_date'] or '-'}, "
+              f"Value {seen['invoice.paid_value'] or '-'}")
+    steps.append(Step("saved Invoice reopened", not problems, "; ".join(problems) or detail))
+    return steps
+
+
+def create_invoice(main: MainWindow, registry: Registry, spec: OrderSpec, money: MoneyFormat, ocr: Callable, *,
+                   allow_duplicate: bool = False, save: bool = True) -> InvoiceRun:
+    """Parts B-D: duplicate guard, open + confirm + payment, Save once, verify."""
+    ref = spec.order.external_reference
+    existing = invoices_with_ref(main, registry, ocr, ref)
+    if existing is None:
+        return InvoiceRun([Step("invoice guard", False, "Documents > Invoices is unreadable")])
+    if existing and not allow_duplicate:
+        return InvoiceRun([Step("invoice guard", False, f"Invoices {existing} already carry Cust.Ref. {ref!r}; "
+                                                        "not creating another (--allow-duplicate overrides)")])
+    guard = Step("invoice guard", True, f"no Invoice carries {ref!r}" if not existing else
+                 f"overridden: {existing} exist")
+    run = open_invoice(main, registry, spec, money, ocr)
+    run.steps.insert(0, guard)
+    if not run.ok or run.invoice is None:
+        return run
+    if not save:
+        run.steps.append(Step("save Invoice", True, "skipped (--no-save): the Invoice is left open, unsaved"))
+        return run
+    run.saved = True
+    step, title = save_invoice(main, registry, run.invoice)
+    run.steps.append(step)
+    if not step.ok:
+        return run
+    run.number, run.invoice = title, None
+    run.steps += verify_invoice(main, registry, spec, money, ocr, number=title)
     return run

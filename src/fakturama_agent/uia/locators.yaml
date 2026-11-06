@@ -464,6 +464,10 @@ tables:
     view: "Documents"
     filter: "Orders"
     columns: ["", "Document", "Date", "Name", "Cust.Ref.", "State", "Total", "Printed"]
+  invoices:
+    view: "Documents"
+    filter: "Invoices"  # the category appears with the first saved Invoice (recorded 2026-11-06)
+    columns: ["", "Document", "Date", "Name", "Cust.Ref.", "State", "Total", "Printed"]
   debtors:
     view: "Debtors"
     columns: ["No.", "First Name", "Name", "Company", "ZIP", "City"]

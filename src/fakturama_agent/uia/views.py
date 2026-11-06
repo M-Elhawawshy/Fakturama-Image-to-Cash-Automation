@@ -132,10 +132,29 @@ class LiveGrid:
         return ImageGrab.grab(bbox=self.grid.rect, all_screens=True)
 
     def select_all(self) -> None:
+        """Ctrl+A on the focused grid. Seen live on Documents > Invoices (2026-11-06):
+        Ctrl+A selected nothing until a row had been clicked once. So if nothing is
+        highlighted afterwards, click inside the first row (a selection, no change) and
+        press Ctrl+A again. The caller still requires exactly the expected highlight."""
+        from fakturama_agent.uia.grid import GridUnreadable, analyze, selected_bands
+
         assert self.grid is not None, "show() first"
         focus_grid(self.grid, self.main.hwnd)
         inputs.send("^a")
-        time.sleep(0.2)
+        time.sleep(0.3)
+        try:
+            image = self.capture()
+            pixels = analyze(image)
+            if pixels.empty or selected_bands(image, pixels):
+                return
+        except GridUnreadable:
+            return  # the caller's checks report it
+        dx, dy = pixels.click_point(0)
+        actions.guarded_click_at(self.grid, dx, dy, self.main.hwnd)
+        actions.park_mouse(self.main.hwnd)
+        focus_grid(self.grid, self.main.hwnd)
+        inputs.send("^a")
+        time.sleep(0.3)
 
     def copy(self) -> ClipboardText:
         assert self.grid is not None, "show() first"

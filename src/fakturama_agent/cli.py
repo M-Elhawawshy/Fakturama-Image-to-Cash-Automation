@@ -65,7 +65,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="read a Data view by Select All + Copy (overwrites the clipboard; changes nothing in Fakturama)",
     )
     tab.add_argument(
-        "table", choices=["documents", "debtors", "creditors", "products", "vats", "shippings", "payments"]
+        "table", choices=["documents", "invoices", "debtors", "creditors", "products", "vats", "shippings", "payments"]
     )
     tab.add_argument("--json", type=Path, dest="json_out", help="also write the rows as JSON")
 
@@ -132,6 +132,17 @@ def build_parser() -> argparse.ArgumentParser:
     inv = sub.add_parser("invoice-open", help="open the saved Order's linked Invoice (follow-up) and confirm what "
                          "it copied: header, addresses, lines, totals. Never saves.")
     inv.add_argument("spec", type=Path, help="OrderSpec JSON")
+
+    cri = sub.add_parser("create-invoice", help="the saved Order's linked Invoice: confirm the copy, set payment "
+                         "method and paid status, Save once, verify Documents and the reopened Invoice. "
+                         "PERSISTS an Invoice: back up first.")
+    cri.add_argument("spec", type=Path, help="OrderSpec JSON")
+    cri.add_argument("--no-save", action="store_true", help="every step except Save (the Invoice is left open)")
+    cri.add_argument("--allow-duplicate", action="store_true",
+                     help="create it even if an Invoice with the same Cust.Ref. exists")
+    cki = sub.add_parser("check-invoice", help="is the OrderSpec's Invoice saved once, paid as specified, and its "
+                         "Order still open? Reopens the Invoice to read the payment fields (read-only).")
+    cki.add_argument("spec", type=Path, help="OrderSpec JSON")
 
     cko = sub.add_parser("check-order", help="is the OrderSpec's Order saved in Data > Documents once, with its "
                          "Cust.Ref., Date, contact, state open and Total? (read-only)")
@@ -248,7 +259,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.command in ("inspect", "locate", "preflight", "read-table", "order-open", "order-select",
                         "check-vat", "check-payment", "check-master",
                         "create-payment", "create-vat", "create-product", "create-debtor", "create-master",
-                        "create-order", "check-order", "run", "invoice-open"):
+                        "create-order", "check-order", "run", "invoice-open",
+                        "create-invoice", "check-invoice"):
         from fakturama_agent.uia import commands
 
         if args.command == "inspect":
@@ -265,6 +277,10 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "create-debtor":
             return commands.cmd_create("debtor", spec_path=args.spec, without_email=args.without_email,
                                        reselect=args.reselect)
+        if args.command == "create-invoice":
+            return commands.cmd_create_invoice(args.spec, allow_duplicate=args.allow_duplicate, save=not args.no_save)
+        if args.command == "check-invoice":
+            return commands.cmd_check_invoice(args.spec)
         if args.command == "invoice-open":
             return commands.cmd_invoice_open(args.spec)
         if args.command == "run":

@@ -74,6 +74,12 @@ Select the Invoice address tab; journal `attempting invoice`; toolbar Save once 
 
 **Live check:** INV00000N in Documents with total 678.30 and the paid state; PO00000N still open; the reopened Invoice shows Bank Transfer, paid, Jul 18 2026, $678.30.
 
+**Done (D) 2026-11-06** (`create-invoice SPEC [--no-save] [--allow-duplicate]`, `check-invoice SPEC`). Saved live: **INV000001**, linked to PO000006 (B and C passed, Save once, no dialog, editor renamed `INV000001`). Then `check-invoice`: Invoices row (Cust.Ref., contact, paid, 678.30), PO000006 still `open` with the same Cust.Ref. and Total, reopened Invoice Bank Transfer / paid / Jul 18, 2026 / $678.30. A second `create-invoice` stops at the Invoice guard. Error.log unchanged. What the live work showed:
+- Documents gets an **`Invoices`** category with the first saved Invoice (same columns as Orders; table spec `invoices`). A paid Invoice shows `paid` with a tick; its model state is **`COMMAND_CHECKED`**. The row's Date is the Invoice Date (today), so it is not compared with the order date. Saving the Invoice left the Order `COMMAND_ORDER_PENDING` (open).
+- **On the Invoices list Ctrl+A selected nothing until a row had been clicked once** (Orders never needed it). `select_all` now clicks inside the first row when Ctrl+A left nothing highlighted, then presses Ctrl+A again; the strict highlight check before Copy is unchanged. 8 alternating Invoices/Orders reads passed after the fix.
+- Closing an editor whose tab is visible while another part (a Data view) is active failed to focus its field; `close_unchanged` now clicks its own tab once and retries.
+- Not yet seen: the state of an unpaid Invoice (`COMMAND_CHECKED` is only required to be absent).
+
 ### E. Into `run`
 
 A step `invoice` after the Order (journal, evidence, Error.log watch), the simulator extended (Invoice created / exists / paid vs unpaid / failure after the Invoice Save), and resume rules (decision 4).

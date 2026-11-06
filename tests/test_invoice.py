@@ -134,3 +134,81 @@ def test_paid_differences(paid, shown, value, total, needle):
 def test_unpaid_leaves_paid_clear():
     assert paid_problems("off", "", None, None, UNPAID) == []
     assert "UNPAID" in paid_problems("on", "", None, None, UNPAID)[0]
+
+
+# --- part D: the saved Invoice in Documents ----------------------------------------------------------
+
+from fakturama_agent.flow.invoice import PAID_STATE, invoice_row_problems  # noqa: E402
+from fakturama_agent.uia.tables import parse_tsv  # noqa: E402
+
+INVOICES = parse_tsv((FIX / "tables" / "copy_invoices.txt").read_bytes().decode(), REG.table("invoices"))
+CONTACT = "Northstar Office GmbH, Marta Klein"
+
+
+def test_recorded_invoice_row():
+    assert INVOICES[0]["Document"] == "INV000001" and INVOICES[0]["State"] == PAID_STATE
+    assert invoice_row_problems(INVOICES, "INV000001", SPEC, CONTACT) == []
+
+
+@pytest.mark.parametrize(
+    "change, needle",
+    [({"Total": "620.0"}, "Total"), ({"State": "COMMAND_ERROR"}, "State"), ({"Name": "Other"}, "Name"),
+     ({"Cust.Ref.": "WEB-X"}, "Cust.Ref.")],
+)
+def test_invoice_row_differences(change, needle):
+    problems = invoice_row_problems([{**INVOICES[0], **change}], "INV000001", SPEC, CONTACT)
+    assert problems and needle in problems[0]
+
+
+def test_unpaid_invoice_must_not_show_paid():
+    assert "UNPAID" in invoice_row_problems(INVOICES, "INV000001", UNPAID, CONTACT)[0]
+    assert invoice_row_problems([{**INVOICES[0], "State": "COMMAND_ERROR"}], "INV000001", UNPAID, CONTACT) == []
+
+
+def test_missing_or_duplicated_invoice():
+    assert "0 Invoices rows" in invoice_row_problems(INVOICES, "INV000002", SPEC, CONTACT)[0]
+    two = [*INVOICES, {**INVOICES[0], "Document": "INV000002"}]
+    assert any("2 Invoices carry" in p for p in invoice_row_problems(two, "INV000001", SPEC, CONTACT))
+
+
+def test_invoice_date_is_not_compared_with_the_order_date():
+    assert "Nov 06" in INVOICES[0]["Date"]  # the Invoice Date (proposed, today), not Jul 14
+
+
+# --- commands ----------------------------------------------------------------------------------------------
+
+from fakturama_agent.uia.commands import cmd_check_invoice, cmd_create_invoice  # noqa: E402
+
+
+def _create(capsys, run, **kw):
+    seen = {}
+
+    def creator(main, registry, spec, money, ocr, **flags):
+        seen.update(flags)
+        return run
+
+    code = cmd_create_invoice(GOLDEN, registry=REG, finder=lambda: MAIN, preflight=lambda m, r: Report(),
+                              creator=creator, ocr=object(), **kw)
+    return code, seen, capsys.readouterr().out
+
+
+def test_create_invoice_outcomes(capsys):
+    done = InvoiceRun([Step("save Invoice", True, "saved once: INV000001")], saved=True, number="INV000001")
+    code, seen, out = _create(capsys, done)
+    assert code == 0 and seen == {"allow_duplicate": False, "save": True} and "INV000001 saved and verified" in out
+    unclear = InvoiceRun([Step("save Invoice", False, "outcome unclear")], saved=True)
+    assert "do not rerun blindly" in _create(capsys, unclear)[2]
+    guard = InvoiceRun([Step("invoice guard", False, "already carry")])
+    code, _, out = _create(capsys, guard)
+    assert code == 2 and "Nothing was saved." in out
+    code, seen, out = _create(capsys, InvoiceRun([Step("save Invoice", True, "skipped")], invoice=object()),
+                              save=False, allow_duplicate=True)
+    assert code == 0 and seen == {"allow_duplicate": True, "save": False} and "--no-save" in out
+
+
+def test_check_invoice_exit_code(capsys):
+    ok = cmd_check_invoice(GOLDEN, registry=REG, finder=lambda: MAIN, preflight=lambda m, r: Report(),
+                           verifier=lambda *a: [Step("Invoice in Documents", True, "fine")], ocr=object())
+    bad = cmd_check_invoice(GOLDEN, registry=REG, finder=lambda: MAIN, preflight=lambda m, r: Report(),
+                            verifier=lambda *a: [Step("source Order", False, "not open")], ocr=object())
+    assert (ok, bad) == (0, 2)

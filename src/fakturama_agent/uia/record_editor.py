@@ -149,7 +149,15 @@ class RecordEditor:
         self.activate()
         if self._dirty():
             raise EditorError(f"the {self.name!r} editor shows unsaved changes; it is left open for you")
-        inputs.focus(self.registry.resolve(self.snapshot(), focus_key), self.main.hwnd)
+        try:
+            inputs.focus(self.registry.resolve(self.snapshot(), focus_key), self.main.hwnd)
+        except inputs.InputError:
+            # Seen 2026-11-06: the editor was visible but another part (a Data view) was the
+            # active one, so the field would not take the focus. A click on our own tab
+            # activates the part; then try once more.
+            actions.guarded_click(self._own_tab(), self.main.hwnd)
+            time.sleep(0.3)
+            inputs.focus(self.registry.resolve(self.snapshot(), focus_key), self.main.hwnd)
         inputs.send("^w")
         try:
             actions.wait_until(lambda: True if not ctypes.windll.user32.IsWindow(self.hwnd) else None,
