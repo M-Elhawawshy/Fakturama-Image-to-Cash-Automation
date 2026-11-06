@@ -6,18 +6,18 @@ Steps (same discipline as part G):
 2. the term of payment must exist and match (part F); the Debtor's Payment
    dropdown lists terms by their *description*, read from that term;
 3. New Debtor editor: keep the proposed Customer ID; Company, first and last name
-   (real key events, blur on Customer ID: Tab would type a tab into Company, R5);
+   (real key events, blur on Customer ID: Tab would type a tab into Company);
    Main address = billing address (role Invoice, + Delivery when billing equals
    delivery); otherwise '+' adds 'additional address #1' = delivery address with
    role Delivery; Miscellaneous: alias, Payment, Net; discount stays 0%;
 4. Fakturama's validation marks are checked on every typed field. A rejected
-   e-mail (e.g. the '.test' domain, R10) stops before saving, unless the caller
+   e-mail (e.g. the '.test' domain) stops before saving, unless the caller
    allows saving without it (``without_email``: the field is cleared and the
    report says so). Decision 5;
 5. every field is read back before Save; Save once, never retried;
 6. Data > Debtors must then show exactly this contact under the kept Customer ID,
-   and the saved contact is reopened and read back field by field (R10 saw a
-   contact persisted without Company/E-Mail).
+   and the saved contact is reopened and read back field by field (a contact saved with a
+   rejected value may lose Company/E-Mail).
 """
 
 from __future__ import annotations
@@ -159,7 +159,7 @@ def set_roles(editor: RecordEditor, roles: frozenset[str]) -> None:
     if roles_in(editor.value("address.roles")) == roles:
         return
     before = {w.hwnd for w in process_windows(main.pid)}
-    actions.guarded_click(editor.registry.resolve(editor.snapshot(), "address.roles_button"), main.hwnd)  # R8
+    actions.guarded_click(editor.registry.resolve(editor.snapshot(), "address.roles_button"), main.hwnd)  # needs a real click
     popup = actions.wait_until(lambda: _popup(main, before), timeout=5.0, what="the address-type popup")
 
     def boxes() -> dict[str, UiNode]:

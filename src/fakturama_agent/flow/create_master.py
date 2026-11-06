@@ -10,7 +10,7 @@ Every create follows the same steps:
 4. check again: the record must now be found and match;
 5. close the saved editor unchanged.
 
-Order matters (reference repo): terms of payment are created before any New
+Order matters: terms of payment are created before any New
 Debtor editor is opened (it reads its payment list once); a product's VAT must
 exist before the product, and is chosen before the gross price, because
 changing the VAT recalculates the gross price.
@@ -169,7 +169,7 @@ def create_vat(main: MainWindow, registry: Registry, rate: Decimal, ocr: Callabl
         editor = RecordEditor.open_new(main, registry, "view.vats.create", "New TAX Rate")
         _type(editor, "vat.name", name, "vat.description")
         _type(editor, "vat.description", name, "vat.name")
-        _type(editor, "vat.value", f"{rate.normalize():f}", "vat.name")  # Value commits on blur (R7)
+        _type(editor, "vat.value", f"{rate.normalize():f}", "vat.name")  # Value commits on blur
         _choose(editor, "vat.code", "S (Standard rate)")
         problems = verify_fields(read_vat_editor(editor), vat_fields(rate))
     except (EditorError, inputs.InputError, TimeoutError, ArithmeticError) as e:

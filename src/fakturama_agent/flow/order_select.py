@@ -207,7 +207,7 @@ def _address_tab_text(editor: OrderEditor, tab_name: str) -> str:
 def check_delivery(editor: OrderEditor, spec: OrderSpec) -> list[str]:
     """After the Debtor was selected: the Delivery address tab shows the spec's delivery
     address. The Invoice address tab is selected again afterwards (saving with the
-    Delivery tab selected crashes 2.2.0, R11) and that is verified."""
+    Delivery tab selected crashes 2.2.0) and that is verified."""
     from fakturama_agent.flow.match import delivery_shows
 
     a = spec.delivery_address

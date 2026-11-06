@@ -11,8 +11,8 @@ leaves the unsaved Order open for the user):
 5. footer: overall Discount 0 %, free shipping 0.00, Total Net / VAT / Total
    equal the spec's derived totals;
 6. addresses: Delivery tab shows the delivery address, then the Invoice tab is
-   selected again and verified (R11);
-7. Save ONCE (never retried; an unclear outcome or any dialog stops, R12);
+   selected again and verified (saving with Delivery selected crashes 2.2.0);
+7. Save ONCE (never retried; an unclear outcome or any dialog stops);
 8. Documents (Orders) holds exactly one row with the saved number, the Cust.Ref.,
    Date, contact, state open and Total.
 """

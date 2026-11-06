@@ -253,7 +253,7 @@ def read_footer(editor: OrderEditor) -> Footer:
 
 
 def invoice_tab_problems(editor: OrderEditor, key: DebtorKey) -> list[str]:
-    """Select the Invoice address tab (R11: saving with Delivery selected crashes 2.2.0),
+    """Select the Invoice address tab (saving with Delivery selected crashes 2.2.0),
     verify it is the selected one and shows the billing address."""
     from fakturama_agent.flow.order_select import _address_tab_text
 

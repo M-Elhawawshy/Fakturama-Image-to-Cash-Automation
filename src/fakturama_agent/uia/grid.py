@@ -2,7 +2,7 @@
 
 Used for two things before any Copy:
 - **emptiness**: Copy on an empty grid crashes Fakturama 2.2.0 with a
-  NullPointerException (reference repo), so an empty grid must be recognised
+  NullPointerException ('copiedCells is null'), so an empty grid must be recognised
   from its pixels and never copied;
 - **header check**: the clipboard copy has no header row, so the header strip
   is read by OCR and must match the expected columns, left to right.

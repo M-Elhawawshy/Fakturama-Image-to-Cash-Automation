@@ -474,7 +474,7 @@ def cmd_create(
         plan += [("vat", r) for r in rates]
     if kind in ("product", "master"):
         plan += [("product", pair) for pair in items]
-    if kind in ("debtor", "master"):  # after its term of payment (R6)
+    if kind in ("debtor", "master"):  # after its term of payment (the editor reads the list once)
         plan.append(("debtor", spec))
 
     results = []

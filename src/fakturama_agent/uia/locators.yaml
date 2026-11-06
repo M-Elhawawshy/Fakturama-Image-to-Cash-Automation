@@ -322,7 +322,7 @@ locators:
     named: {control_type: Edit, name: "Company"}
     transient: true
     status: verified
-    note: "multi-line; Tab would type a tab character (R5), blur by focusing Customer ID"
+    note: "multi-line; Tab would type a tab character, blur by focusing Customer ID"
   debtor.first_name:
     label_sibling: {label: "First Name Last Name", sibling_type: Edit, nth: 0, descend: true}
     transient: true
