@@ -92,7 +92,13 @@ class ItemsGrid:
         self.grid = items_grid(self.editor.snapshot())
 
     def capture(self) -> Image.Image:
-        return ImageGrab.grab(bbox=self.grid.rect, all_screens=True)
+        from fakturama_agent.uia.tree import visible_rect
+
+        try:  # only the part not hidden by a scrolled editor (the Invoice's grid is partly covered)
+            box = visible_rect(self.grid)
+        except ValueError as e:
+            raise TableError(str(e)) from e
+        return ImageGrab.grab(bbox=box, all_screens=True)
 
     def select_all(self) -> None:
         focus_grid(self.grid, self.editor.main.hwnd)

@@ -30,7 +30,7 @@ from fakturama_agent.spec.models import Item, OrderSpec
 from fakturama_agent.uia import actions, inputs
 from fakturama_agent.uia.grid import GridUnreadable, analyze, cell_point, column_edges
 from fakturama_agent.uia.money import MoneyFormat, MoneyFormatError
-from fakturama_agent.uia.tree import Snapshot, UiNode
+from fakturama_agent.uia.tree import Snapshot, UiNode, visible_rect
 
 ORDER_STATE_OPEN = "COMMAND_ORDER_PENDING"  # Documents shows 'open'
 FREE_SHIPPING = "Free of shipping costs"
@@ -205,7 +205,10 @@ def edit_cell(editor: OrderEditor, row: int, column: str, text: str) -> None:
         raise LineError("an inline cell editor is already open")
     grid = _grid_holder(editor.snapshot().root)
     actions.park_mouse(editor.main.hwnd)
-    image = ImageGrab.grab(bbox=grid.rect, all_screens=True)
+    try:
+        image = ImageGrab.grab(bbox=visible_rect(grid), all_screens=True)
+    except ValueError as e:
+        raise LineError(str(e)) from e
     try:
         pixels = analyze(image)
         edges = column_edges(image, pixels)

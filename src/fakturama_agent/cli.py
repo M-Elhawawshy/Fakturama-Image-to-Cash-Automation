@@ -129,6 +129,10 @@ def build_parser() -> argparse.ArgumentParser:
     rn.add_argument("--checked", action="store_true",
                     help="you checked Fakturama after an earlier run left a Save of unknown outcome")
 
+    inv = sub.add_parser("invoice-open", help="open the saved Order's linked Invoice (follow-up) and confirm what "
+                         "it copied: header, addresses, lines, totals. Never saves.")
+    inv.add_argument("spec", type=Path, help="OrderSpec JSON")
+
     cko = sub.add_parser("check-order", help="is the OrderSpec's Order saved in Data > Documents once, with its "
                          "Cust.Ref., Date, contact, state open and Total? (read-only)")
     cko.add_argument("spec", type=Path, help="OrderSpec JSON")
@@ -244,7 +248,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command in ("inspect", "locate", "preflight", "read-table", "order-open", "order-select",
                         "check-vat", "check-payment", "check-master",
                         "create-payment", "create-vat", "create-product", "create-debtor", "create-master",
-                        "create-order", "check-order", "run"):
+                        "create-order", "check-order", "run", "invoice-open"):
         from fakturama_agent.uia import commands
 
         if args.command == "inspect":
@@ -261,6 +265,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "create-debtor":
             return commands.cmd_create("debtor", spec_path=args.spec, without_email=args.without_email,
                                        reselect=args.reselect)
+        if args.command == "invoice-open":
+            return commands.cmd_invoice_open(args.spec)
         if args.command == "run":
             return commands.cmd_run(args.spec, without_email=args.without_email,
                                     allow_duplicate=args.allow_duplicate, checked=args.checked)

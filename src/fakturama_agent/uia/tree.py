@@ -288,3 +288,19 @@ def snapshot_hwnd(hwnd: int, **kwargs: Any) -> Snapshot:
     from pywinauto.uia_element_info import UIAElementInfo
 
     return snapshot_element(UIAElementInfo(hwnd), **kwargs)
+
+
+def visible_rect(node: UiNode) -> tuple[int, int, int, int]:
+    """``node``'s rectangle clipped by every ancestor's (a scrolled editor hides part of
+    a grid under the next section: seen on the Invoice, 2026-11-06). Pixel offsets are
+    measured from the node's own top-left, so a hidden top or left edge is an error."""
+    left, top, right, bottom = node.rect
+    parent = node.parent
+    while parent is not None:
+        pl, pt, pr, pb = parent.rect
+        if pr > pl and pb > pt:  # ignore empty rectangles
+            left, top, right, bottom = max(left, pl), max(top, pt), min(right, pr), min(bottom, pb)
+        parent = parent.parent
+    if (left, top) != tuple(node.rect[:2]) or right <= left or bottom <= top:
+        raise ValueError(f"{node.label()} is scrolled out of view (visible part {(left, top, right, bottom)})")
+    return left, top, right, bottom

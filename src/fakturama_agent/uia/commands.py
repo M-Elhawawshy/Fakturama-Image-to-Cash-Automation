@@ -672,3 +672,45 @@ def cmd_run(
     else:
         print("Stopped for manual review; Fakturama is left as it is.")
     return EXIT_UNRESOLVED
+
+
+def cmd_invoice_open(spec_path: Path, *, registry: Registry | None = None,
+                     finder: Callable[[], MainWindow] = find_main_window, preflight=None, opener=None,
+                     ocr=None) -> int:
+    """invoice-open: open the saved Order's linked Invoice and confirm the copy (Phase 4). Never saves."""
+    from pydantic import ValidationError
+
+    from fakturama_agent.spec.models import OrderSpec
+
+    try:
+        spec = OrderSpec.model_validate_json(spec_path.read_text(encoding="utf-8"))
+    except (OSError, ValidationError) as e:
+        print(f"Cannot load {spec_path}: {e}", file=sys.stderr)
+        return EXIT_ERROR
+    registry = registry or Registry.load()
+    main = _bind(finder)
+    if main is None:
+        return EXIT_ERROR
+    if ocr is None:
+        from fakturama_agent.extract.ocr import run_ocr as ocr
+    if preflight is None:
+        from fakturama_agent.uia.preflight import LiveProbe, run_preflight
+
+        preflight = lambda m, r: run_preflight(m, LiveProbe(r), r)  # noqa: E731
+    report = preflight(main, registry)
+    if not report.ok:
+        print_report(report)
+        print("\nNot opening the Invoice until preflight is clean.")
+        return EXIT_UNRESOLVED
+    if opener is None:
+        from fakturama_agent.flow.invoice import open_invoice as opener
+    run = opener(main, registry, spec, report.money, ocr)
+    width = max(len(s.name) for s in run.steps)
+    for s in run.steps:
+        print(f"[{'ok  ' if s.ok else 'FAIL'}] {s.name:<{width}}  {s.detail}")
+    if run.invoice is not None:
+        print("\nNothing was saved. The New Invoice is left open: close it without saving "
+              "(Save Parts: untick it, OK).")
+    else:
+        print("\nNothing was saved.")
+    return EXIT_OK if run.ok else EXIT_UNRESOLVED

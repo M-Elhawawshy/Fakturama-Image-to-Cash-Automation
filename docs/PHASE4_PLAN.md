@@ -53,6 +53,10 @@ Find the saved Order by Cust.Ref. in Documents (exactly one, verified as in `che
 
 **Live check:** `invoice-open out/order.json` reports every copied field ok; nothing is saved; you discard the New Invoice.
 
+**Done (B) 2026-11-06** (`invoice-open SPEC`, `flow/invoice.py`). Live on PO000006: source Order found once and its open tab bound; follow-up Invoice opened INV000001; header (proposed No./Date/Service date kept, Order Date Jul 14 2026, Cust.Ref., Net, With VAT), both addresses, both lines (450.00 / 120.00) and totals (570.00 / 108.30 / 678.30) confirmed; nothing saved. What the live work showed:
+- **The Invoice editor scrolls**: its payment area makes it taller, so the lower part of the item grid lies under the Remarks section while UIA still reports the grid's full rectangle. The reader first refused it ("used rows after an empty row"). Grid captures are now clipped to every ancestor's rectangle (`tree.visible_rect`); a hidden top or left edge is an error, because click offsets are measured from it.
+- An already open `New Invoice` is refused (it would make binding ambiguous); a disabled follow-up button means the Order is not saved.
+
 ### C. Payment method and paid status (unsaved)
 
 - Method (5.2): the dropdown lists term descriptions; select the description of the verified term (part F's check, which also reads the description). Already showing it → untouched. Not listed → review.
