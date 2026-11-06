@@ -216,3 +216,56 @@ def test_cmd_read_table_empty_and_failure(capsys):
     assert cmd_read_table("vats", registry=REGISTRY, finder=lambda: MAIN,
                           backend_factory=lambda m, r: FakeGrid("vats", owner=1), ocr=recorded_ocr("vats")) == 2
     assert "Cannot read VATs" in capsys.readouterr().err
+
+
+# --- a transient overlay over the bottom rows (seen repeatedly 2026-11-06) --------------------------------
+
+
+def _covered(image):
+    """Paint 'ink' into the last bands of a grid capture, as the overlay did."""
+    from PIL import ImageDraw
+
+    from fakturama_agent.uia.grid import GridUnreadable, analyze
+
+    covered = image.convert("RGB").copy()
+    p = analyze(image)
+    top, _ = p.band(p.bands - 3)
+    ImageDraw.Draw(covered).rectangle((10, top, 300, covered.height - 3), fill=(40, 40, 40))
+    return covered
+
+
+class _Frames:
+    def __init__(self, frames):
+        self.frames = list(frames)
+
+    def capture(self):
+        return self.frames.pop(0) if len(self.frames) > 1 else self.frames[0]
+
+
+def test_reader_waits_for_a_transient_overlay(monkeypatch, tmp_path):
+    from PIL import Image
+
+    import fakturama_agent.uia.tables as t
+    from fakturama_agent.uia.grid import GridUnreadable, analyze
+
+    monkeypatch.setattr(t, "_save_overlay_evidence", lambda: None)
+    monkeypatch.setattr(t.time, "sleep", lambda s: None)
+    clean = Image.open(Path(__file__).parent / "fixtures" / "tables" / "grid_debtors.png")
+    covered = _covered(clean)
+    with pytest.raises(GridUnreadable, match="covers the grid"):
+        analyze(covered)
+    backend = _Frames([covered, covered, covered, covered, clean, clean])
+    image = t.uncovered_capture(backend, analyze, interval=0)
+    assert analyze(image).ink_rows == analyze(clean).ink_rows
+
+
+def test_reader_gives_up_on_a_lasting_overlay(monkeypatch):
+    from PIL import Image
+
+    import fakturama_agent.uia.tables as t
+    from fakturama_agent.uia.grid import GridUnreadable, analyze
+
+    monkeypatch.setattr(t, "_save_overlay_evidence", lambda: None)
+    covered = _covered(Image.open(Path(__file__).parent / "fixtures" / "tables" / "grid_debtors.png"))
+    with pytest.raises(GridUnreadable, match="covers the grid"):
+        t.uncovered_capture(_Frames([covered]), analyze, interval=0, wait=0.0)

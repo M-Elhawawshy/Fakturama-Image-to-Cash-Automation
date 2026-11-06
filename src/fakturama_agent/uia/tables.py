@@ -24,6 +24,7 @@ from __future__ import annotations
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Protocol
 
 from PIL import Image, ImageChops
@@ -90,6 +91,45 @@ class GridBackend(Protocol):
     def copy(self) -> ClipboardText: ...  # Ctrl+C, wait for a new clipboard sequence number
 
 
+COVERED = "something covers the grid"
+OVERLAY_WAIT = 10.0  # seconds a transient overlay (e.g. a notification) may stay before we give up
+
+
+def _save_overlay_evidence() -> None:
+    """Keep a full-screen picture of what covered the grid (out/overlays/), to identify it later."""
+    try:
+        from datetime import datetime
+
+        from PIL import ImageGrab
+
+        folder = Path("out/overlays")
+        folder.mkdir(parents=True, exist_ok=True)
+        ImageGrab.grab(all_screens=True).save(folder / f"{datetime.now():%Y%m%dT%H%M%S}.png")
+    except Exception:  # noqa: BLE001 - evidence must never break a read
+        pass
+
+
+def uncovered_capture(backend, check: Callable[[Image.Image], object], *, stable_timeout: float = 5.0,
+                      interval: float = 0.3, wait: float = OVERLAY_WAIT) -> Image.Image:
+    """A stable capture that ``check`` accepts. Seen repeatedly (2026-11-06): something drew over
+    the bottom rows of a grid for a few seconds (refused as 'used rows after an empty row').
+    Reading is read-only, so we look again until it is gone; anything else fails at once."""
+    deadline = time.monotonic() + wait
+    saved = False
+    while True:
+        image = stable_capture(backend, stable_timeout, interval)
+        try:
+            check(image)
+            return image
+        except (GridUnreadable, TableError) as e:
+            if COVERED not in str(e) or time.monotonic() >= deadline:
+                raise
+            if not saved:
+                _save_overlay_evidence()
+                saved = True
+            time.sleep(1.0)
+
+
 def stable_capture(backend, timeout: float = 5.0, interval: float = 0.3) -> Image.Image:
     """Capture until two consecutive captures are identical."""
     deadline = time.monotonic() + timeout
@@ -135,8 +175,8 @@ def read_table(
     interval: float = 0.3,
 ) -> TableRead:
     backend.show(spec)
-    image = stable_capture(backend, stable_timeout, interval)
     try:
+        image = uncovered_capture(backend, analyze, stable_timeout=stable_timeout, interval=interval)
         pixels = analyze(image)
         check_header(read_header(image, pixels, ocr), spec.expected_header(), prefix=spec.checked is not None)
     except GridUnreadable as e:
@@ -148,7 +188,9 @@ def read_table(
     texts = []
     for attempt in (1, 2):
         backend.select_all()
-        require_selection(stable_capture(backend, stable_timeout, interval), list(range(pixels.ink_rows)))
+        expected = list(range(pixels.ink_rows))
+        uncovered_capture(backend, lambda im: require_selection(im, expected), stable_timeout=stable_timeout,
+                          interval=interval)
         texts.append(accept_copy(backend.copy(), fakturama_pid, f"copy {attempt}"))
     if texts[0] != texts[1]:
         raise TableError("two copies of the grid differ; the list changed while reading")
