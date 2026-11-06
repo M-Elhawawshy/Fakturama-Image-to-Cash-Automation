@@ -1,5 +1,7 @@
 # Fakturama Image-to-Cash automation
 
+**[Design document](docs/DESIGN.md)** · **[Video of a full run](https://www.youtube.com/watch?v=I7JOPBT1x00)**
+
 One order image in; a saved, verified **Order** and its **linked, paid Invoice** out, in Fakturama 2.2.0 on Windows. A vision LLM reads the image and OCR cross-checks it. Fakturama is driven through **Microsoft UI Automation** (pywinauto) with no hardcoded coordinates. Every write is read back, every Save happens once, and anything ambiguous stops the run for manual review instead of guessing.
 
 ```
@@ -75,7 +77,7 @@ uv run python -m fakturama_agent run out/order.json --without-email
 
 Every saved record is read back. A Save is never repeated: the journal records each attempt, and an unknown outcome blocks the next run until `--checked`. Reruns are idempotent because every step checks first; an Order without an Invoice is resumed with the Invoice only. A simulator (`FakeFakturama`) implements the same step interface, so the decision tree is tested offline.
 
-More detail: [docs/DESIGN.md](docs/DESIGN.md), and the phase plans with everything observed live ([Phase 3](docs/PHASE3_PLAN.md), [Phase 4](docs/PHASE4_PLAN.md)).
+More detail: the [design document](docs/DESIGN.md), and the phase plans with everything observed live ([Phase 3](docs/PHASE3_PLAN.md), [Phase 4](docs/PHASE4_PLAN.md)).
 
 ## Evidence
 
