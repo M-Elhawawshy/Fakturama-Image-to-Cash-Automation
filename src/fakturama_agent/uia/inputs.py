@@ -29,13 +29,43 @@ def escape_keys(text: str) -> str:
     return "".join("{" + c + "}" if c in _SPECIAL else c for c in text)
 
 
+VK_CONTROL = 0x11
+KEYEVENTF_KEYUP = 0x0002
+
+
+def ctrl_letter(keys: str) -> str | None:
+    """Pure: the letter of a Ctrl+letter shortcut ('^a' -> 'A'), else None."""
+    if len(keys) == 2 and keys[0] == "^" and keys[1].isascii() and keys[1].isalpha():
+        return keys[1].upper()
+    return None
+
+
+def _send_ctrl_letter(letter: str) -> None:
+    """Ctrl+letter as virtual-key codes ('A' = 0x41 ...), independent of the keyboard layout.
+
+    Seen live (2026-11-06): with an Arabic (Egypt) layout active, pywinauto maps 'a'
+    through VkKeyScan, which has no key for it, so '^a' / '^c' / '^w' never reached
+    Fakturama (Select All silently did nothing)."""
+    import ctypes
+
+    user32 = ctypes.windll.user32
+    vk = ord(letter)
+    user32.keybd_event(VK_CONTROL, 0, 0, 0)
+    user32.keybd_event(vk, 0, 0, 0)
+    user32.keybd_event(vk, 0, KEYEVENTF_KEYUP, 0)
+    user32.keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0)
+    time.sleep(0.05)
+
+
 def send(keys: str, *, literal: bool = False) -> None:
     from pywinauto.keyboard import send_keys
 
     if literal:
         send_keys(keys, with_spaces=True, pause=0.01)  # Unicode packets for text
+    elif (letter := ctrl_letter(keys)) is not None:
+        _send_ctrl_letter(letter)
     else:
-        send_keys(keys, vk_packet=False)  # real virtual-key events for shortcuts
+        send_keys(keys, vk_packet=False)  # real virtual-key events (named keys, digits)
 
 
 def focus(node: UiNode, owner_hwnd: int) -> None:

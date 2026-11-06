@@ -161,6 +161,60 @@ locators:
     transient: true
     status: verified
     note: "first of four icons beside Items opens Select a product. Behaviour confirmed in part E"
+  order.followup:
+    named: {control_type: Group, name: "Create a follow-up document"}
+    transient: true
+    status: verified
+    note: "enabled only once the Order is saved (Confirmation / Invoice / Delivery / Proforma)"
+  order.followup.invoice:
+    named: {control_type: Button, name: "Invoice"}
+    within: order.followup
+    transient: true
+    status: verified
+    note: "the LINKED Invoice (brief 4.6); never the main toolbar's Invoice button"
+
+  # --- Invoice editor (Phase 4; tests/fixtures/uia/invoice_editor*.json). Same layout as the
+  # Order: No./Date/price mode, Cust.Ref., VAT, addresses and totals resolve with order.* keys.
+  invoice.service_date:
+    label_sibling: {label: "Service date", sibling_type: Edit, nth: 0, descend: true}
+    transient: true
+    status: verified
+    note: "proposed (today); left unchanged (brief 5.1)"
+  invoice.order_date:
+    label_sibling: {label: "Order Date", sibling_type: Edit, nth: 0, descend: true}
+    transient: true
+    status: verified
+    note: "copied from the Order, e.g. 'Jul 14, 2026'"
+  invoice.paid:
+    named: {control_type: CheckBox, name: "paid"}
+    transient: true
+    status: verified
+    note: "UIA Toggle works; ticking it swaps Due Days/Pay Until for at/Value"
+  invoice.payment:
+    label_sibling: {label: "paid", label_type: CheckBox, sibling_type: ComboBox, nth: 0, descend: true}
+    transient: true
+    status: verified
+    note: "unnamed ComboBox after the paid CheckBox; lists term descriptions, prefilled from the Debtor"
+  invoice.due_days:
+    label_sibling: {label: "Due Days", sibling_type: Edit, nth: 0, descend: true}
+    transient: true
+    status: verified
+    note: "present only while paid is clear"
+  invoice.pay_until:
+    label_sibling: {label: "Pay Until", sibling_type: Edit, nth: 0, descend: true}
+    transient: true
+    status: verified
+    note: "present only while paid is clear"
+  invoice.paid_date:
+    label_sibling: {label: "at", sibling_type: Edit, nth: 0, descend: true}
+    transient: true
+    status: verified
+    note: "segmented date, default today; present only while paid is ticked"
+  invoice.paid_value:
+    named: {control_type: Edit, name: "Value"}
+    transient: true
+    status: verified
+    note: "display money, prefilled with the Total; present only while paid is ticked"
 
   # --- selector dialogs (own top-level windows; tests/fixtures/uia/select_address.json)
   # The Search Edit sits inside a Pane after the label, hence descend.

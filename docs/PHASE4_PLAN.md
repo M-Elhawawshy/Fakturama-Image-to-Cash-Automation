@@ -49,6 +49,8 @@ Invoice editor locators from the recordings: `invoice.no`, `invoice.date`, `invo
 
 Find the saved Order by Cust.Ref. in Documents (exactly one, verified as in `check-order`); open its editor, or bind it when its tab is already open (seen: PO000006 was still open from the run); invoke the follow-up `Invoice`; bind the new `New Invoice` pane by handle. Read and compare (5.1): No. matches `INV\d+` (kept), Date and Service date not touched, Cust.Ref., Order Date = spec date, VAT `With VAT`, Net, invoice address, delivery address (Delivery tab, then the Invoice tab again: the Order's Delivery-tab Save crash may apply to Invoices too), lines (table reader, `lines_problems`), footer (`footer_problems`). Command `invoice-open SPEC` leaves the editor unsaved.
 
+**Done (A) 2026-11-06:** locators `order.followup`, `order.followup.invoice`, `invoice.*` added; offline tests on both recordings (`tests/test_invoice_locators.py`), and resolved live on a New Invoice opened from PO000006 (then discarded). Found on the way: with an **Arabic (Egypt) keyboard layout** active, Ctrl+letter shortcuts sent through pywinauto never arrived (it maps the letter through the layout, which has no 'a'), so Select All silently did nothing and the table reader refused to copy. Ctrl+letter is now sent as virtual-key codes, independent of the layout; digits and named keys were unaffected.
+
 **Live check:** `invoice-open out/order.json` reports every copied field ok; nothing is saved; you discard the New Invoice.
 
 ### C. Payment method and paid status (unsaved)
@@ -72,7 +74,7 @@ A step `invoice` after the Order (journal, evidence, Error.log watch), the simul
 
 **Live check:** on a clean workspace `run out/order.json --without-email` ends with the Order and its paid Invoice; a second run stops at the duplicate guard.
 
-## Decisions (proposed; confirm before part D)
+## Decisions (confirmed 2026-11-06)
 
 1. **Value = the Invoice's own Total**, which must also equal the spec's gross; any difference is review (never typed to force a match).
 2. **Payment method by description**: the dropdown shows term descriptions; the description comes from the verified term, so a renamed or missing term is review.

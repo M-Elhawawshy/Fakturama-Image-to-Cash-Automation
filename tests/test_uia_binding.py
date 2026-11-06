@@ -66,3 +66,11 @@ def test_minimized_is_reported_not_rejected():
 def test_process_windows():
     assert [w.hwnd for w in process_windows(100, REAL)] == [3, 6]
     assert len(process_windows(100, REAL, visible_only=False)) == 6
+
+
+def test_ctrl_letter_shortcuts_bypass_the_keyboard_layout():
+    from fakturama_agent.uia.inputs import ctrl_letter
+
+    assert ctrl_letter("^a") == "A" and ctrl_letter("^w") == "W" and ctrl_letter("^C") == "C"
+    for other in ("{ENTER}", "^", "a", "^1", "^{DOWN}", "^ab", "^ع"):
+        assert ctrl_letter(other) is None
