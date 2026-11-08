@@ -23,6 +23,7 @@ order image ──extract──▶ OrderSpec JSON (validated) ──run──▶
 **Python**
 - Python 3.12 and [uv](https://docs.astral.sh/uv/); `uv sync` installs the dependencies (pywinauto, google-genai, RapidOCR, pydantic, PyYAML).
 - Copy `.env.example` to `.env` and set `GEMINI_API_KEY` (only needed for extraction; responses are cached in `.cache/`).
+- **The Gemini key is free:** create one in [Google AI Studio](https://aistudio.google.com/apikey) with a Google account, no billing needed. The free tier's limits are generous; one extraction is a single call.
 
 **During a run:** keep Fakturama maximized and in front, keep hands off mouse and keyboard, and close editors with unsaved changes. Turn off desktop notifications: one covering Fakturama makes the table reader wait.
 
